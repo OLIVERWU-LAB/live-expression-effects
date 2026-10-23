@@ -1,0 +1,936 @@
+{
+  "url": "https://oliverwu-lab.github.io/live-expression-effects/",
+  "filesVerified": 116,
+  "https": true,
+  "checks": [
+    {
+      "path": ".nojekyll",
+      "status": 200,
+      "type": "application/octet-stream",
+      "localBytes": 0,
+      "verification": "full SHA256",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "app.mjs",
+      "status": 200,
+      "type": "text/javascript; charset=utf-8",
+      "localBytes": 27483,
+      "verification": "full SHA256",
+      "sha256": "6a5fd487b5210c2a02ae320428bc895eabb2f260e5a866dc234ccc4ac263ec44"
+    },
+    {
+      "path": "assets/favicon.svg",
+      "status": 200,
+      "type": "image/svg+xml",
+      "localBytes": 315,
+      "verification": "full SHA256",
+      "sha256": "d2055a02dfb4876195dbfc98e2b0e0ebde1edc0ccc02c48884300856f597af5f"
+    },
+    {
+      "path": "assets/gift-v32/candy/bead-0.png",
+      "status": 200,
+      "type": "image/png",
+      "localBytes": 7706,
+      "verification": "full SHA256",
+      "sha256": "3f8264de7533c931ee6135b9a5ab21c33cbc7ec0cd51829ab6e125954ddbf1a5"
+    },
+    {
+      "path": "assets/gift-v32/candy/bead-1.png",
+      "status": 200,
+      "type": "image/png",
+      "localBytes": 7898,
+      "verification": "full SHA256",
+      "sha256": "01d2c297c5f2a2f7f0c2968af5805184966c1586f7495ed04fa11ee97004eb3d"
+    },
+    {
+      "path": "assets/gift-v32/candy/bead-2.png",
+      "status": 200,
+      "type": "image/png",
+      "localBytes": 7744,
+      "verification": "full SHA256",
+      "sha256": "933110e1e83fcda8640ee69bace03d36fc92f745a4ca8be619fa6194be7f9822"
+    },
+    {
+      "path": "assets/gift-v32/candy/bead-3.png",
+      "status": 200,
+      "type": "image/png",
+      "localBytes": 7775,
+      "verification": "full SHA256",
+      "sha256": "119a8ef16625ecf340691db5170dee64397651f116951e1521f2eb4d13683f91"
+    },
+    {
+      "path": "assets/gift-v32/candy/bead-4.png",
+      "status": 200,
+      "type": "image/png",
+      "localBytes": 7597,
+      "verification": "full SHA256",
+      "sha256": "40e5f55d201ca9c0eac7ed498f314786b8273921908da714137451cde8eec23d"
+    },
+    {
+      "path": "assets/gift-v32/candy/bead-5.png",
+      "status": 200,
+      "type": "image/png",
+      "localBytes": 7703,
+      "verification": "full SHA256",
+      "sha256": "dfa594d2959911d93ca8ba404ab9c750ce58f1c9255b6efb7b1dc061cd638b98"
+    },
+    {
+      "path": "assets/gift-v32/candy/capsule-0.png",
+      "status": 200,
+      "type": "image/png",
+      "localBytes": 4410,
+      "verification": "full SHA256",
+      "sha256": "de951b3c4fa47a4776087681313c4486e1104f7f351beb498c1d4c20e4a18f2c"
+    },
+    {
+      "path": "assets/gift-v32/candy/drop-0.png",
+      "status": 200,
+      "type": "image/png",
+      "localBytes": 11021,
+      "verification": "full SHA256",
+      "sha256": "6573192a2ebeb7c226278a51acba49e41041d0696e4ec9fd0cbaf20e6342b4a9"
+    },
+    {
+      "path": "assets/gift-v32/candy/popper-0.png",
+      "status": 200,
+      "type": "image/png",
+      "localBytes": 10535,
+      "verification": "full SHA256",
+      "sha256": "e6fed5d9978b2ff1915daf7c92db8b4f9dc8815309ee871f2a45d4d6437378c8"
+    },
+    {
+      "path": "assets/gift-v32/candy/twinkle-0.png",
+      "status": 200,
+      "type": "image/png",
+      "localBytes": 7706,
+      "verification": "full SHA256",
+      "sha256": "3f8264de7533c931ee6135b9a5ab21c33cbc7ec0cd51829ab6e125954ddbf1a5"
+    },
+    {
+      "path": "assets/gift-v32/candy/twinkle-1.png",
+      "status": 200,
+      "type": "image/png",
+      "localBytes": 7898,
+      "verification": "full SHA256",
+      "sha256": "01d2c297c5f2a2f7f0c2968af5805184966c1586f7495ed04fa11ee97004eb3d"
+    },
+    {
+      "path": "assets/gift-v32/soft/capsule-0.png",
+      "status": 200,
+      "type": "image/png",
+      "localBytes": 4410,
+      "verification": "full SHA256",
+      "sha256": "de951b3c4fa47a4776087681313c4486e1104f7f351beb498c1d4c20e4a18f2c"
+    },
+    {
+      "path": "assets/gift-v32/soft/drop-0.png",
+      "status": 200,
+      "type": "image/png",
+      "localBytes": 11021,
+      "verification": "full SHA256",
+      "sha256": "6573192a2ebeb7c226278a51acba49e41041d0696e4ec9fd0cbaf20e6342b4a9"
+    },
+    {
+      "path": "assets/gift-v32/soft/popper-0.png",
+      "status": 200,
+      "type": "image/png",
+      "localBytes": 10535,
+      "verification": "full SHA256",
+      "sha256": "e6fed5d9978b2ff1915daf7c92db8b4f9dc8815309ee871f2a45d4d6437378c8"
+    },
+    {
+      "path": "assets/gift-v34/candy/coil-1.png",
+      "status": 200,
+      "type": "image/png",
+      "localBytes": 225390,
+      "verification": "full SHA256",
+      "sha256": "adacc7ae1d45d53068a08ae140b423efac9cba6f8ebe2c1496595449e01bf580"
+    },
+    {
+      "path": "assets/gift-v34/candy/coil-2.png",
+      "status": 200,
+      "type": "image/png",
+      "localBytes": 225917,
+      "verification": "full SHA256",
+      "sha256": "1d96eea63fc2c021b624bd452215b51d11aeda94dd9f4c0c35cfe00dae278eb4"
+    },
+    {
+      "path": "assets/gift-v34/candy/cube-1.png",
+      "status": 200,
+      "type": "image/png",
+      "localBytes": 184815,
+      "verification": "full SHA256",
+      "sha256": "eb5c8d666e9b152587b14bbd8add75c587fea832a42fa1fa7af5212442c1b20a"
+    },
+    {
+      "path": "assets/gift-v34/candy/cube-3.png",
+      "status": 200,
+      "type": "image/png",
+      "localBytes": 183677,
+      "verification": "full SHA256",
+      "sha256": "5f546aa2b8b4b2678e362544c42dda77f7862a003c9bb82c070fae5fbbddcdfd"
+    },
+    {
+      "path": "assets/gift-v34/candy/cube-5.png",
+      "status": 200,
+      "type": "image/png",
+      "localBytes": 173424,
+      "verification": "full SHA256",
+      "sha256": "38e80193b35aa3ee7977022cc7bc14c1228b8256a4709259b1624763b5f581d8"
+    },
+    {
+      "path": "assets/gift-v34/candy/cylinder-1.png",
+      "status": 200,
+      "type": "image/png",
+      "localBytes": 105871,
+      "verification": "full SHA256",
+      "sha256": "72fb86f46e1de7554a2b25cac5f3c5bc38a525fe177e1aa9ba664632edf8ca0e"
+    },
+    {
+      "path": "assets/gift-v34/candy/fourstar-3.png",
+      "status": 200,
+      "type": "image/png",
+      "localBytes": 129568,
+      "verification": "full SHA256",
+      "sha256": "3ddbbf2e0ebd42185835eb201808755c1100ec3630f0ef89092c9634bd8a793a"
+    },
+    {
+      "path": "assets/gift-v34/candy/fourstar-4.png",
+      "status": 200,
+      "type": "image/png",
+      "localBytes": 130933,
+      "verification": "full SHA256",
+      "sha256": "5193eaf0050192c844acebe8a5152940afe055d9d741ada1219516191c8f7b22"
+    },
+    {
+      "path": "assets/gift-v34/candy/ribbon-0.png",
+      "status": 200,
+      "type": "image/png",
+      "localBytes": 95003,
+      "verification": "full SHA256",
+      "sha256": "0a61bc2ae69d2023041f2a71155027ced0c7465e2e7f42346b76cff58f6eaf63"
+    },
+    {
+      "path": "assets/gift-v34/candy/ribbon-1.png",
+      "status": 200,
+      "type": "image/png",
+      "localBytes": 95682,
+      "verification": "full SHA256",
+      "sha256": "0597fd882fcdb801071ffdb8c5789bf32d3bc8699795067d1b540d63760eda70"
+    },
+    {
+      "path": "assets/gift-v34/candy/ribbon-2.png",
+      "status": 200,
+      "type": "image/png",
+      "localBytes": 95619,
+      "verification": "full SHA256",
+      "sha256": "d74bcbaf994c8c344ca0cd7aeb332e819d69858c95a2eed02085e25e96b973d8"
+    },
+    {
+      "path": "assets/gift-v34/candy/ribbon-3.png",
+      "status": 200,
+      "type": "image/png",
+      "localBytes": 94261,
+      "verification": "full SHA256",
+      "sha256": "5dbbfc0c06211897795f542beba5df5763e7d63363a7ad1b0e44e84334ffa263"
+    },
+    {
+      "path": "assets/gift-v34/candy/ribbon-4.png",
+      "status": 200,
+      "type": "image/png",
+      "localBytes": 94084,
+      "verification": "full SHA256",
+      "sha256": "d2b9d8d49fedc259136a6ca2eeddcbc9a07a275f9fdc49ea03b01636d14d40fc"
+    },
+    {
+      "path": "assets/gift-v34/candy/ribbon-5.png",
+      "status": 200,
+      "type": "image/png",
+      "localBytes": 95025,
+      "verification": "full SHA256",
+      "sha256": "9224244571a23f0d64aaccc5216d616453bf87af5d9fe5a4af0f117adb3dc79a"
+    },
+    {
+      "path": "assets/gift-v34/candy/ring-0.png",
+      "status": 200,
+      "type": "image/png",
+      "localBytes": 143887,
+      "verification": "full SHA256",
+      "sha256": "a70a0d9a231805fe19820ab170a05f6afc13b64d4857996b090533f0c9ab4927"
+    },
+    {
+      "path": "assets/gift-v34/candy/ring-1.png",
+      "status": 200,
+      "type": "image/png",
+      "localBytes": 145466,
+      "verification": "full SHA256",
+      "sha256": "c5ebea7aab2289afeb19d275849ff545f391a81b5b0027ac8166d49b63d5980d"
+    },
+    {
+      "path": "assets/gift-v34/candy/sparkle-0.png",
+      "status": 200,
+      "type": "image/png",
+      "localBytes": 109311,
+      "verification": "full SHA256",
+      "sha256": "3343fec1348e4d796d254d796626a3b58e33b6b4426c11ab874c70aa0b927539"
+    },
+    {
+      "path": "assets/gift-v34/candy/star-0.png",
+      "status": 200,
+      "type": "image/png",
+      "localBytes": 148130,
+      "verification": "full SHA256",
+      "sha256": "f0d1ec8005a20f595e921434d95d5f895c7828186aa11f1ef3d629244738b510"
+    },
+    {
+      "path": "assets/gift-v34/candy/star-3.png",
+      "status": 200,
+      "type": "image/png",
+      "localBytes": 147614,
+      "verification": "full SHA256",
+      "sha256": "82950e74bf7e8c229fc14acdf66803a46324447025188ad8111325f962034236"
+    },
+    {
+      "path": "assets/gift-v34/candy/star-4.png",
+      "status": 200,
+      "type": "image/png",
+      "localBytes": 149360,
+      "verification": "full SHA256",
+      "sha256": "9aa9095b9ac27feecab800bd71c52e895fd8e82f782d173bbd45f3d03dd24ffb"
+    },
+    {
+      "path": "assets/gift-v34/candy/triangle-0.png",
+      "status": 200,
+      "type": "image/png",
+      "localBytes": 96811,
+      "verification": "full SHA256",
+      "sha256": "c2e4c3ba58df125a333b27b480126a7322c0f9c66937324cbee334ad453e3841"
+    },
+    {
+      "path": "assets/gift-v34/candy/triangle-4.png",
+      "status": 200,
+      "type": "image/png",
+      "localBytes": 98534,
+      "verification": "full SHA256",
+      "sha256": "9be772daf31d700a50ecf99982d5f593d5b16f428ae4a7533dc0b59ce3c48856"
+    },
+    {
+      "path": "assets/gift-v34/candy/wave-3.png",
+      "status": 200,
+      "type": "image/png",
+      "localBytes": 103744,
+      "verification": "full SHA256",
+      "sha256": "949198ba7bc09da3bc28914c5cd5cabab827368cebd4818391fc8d8ea4bf6473"
+    },
+    {
+      "path": "assets/gift-v34/candy/wave-4.png",
+      "status": 200,
+      "type": "image/png",
+      "localBytes": 104938,
+      "verification": "full SHA256",
+      "sha256": "38ad375617ae69a6d03dae5000c51c569f00abe27fbb807f9314239e65749bdb"
+    },
+    {
+      "path": "assets/gift-v37/soft-candy/bead-0.png",
+      "status": 200,
+      "type": "image/png",
+      "localBytes": 5562,
+      "verification": "full SHA256",
+      "sha256": "c36db8bd115281ecc5218c48db774189565c59bd7c3cee3d1360bfcc2d307b57"
+    },
+    {
+      "path": "assets/gift-v37/soft-candy/bead-1.png",
+      "status": 200,
+      "type": "image/png",
+      "localBytes": 5887,
+      "verification": "full SHA256",
+      "sha256": "ae850d1bd92306cc7404dc53171e26e65ba460bb04cf22cdb85ed1b511b87774"
+    },
+    {
+      "path": "assets/gift-v37/soft-candy/bead-2.png",
+      "status": 200,
+      "type": "image/png",
+      "localBytes": 5488,
+      "verification": "full SHA256",
+      "sha256": "7694e97db23110714a4948fbb1303565e1564ade16d1bda1dc15d8e353ef7d0b"
+    },
+    {
+      "path": "assets/gift-v37/soft-candy/bead-3.png",
+      "status": 200,
+      "type": "image/png",
+      "localBytes": 5987,
+      "verification": "full SHA256",
+      "sha256": "a4b1aa5d4e19f921325a8743e2a7daeac38c06a6c4dc35bbf908f575facf477a"
+    },
+    {
+      "path": "assets/gift-v37/soft-candy/bead-4.png",
+      "status": 200,
+      "type": "image/png",
+      "localBytes": 5720,
+      "verification": "full SHA256",
+      "sha256": "cc7e6329e40a41f6cdf99e080782173f97620c9d317e4744c93e0c2f43796361"
+    },
+    {
+      "path": "assets/gift-v37/soft-candy/bead-5.png",
+      "status": 200,
+      "type": "image/png",
+      "localBytes": 5624,
+      "verification": "full SHA256",
+      "sha256": "c895a2eb29aedb55d2bb3194e8c9dfac5c1d1fdf65f54063d0b9997a2802f4e1"
+    },
+    {
+      "path": "assets/gift-v37/soft-candy/coil-1.png",
+      "status": 200,
+      "type": "image/png",
+      "localBytes": 221934,
+      "verification": "full SHA256",
+      "sha256": "683540f98c8ba19aa45c18d8a6728760bf45e57cc0ca10b60d1431f823972df8"
+    },
+    {
+      "path": "assets/gift-v37/soft-candy/coil-2.png",
+      "status": 200,
+      "type": "image/png",
+      "localBytes": 214070,
+      "verification": "full SHA256",
+      "sha256": "3fb8d13807c2a9a17fb7fc11f22255d4e231e286250e94adf2e7d08881249c41"
+    },
+    {
+      "path": "assets/gift-v37/soft-candy/cube-1.png",
+      "status": 200,
+      "type": "image/png",
+      "localBytes": 197536,
+      "verification": "full SHA256",
+      "sha256": "8a0d091f593e27a642db5f7879b8195f0f18b4452a80f81af685ed01444ab545"
+    },
+    {
+      "path": "assets/gift-v37/soft-candy/cube-3.png",
+      "status": 200,
+      "type": "image/png",
+      "localBytes": 194443,
+      "verification": "full SHA256",
+      "sha256": "60b26e0caafef67d52d850693db199dc3377855f229326a8a994ee595d8ca51d"
+    },
+    {
+      "path": "assets/gift-v37/soft-candy/cube-5.png",
+      "status": 200,
+      "type": "image/png",
+      "localBytes": 178011,
+      "verification": "full SHA256",
+      "sha256": "96f2bf6057e9b97f5d221417475fc5b5ec51339100c0dab8024250bb317ef017"
+    },
+    {
+      "path": "assets/gift-v37/soft-candy/cylinder-1.png",
+      "status": 200,
+      "type": "image/png",
+      "localBytes": 111700,
+      "verification": "full SHA256",
+      "sha256": "50313045e6d15b0f6b52a976092efa305dda4c37c27cdf835aa0909daaa753c6"
+    },
+    {
+      "path": "assets/gift-v37/soft-candy/fourstar-3.png",
+      "status": 200,
+      "type": "image/png",
+      "localBytes": 139656,
+      "verification": "full SHA256",
+      "sha256": "4fef12883cbfd4af3aad9d50ed1e362e60e29a459355b570ac7c92dd84e83a2e"
+    },
+    {
+      "path": "assets/gift-v37/soft-candy/fourstar-4.png",
+      "status": 200,
+      "type": "image/png",
+      "localBytes": 134312,
+      "verification": "full SHA256",
+      "sha256": "1f5e64efa58b7700e4ccb9c84c4523415b62115bda516259795eb98a73a57718"
+    },
+    {
+      "path": "assets/gift-v37/soft-candy/ribbon-0.png",
+      "status": 200,
+      "type": "image/png",
+      "localBytes": 94007,
+      "verification": "full SHA256",
+      "sha256": "fd621ff2265e8de091bfa4ffe05a7c6e56523d37dbeefc971321b89c8d5f5340"
+    },
+    {
+      "path": "assets/gift-v37/soft-candy/ribbon-1.png",
+      "status": 200,
+      "type": "image/png",
+      "localBytes": 98080,
+      "verification": "full SHA256",
+      "sha256": "23e82e852f0ce9dfd720978804c6ab56c86d3e53255e4c315e24701cef2dfd47"
+    },
+    {
+      "path": "assets/gift-v37/soft-candy/ribbon-2.png",
+      "status": 200,
+      "type": "image/png",
+      "localBytes": 91788,
+      "verification": "full SHA256",
+      "sha256": "ed81a06d7ad8312c2a3c5e962d09ed75d0f2e7407e202354948795734bcdef4b"
+    },
+    {
+      "path": "assets/gift-v37/soft-candy/ribbon-3.png",
+      "status": 200,
+      "type": "image/png",
+      "localBytes": 98194,
+      "verification": "full SHA256",
+      "sha256": "e1ba171bebe28d846fc1d01bb8c4049f873adea3b3319e8a88dfdc7526a53790"
+    },
+    {
+      "path": "assets/gift-v37/soft-candy/ribbon-4.png",
+      "status": 200,
+      "type": "image/png",
+      "localBytes": 95608,
+      "verification": "full SHA256",
+      "sha256": "527903278f8b30f4c514b4b4950d1dd1e42d2a07daa992d9e1fe8493a5d6d3cc"
+    },
+    {
+      "path": "assets/gift-v37/soft-candy/ribbon-5.png",
+      "status": 200,
+      "type": "image/png",
+      "localBytes": 93734,
+      "verification": "full SHA256",
+      "sha256": "3616d9770153b630c0e34eeccec509582b8eb34c973e827095ac34e1a9c41da4"
+    },
+    {
+      "path": "assets/gift-v37/soft-candy/ring-0.png",
+      "status": 200,
+      "type": "image/png",
+      "localBytes": 141823,
+      "verification": "full SHA256",
+      "sha256": "0f085b31e2f0fba464f32fbf4d39834d2dc0bd6b5e1233464ed484b13c8c3525"
+    },
+    {
+      "path": "assets/gift-v37/soft-candy/ring-1.png",
+      "status": 200,
+      "type": "image/png",
+      "localBytes": 149411,
+      "verification": "full SHA256",
+      "sha256": "d3df3e77da11cf05373c13d053d690358300fbc4e9af64af16ac95d0c4bb1470"
+    },
+    {
+      "path": "assets/gift-v37/soft-candy/sparkle-0.png",
+      "status": 200,
+      "type": "image/png",
+      "localBytes": 107289,
+      "verification": "full SHA256",
+      "sha256": "062085946c067728b3e5bf2d68e4881ad37871a9cfa8c50699eff117dcc082d7"
+    },
+    {
+      "path": "assets/gift-v37/soft-candy/star-0.png",
+      "status": 200,
+      "type": "image/png",
+      "localBytes": 146435,
+      "verification": "full SHA256",
+      "sha256": "701c503b51556025fa7bfe7348e3e89e572631b93de5ef8e7ba460fe7ea17e33"
+    },
+    {
+      "path": "assets/gift-v37/soft-candy/star-3.png",
+      "status": 200,
+      "type": "image/png",
+      "localBytes": 155822,
+      "verification": "full SHA256",
+      "sha256": "92519d43bfda34455348e6eed42218a1de7b99378bb6c70465c15c0e59229fe5"
+    },
+    {
+      "path": "assets/gift-v37/soft-candy/star-4.png",
+      "status": 200,
+      "type": "image/png",
+      "localBytes": 151547,
+      "verification": "full SHA256",
+      "sha256": "31cd51ae792be4b8b5321166dbae56c192c6b3f0e5702af102cb44093a5c0afe"
+    },
+    {
+      "path": "assets/gift-v37/soft-candy/triangle-0.png",
+      "status": 200,
+      "type": "image/png",
+      "localBytes": 96563,
+      "verification": "full SHA256",
+      "sha256": "16fb002e4ec9ea3ca9a1461f7a60af5c2d9d0edd23c119a5ab5639ed2fa6651f"
+    },
+    {
+      "path": "assets/gift-v37/soft-candy/triangle-4.png",
+      "status": 200,
+      "type": "image/png",
+      "localBytes": 99543,
+      "verification": "full SHA256",
+      "sha256": "e5b9c2c32e49c542f016b29a7a3d1e1a277cfca6b3669f8d42e32ea59359f1dd"
+    },
+    {
+      "path": "assets/gift-v37/soft-candy/twinkle-0.png",
+      "status": 200,
+      "type": "image/png",
+      "localBytes": 5562,
+      "verification": "full SHA256",
+      "sha256": "c36db8bd115281ecc5218c48db774189565c59bd7c3cee3d1360bfcc2d307b57"
+    },
+    {
+      "path": "assets/gift-v37/soft-candy/twinkle-1.png",
+      "status": 200,
+      "type": "image/png",
+      "localBytes": 5887,
+      "verification": "full SHA256",
+      "sha256": "ae850d1bd92306cc7404dc53171e26e65ba460bb04cf22cdb85ed1b511b87774"
+    },
+    {
+      "path": "assets/gift-v37/soft-candy/wave-3.png",
+      "status": 200,
+      "type": "image/png",
+      "localBytes": 109981,
+      "verification": "full SHA256",
+      "sha256": "9e9e4d751da1ab5b75b6064cc57f2e9a0b46ea1da360cb4061e95083d9d91127"
+    },
+    {
+      "path": "assets/gift-v37/soft-candy/wave-4.png",
+      "status": 200,
+      "type": "image/png",
+      "localBytes": 106754,
+      "verification": "full SHA256",
+      "sha256": "bdf4234b0b72c28a76b953e16b45be748951d9141ec63bed01b5fa79a3f55618"
+    },
+    {
+      "path": "bouquet.mjs",
+      "status": 200,
+      "type": "text/javascript; charset=utf-8",
+      "localBytes": 4040,
+      "verification": "full SHA256",
+      "sha256": "e4768e0e04e049b4e0364a10a7523069dddeee9db02c004b1417c2247d710843"
+    },
+    {
+      "path": "cinema-original-particles.mjs",
+      "status": 200,
+      "type": "text/javascript; charset=utf-8",
+      "localBytes": 5010,
+      "verification": "full SHA256",
+      "sha256": "05c05718831816fc2ee1f02345bd1721172a057c381ea8858f71754db8005fa2"
+    },
+    {
+      "path": "cinema-original-renderer.mjs",
+      "status": 200,
+      "type": "text/javascript; charset=utf-8",
+      "localBytes": 7109,
+      "verification": "full SHA256",
+      "sha256": "1b0a4651d029b7ebe747047e43b917a91c3d9eed3a778c9035ec792ebda48a0f"
+    },
+    {
+      "path": "cinema-refined-particles.mjs",
+      "status": 200,
+      "type": "text/javascript; charset=utf-8",
+      "localBytes": 1576,
+      "verification": "full SHA256",
+      "sha256": "d5e540cee2a1ca8754d73a88c29ce2d65e022ba89611c4f652385a838e7d285c"
+    },
+    {
+      "path": "cinema-refined-renderer.mjs",
+      "status": 200,
+      "type": "text/javascript; charset=utf-8",
+      "localBytes": 6940,
+      "verification": "full SHA256",
+      "sha256": "f714ddbd4efde9584d08a2af1e01b73141f34458f4dee6a544120fc9ddad922c"
+    },
+    {
+      "path": "cinema-renderer.mjs",
+      "status": 200,
+      "type": "text/javascript; charset=utf-8",
+      "localBytes": 11808,
+      "verification": "full SHA256",
+      "sha256": "106fb114769751042619b925dcbf5a9207d0fc8e802145143a1682170ae6141d"
+    },
+    {
+      "path": "core.mjs",
+      "status": 200,
+      "type": "text/javascript; charset=utf-8",
+      "localBytes": 5039,
+      "verification": "full SHA256",
+      "sha256": "9f0c3318f3ee0927f33c17a0ddcc92a57ea936819bcc98a5f0f9479b5420ecd8"
+    },
+    {
+      "path": "dandelion.mjs",
+      "status": 200,
+      "type": "text/javascript; charset=utf-8",
+      "localBytes": 916,
+      "verification": "full SHA256",
+      "sha256": "a409132287cdb109d9a13ccafef477c4e1189a6f009a9a9e44b7f9a1dd320f4d"
+    },
+    {
+      "path": "effects.mjs",
+      "status": 200,
+      "type": "text/javascript; charset=utf-8",
+      "localBytes": 33371,
+      "verification": "full SHA256",
+      "sha256": "10d9b1b441fb2c28a3254a6167518638ac68a45e1df79675b0aeb983a909b87c"
+    },
+    {
+      "path": "emission.mjs",
+      "status": 200,
+      "type": "text/javascript; charset=utf-8",
+      "localBytes": 1013,
+      "verification": "full SHA256",
+      "sha256": "cea2e172dc8301bafdf8d8aaef2163fdd53ead6559325fe348ee2600f1c27ba3"
+    },
+    {
+      "path": "flat-fireworks.mjs",
+      "status": 200,
+      "type": "text/javascript; charset=utf-8",
+      "localBytes": 22847,
+      "verification": "full SHA256",
+      "sha256": "685fe8eebf9e1a307aa9f6f00db0e3281f0c1219c609a56d6a72166b36051526"
+    },
+    {
+      "path": "gift-materials.mjs",
+      "status": 200,
+      "type": "text/javascript; charset=utf-8",
+      "localBytes": 817,
+      "verification": "full SHA256",
+      "sha256": "d99471f031c1e5333a11336e5b3bc3e55348624af44387dd7f4ca4c169e7baf8"
+    },
+    {
+      "path": "gift-renderer.mjs",
+      "status": 200,
+      "type": "text/javascript; charset=utf-8",
+      "localBytes": 9189,
+      "verification": "full SHA256",
+      "sha256": "5e9f332b84b124f214aa8dd1366ca1016d3371f6a226d883bce79dd7d6fa27ee"
+    },
+    {
+      "path": "gift-shapes.mjs",
+      "status": 200,
+      "type": "text/javascript; charset=utf-8",
+      "localBytes": 898,
+      "verification": "full SHA256",
+      "sha256": "b1380df40778751ddcdc6ee71ff8cf2300826d3ee0b24778b0ccbcc1cce5b6c5"
+    },
+    {
+      "path": "gift-style.mjs",
+      "status": 200,
+      "type": "text/javascript; charset=utf-8",
+      "localBytes": 3232,
+      "verification": "full SHA256",
+      "sha256": "a7df5b10dbd734cd28a3c8eefe662e2ae12a7fb6fab5969e56d1b3b5a9f5dd3d"
+    },
+    {
+      "path": "handglow-particles.mjs",
+      "status": 200,
+      "type": "text/javascript; charset=utf-8",
+      "localBytes": 2216,
+      "verification": "full SHA256",
+      "sha256": "133cedb7d572888b5b17d30dd7840d311eaa882e2a68876d964537efcdd4e464"
+    },
+    {
+      "path": "handglow.mjs",
+      "status": 200,
+      "type": "text/javascript; charset=utf-8",
+      "localBytes": 3707,
+      "verification": "full SHA256",
+      "sha256": "3ee59fe2452fadeb8ffaf93a970093f89f1b6de2ac6302e484c6c7880cbd588e"
+    },
+    {
+      "path": "hands.mjs",
+      "status": 200,
+      "type": "text/javascript; charset=utf-8",
+      "localBytes": 3582,
+      "verification": "full SHA256",
+      "sha256": "5dac28be4e82f044cb2a08a7938e585478cba0e95d95e4ac4e0db45ab9cc9793"
+    },
+    {
+      "path": "head-collision.mjs",
+      "status": 200,
+      "type": "text/javascript; charset=utf-8",
+      "localBytes": 2341,
+      "verification": "full SHA256",
+      "sha256": "4653fc9eaf6c68c914bb563d02cf9e7e053458c4742e2e96114c53abca561cf2"
+    },
+    {
+      "path": "index.html",
+      "status": 200,
+      "type": "text/html; charset=utf-8",
+      "localBytes": 6376,
+      "verification": "full SHA256",
+      "sha256": "918a6853112fa18d16ab2c332d22b7bebf27a7d3d18bab900057d7b96b56a462"
+    },
+    {
+      "path": "lighting.mjs",
+      "status": 200,
+      "type": "text/javascript; charset=utf-8",
+      "localBytes": 2935,
+      "verification": "full SHA256",
+      "sha256": "3e3181cb7f3566d9224632fdcc3eaf5cc3272bf384894a89fb5c3ff2d2a6bae1"
+    },
+    {
+      "path": "live-playback.mjs",
+      "status": 200,
+      "type": "text/javascript; charset=utf-8",
+      "localBytes": 578,
+      "verification": "full SHA256",
+      "sha256": "b3e226003ea68d42edc6765144642391880f359358f17b8d3d85e9e2cabaee73"
+    },
+    {
+      "path": "optics.mjs",
+      "status": 200,
+      "type": "text/javascript; charset=utf-8",
+      "localBytes": 6644,
+      "verification": "full SHA256",
+      "sha256": "591b9d63f0068848bf109208e97e54dc03f261dda2e4e5b84d852f12900a5abd"
+    },
+    {
+      "path": "particle-quality.mjs",
+      "status": 200,
+      "type": "text/javascript; charset=utf-8",
+      "localBytes": 2042,
+      "verification": "full SHA256",
+      "sha256": "87e837f1b8c32e83d29c8b39ce2a803f72f669ac46ccde874250c5addbec2736"
+    },
+    {
+      "path": "particle-visibility.mjs",
+      "status": 200,
+      "type": "text/javascript; charset=utf-8",
+      "localBytes": 201,
+      "verification": "full SHA256",
+      "sha256": "9833b863291bc51994ab589766c78bcce2ad5985d6a3e49e81138e566ba13199"
+    },
+    {
+      "path": "pyro.mjs",
+      "status": 200,
+      "type": "text/javascript; charset=utf-8",
+      "localBytes": 7321,
+      "verification": "full SHA256",
+      "sha256": "063815c1405ec312e30911e8487642974bf7b07cc2077d969a32c8f8514b44d6"
+    },
+    {
+      "path": "rain-style.mjs",
+      "status": 200,
+      "type": "text/javascript; charset=utf-8",
+      "localBytes": 4074,
+      "verification": "full SHA256",
+      "sha256": "270f005a43448b641f5ab58d3ed47520942ecc4705d082f66c4aa65b85f5a4ef"
+    },
+    {
+      "path": "reference-bursts.mjs",
+      "status": 200,
+      "type": "text/javascript; charset=utf-8",
+      "localBytes": 12078,
+      "verification": "full SHA256",
+      "sha256": "aca72bdd0989d0f69bcb3038e9cd60e12ede0a000697598bb67b5e9ec67b9deb"
+    },
+    {
+      "path": "renderer.mjs",
+      "status": 200,
+      "type": "text/javascript; charset=utf-8",
+      "localBytes": 22299,
+      "verification": "full SHA256",
+      "sha256": "8b8dd24a35ef04a181402ba88d2dbcc831cc2677f4455db2f325c6760b94bc41"
+    },
+    {
+      "path": "sound.mjs",
+      "status": 200,
+      "type": "text/javascript; charset=utf-8",
+      "localBytes": 9453,
+      "verification": "full SHA256",
+      "sha256": "464d5462afb34b82264558bb2a682caaa184852208632fa96954d6a36a321724"
+    },
+    {
+      "path": "style.css",
+      "status": 200,
+      "type": "text/css; charset=utf-8",
+      "localBytes": 12311,
+      "verification": "full SHA256",
+      "sha256": "ff6a1ef19ff8bac93e0fbd1e04adedb2f30d039edd072f593b1118f077ee2384"
+    },
+    {
+      "path": "vendor/LICENSE-APACHE-2.0.txt",
+      "status": 200,
+      "type": "text/plain; charset=utf-8",
+      "localBytes": 10174,
+      "verification": "full SHA256",
+      "sha256": "0d542e0c8804e39aa7f37eb00da5a762149dc682d7829451287e11b938e94594"
+    },
+    {
+      "path": "vendor/THIRD_PARTY_NOTICES.txt",
+      "status": 200,
+      "type": "text/plain; charset=utf-8",
+      "localBytes": 1170,
+      "verification": "full SHA256",
+      "sha256": "819adaabf33026dc3411bee26b7f9cc81a79ca1106acb54ecb5ba176aecbbbe1"
+    },
+    {
+      "path": "vendor/face_landmarker.task",
+      "status": 206,
+      "type": "application/octet-stream",
+      "localBytes": 3758596,
+      "verification": "64-byte range",
+      "sha256": "64184e229b263107bc2b804c6625db1341ff2bb731874b0bcc2fe6544e0bc9ff"
+    },
+    {
+      "path": "vendor/hand_landmarker.task",
+      "status": 206,
+      "type": "application/octet-stream",
+      "localBytes": 7819105,
+      "verification": "64-byte range",
+      "sha256": "fbc2a30080c3c557093b5ddfc334698132eb341044ccee322ccf8bcf3607cde1"
+    },
+    {
+      "path": "vendor/selfie_segmenter.tflite",
+      "status": 200,
+      "type": "application/octet-stream",
+      "localBytes": 249537,
+      "verification": "full SHA256",
+      "sha256": "191ac9529ae506ee0beefa6b2c945a172dab9d07d1e802a290a4e4038226658b"
+    },
+    {
+      "path": "vendor/vision_bundle.cjs",
+      "status": 200,
+      "type": "application/node",
+      "localBytes": 137890,
+      "verification": "full SHA256",
+      "sha256": "bf58c9b3f592304422947b51e1f7de360c67d4dfeaa900064352da0c5a7c9115"
+    },
+    {
+      "path": "vendor/wasm/vision_wasm_internal.js",
+      "status": 200,
+      "type": "application/javascript; charset=utf-8",
+      "localBytes": 204284,
+      "verification": "full SHA256",
+      "sha256": "4a97e2520ba506c680ecd6ba6acfb146888afa0e2746d57f205352bc6ebb82eb"
+    },
+    {
+      "path": "vendor/wasm/vision_wasm_internal.wasm",
+      "status": 206,
+      "type": "application/wasm",
+      "localBytes": 9574032,
+      "verification": "64-byte range",
+      "sha256": "f00ec4731faa23b3e714d00e88d4d10e2df5c0a427d3a2b4ae6e3526fdd14ef7"
+    },
+    {
+      "path": "vendor/wasm/vision_wasm_nosimd_internal.js",
+      "status": 200,
+      "type": "application/javascript; charset=utf-8",
+      "localBytes": 204137,
+      "verification": "full SHA256",
+      "sha256": "927def7b465c51b86e4b3060f93646aca4e27121f4b8fc0483786e407ea9cf1f"
+    },
+    {
+      "path": "vendor/wasm/vision_wasm_nosimd_internal.wasm",
+      "status": 206,
+      "type": "application/wasm",
+      "localBytes": 9448638,
+      "verification": "64-byte range",
+      "sha256": "3821ea9b1f7fb8c549ef2a064ef5c85750bf375c545a49fd6eea0df44a95f1f4"
+    },
+    {
+      "path": "vision-config.js",
+      "status": 200,
+      "type": "application/javascript; charset=utf-8",
+      "localBytes": 184,
+      "verification": "full SHA256",
+      "sha256": "cbd386e5e3193a78f4619c4a053936c3d236bfd7f04c9680da71154e26568996"
+    },
+    {
+      "path": "vision.worker.js",
+      "status": 200,
+      "type": "application/javascript; charset=utf-8",
+      "localBytes": 6785,
+      "verification": "full SHA256",
+      "sha256": "50618b96693544da23c2fd42d3758f5b3553662ca643c5c92f8789683e932ebd"
+    }
+  ],
+  "cameraOnDeviceTested": false
+}
