@@ -1,0 +1,21 @@
+MediaPipe Tasks Vision 0.10.21 and Face Landmarker
+Copyright Google LLC and MediaPipe contributors.
+
+This directory contains unmodified, version-pinned third-party runtime assets
+from @mediapipe/tasks-vision and the official Face Landmarker model bundle.
+Application code is maintained separately in ../core.mjs, ../renderer.mjs,
+../app.mjs and ../vision.worker.js.
+
+Upstream project: https://github.com/google-ai-edge/mediapipe
+Package: https://www.npmjs.com/package/@mediapipe/tasks-vision/v/0.10.21
+Model overview: https://ai.google.dev/edge/mediapipe/solutions/vision/face_landmarker
+Model: https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task
+
+Apache License 2.0 is included in LICENSE-APACHE-2.0.txt.
+
+Selfie Segmenter (unmodified model):
+https://storage.googleapis.com/mediapipe-models/image_segmenter/selfie_segmenter/float16/1/selfie_segmenter.tflite
+
+Hand Landmarker (unmodified, float16 version 1 model bundle):
+https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task
+https://developers.google.com/edge/mediapipe/solutions/vision/hand_landmarker

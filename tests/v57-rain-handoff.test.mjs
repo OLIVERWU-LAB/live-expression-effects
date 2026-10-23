@@ -1,0 +1,12 @@
+import test from 'node:test';import assert from 'node:assert/strict';
+import {StickerWorld}from '../dist/effects.mjs';import{giftShell,GIFT_LAYOUT}from '../dist/reference-bursts.mjs';
+const rng=s=>()=>((s=Math.imul(s,1664525)+1013904223>>>0)/4294967296);
+test('gift dispersion varies continuously by whole shell within a gentler range while retaining slots and gravity',()=>{
+ const levels=[];for(let seed=0;seed<100;seed++){const ps=giftShell('gift-twinkle',500,250,1,rng(seed),'random').particles;levels.push(ps[0].layoutScatter);assert.equal(ps.length,41);assert.equal(new Set(ps.map(p=>p.layoutScatter)).size,1);assert.ok(ps.every((p,i)=>p.giftMaterial.kind===GIFT_LAYOUT[i][0]&&p.size===GIFT_LAYOUT[i][4]/1000*205*.64&&p.gravity===255&&p.giftSplitAt===null&&Number.isFinite(p.vx+p.vy)));}assert.equal(new Set(levels).size,100);assert.ok(Math.min(...levels)<.10&&Math.max(...levels)>.45);assert.ok(levels.every(v=>v>=.06&&v<=.52));
+});
+test('flat impact beads retain size contrast but cap the largest contact particle and clear without recursion',()=>{
+ for(let seed=0;seed<40;seed++){const w=new StickerWorld(rng(seed));w.setStyle('flat');w.setEffect('smile');w.split({type:'drop',x:400,y:250,size:22,vx:100,vy:850,volume:22**3,variant:0,generation:0,hitNormal:{x:0,y:-1}});assert.ok(w.particles.length>=2);assert.ok(w.particles.every(p=>p.size<=8.5&&p.flatRound&&p.noRecollision));assert.ok(new Set(w.particles.map(p=>p.size)).size>1);for(let i=0;i<40;i++)w.update(.02,1000,1000,null);assert.equal(w.particles.length,0);}
+});
+test('repeated smile requests do not restart the fade and rapid reversal cannot leave stale pending state',()=>{
+ for(const style of['gift','flat','cinema','glow'])for(const limit of[150,700]){const w=new StickerWorld(rng(31));w.limit=limit;w.setStyle(style);w.setEffect('laugh');w.burst(600,250,1);w.requestEffect('smile');let first=null;for(let i=0;i<30;i++){w.requestEffect('smile');w.rain(.01,1200,900,.35);w.update(.01,1200,900,null);if(first===null&&w.particles.some(p=>p.type==='drop'))first=i*.01;assert.ok(w.particles.length<=limit);}assert.ok(first!==null&&first<=.26);assert.ok(w.particles.every(p=>p.type==='drop'));w.requestEffect('laugh');assert.equal(w.effect,'laugh');assert.equal(w.pendingEffect,null);assert.equal(w.finishRemaining,0);w.requestEffect('smile');w.update(.1,1200,900,null);w.requestEffect('laugh');for(let i=0;i<30;i++)w.update(.01,1200,900,null);assert.equal(w.effect,'laugh');assert.equal(w.pendingEffect,null);}
+});

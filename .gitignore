@@ -1,0 +1,8 @@
+.DS_Store
+node_modules/
+.openai/*local*
+*.log
+.vendor-download/
+
+.pages/
+.release/

@@ -1,0 +1,13 @@
+{
+  "version": "v35",
+  "commit": "69ee743e141805e043930e60510681754e3ed50f",
+  "beforeChange": "v36 handglow-inspired fragmented erosion",
+  "files": {
+    "reference-bursts.mjs": "356a53e255162ac2bc7336b05f37f77cb40631e005c5886bb477ef43f752b18c",
+    "cinema-renderer.mjs": "e2a2aaf08ccd4c208031b4ba05e9d599c3d77e3e47bca022b3375ef329f41fc4"
+  },
+  "adaptations": [
+    "pattern id cinema-original and particle marker",
+    "modern resource-pressure fade only"
+  ]
+}

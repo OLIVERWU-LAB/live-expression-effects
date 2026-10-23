@@ -1,0 +1,20 @@
+import test from 'node:test';import assert from 'node:assert/strict';
+import {StickerWorld}from'../dist/effects.mjs';import{SHELLS,PATTERNS,rocketPoint,shellParticles}from'../dist/pyro.mjs';import{SoundDesigner,MIX}from'../dist/sound.mjs';
+let seed=831;const random=()=>{seed=(Math.imul(seed,1664525)+1013904223)>>>0;return seed/4294967296;};
+test('launch has a visible ascent and explodes exactly once at its own target',()=>{
+ const w=new StickerWorld(random);w.setEffect('laugh');w.setPattern('heart');assert.equal(w.launch(240,150,900,700),true);
+ const r=w.rockets[0];assert.ok(r.duration>=.58&&r.duration<=.70);assert.equal(w.blooms.length,0);const point=rocketPoint(r,.5);assert.ok(point.y<r.sy&&point.y>r.ty);assert.deepEqual(rocketPoint(r,1),{x:r.tx,y:r.ty});
+ const events=[...w.consumeEvents()];for(let i=0;i<8;i++)w.update(.05,900,700,null);assert.equal(w.blooms.length,0);assert.ok(w.rockets[0].trail.length>0&&w.rockets[0].trail.length<=8);
+ for(let i=0;i<13;i++){w.update(.05,900,700,null);events.push(...w.consumeEvents());}assert.equal(events.filter(e=>e.type==='launch').length,1);assert.equal(events.filter(e=>e.type==='burst').length,1);assert.equal(w.rockets.length,0);assert.ok(w.particles.some(p=>p.pattern==='heart'));assert.equal(w.blooms[0].x,240);assert.equal(w.blooms[0].y,150);
+});
+test('five distinct illustration patterns are visited without an immediate repeat',()=>{const w=new StickerWorld(random);w.setStyle('sticker');let previous=null;for(let round=0;round<4;round++){const set=new Set();for(let i=0;i<5;i++){const next=w.nextPattern();assert.notEqual(next,previous);set.add(next);w.lastPattern=next;previous=next;}assert.equal(set.size,5);}});
+test('all shapes stay finite, with longer gold willow tails and a real secondary crossette',()=>{
+ for(const key of PATTERNS){const s=shellParticles(key,400,250,1,true,random);assert.ok(s.particles.length>10);assert.ok(s.particles.every(p=>Number.isFinite(p.vx)&&Number.isFinite(p.vy)&&p.tailLength>=18));}
+ assert.ok(SHELLS.willow.tail>SHELLS.chrysanthemum.tail);assert.ok(SHELLS.willow.life[0]>SHELLS.heart.life[0]);
+ const w=new StickerWorld(random);w.setStyle('cinema');w.setEffect('laugh');w.burst(400,250,1,'crossette');assert.ok(w.particles.every(p=>!p.secondary));for(let i=0;i<20;i++)w.update(.05,900,900,null);assert.ok(w.particles.some(p=>p.secondary===1));assert.ok(w.particles.length<=SHELLS.crossette.count*4);for(let i=0;i<200;i++)w.update(.05,900,900,null);assert.equal(w.particles.length,0);assert.equal(w.afterglows.length,0);
+});
+test('switching effect or style cancels ascending shells and delayed secondary effects',()=>{for(const change of ['style','effect','clear']){const w=new StickerWorld(random);w.setEffect('laugh');w.launch(200,150,800,700);if(change==='style')w.setStyle('cinema');else if(change==='effect')w.setEffect('smile');else w.clear();for(let i=0;i<60;i++)w.update(.05,800,700,null);assert.equal(w.rockets.length,0);assert.equal(w.blooms.length,0);assert.equal(w.consumeEvents().length,0);}});
+test('rocket progress is time based, and spark trails remain bounded over a long show',()=>{const outcomes=[];for(const step of [.01,.025]){const w=new StickerWorld(()=>.4);w.setEffect('laugh');w.launch(250,160,900,700);for(let t=0;t<.5-1e-6;t+=step)w.update(step,900,700,null);outcomes.push({x:w.rockets[0].x,y:w.rockets[0].y});}assert.ok(Math.abs(outcomes[0].y-outcomes[1].y)<.01);
+ const w=new StickerWorld(random);w.setStyle('cinema');w.setEffect('laugh');for(let i=0;i<6000;i++){if(i%110===0)w.launch(450,180,900,1000);w.update(.016,900,1000,null);w.consumeEvents();assert.ok(w.rockets.length<=3&&w.particles.length<=700&&w.afterglows.length<=150);assert.ok(w.particles.every(p=>!p.trail||p.trail.length<=40));}
+});
+test('muted and not-yet-unlocked sound requires no AudioContext and cleans safely',()=>{const s=new SoundDesigner();s.setEnabled(false);s.stopAll();s.pause();s.setScene('laugh','cinema');s.handle([{type:'burst',style:'cinema',x:.5}]);s.update(.1);assert.equal(s.context,null);assert.equal(s.voices.size,0);assert.ok(MIX.master<.5&&MIX.maxVoices<=48);});

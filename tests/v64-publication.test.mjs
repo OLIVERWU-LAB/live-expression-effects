@@ -1,0 +1,6 @@
+import test from'node:test';import assert from'node:assert/strict';import{execFileSync,spawnSync}from'node:child_process';import{readFileSync,existsSync,rmSync}from'node:fs';import{fileURLToPath}from'node:url';import{liveFiles}from'../tools/live-files.mjs';
+const root=fileURLToPath(new URL('../',import.meta.url));
+test('Pages build ships only live dependencies, preserves relative worker/assets and rejects source overwrite',()=>{
+ const before=readFileSync(new URL('../dist/index.html',import.meta.url));assert.notEqual(spawnSync(process.execPath,['tools/build-static.mjs','--out','dist'],{cwd:root}).status,0);assert.deepEqual(readFileSync(new URL('../dist/index.html',import.meta.url)),before);
+ try{execFileSync(process.execPath,['tools/build-static.mjs','--out','.pages-check'],{cwd:root});const out=new URL('../.pages-check/',import.meta.url);assert.ok(existsSync(new URL('.nojekyll',out)));for(const rel of liveFiles())assert.deepEqual(readFileSync(new URL(rel,out)),readFileSync(new URL('../dist/'+rel,import.meta.url)));for(const rel of ['qa','AGENTS.md','.git','.openai'])assert.ok(!existsSync(new URL(rel,out)));const worker=readFileSync(new URL('vision-config.js',out),'utf8');assert.ok(worker.includes("new URL('./vendor/wasm',self.location.href)"));}finally{rmSync(new URL('../.pages-check/',import.meta.url),{recursive:true,force:true});}
+});

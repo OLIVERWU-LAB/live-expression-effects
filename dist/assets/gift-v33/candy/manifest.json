@@ -1,0 +1,42 @@
+{
+  "profile": "candy",
+  "tile": 160,
+  "assets": [
+    {
+      "file": "wave-0.png",
+      "frames": 4,
+      "bytes": 23611,
+      "sha256": "5c84ec0bd3e53f52f945a426ecb433ec874690a163442772de3048687f36a0af"
+    },
+    {
+      "file": "wave-1.png",
+      "frames": 4,
+      "bytes": 24124,
+      "sha256": "b209e152496d11d8546a798e8b4c8e8d3c76bf039b67a5855d4f1775771b7ec1"
+    },
+    {
+      "file": "wave-2.png",
+      "frames": 4,
+      "bytes": 23986,
+      "sha256": "1ff146aaa61d6b3a4568ceb0ea62ca03de4c996c9990da0500252f522b3ac743"
+    },
+    {
+      "file": "wave-3.png",
+      "frames": 4,
+      "bytes": 23403,
+      "sha256": "464a0cc235f71472a496602b815361e2236a14c8090f8b5ad656de20e15ee345"
+    },
+    {
+      "file": "wave-4.png",
+      "frames": 4,
+      "bytes": 23717,
+      "sha256": "cb2927bc9bcb78911ae7ea3a4fb70a77a343dd54cc074e180f60e5d06655893d"
+    },
+    {
+      "file": "wave-5.png",
+      "frames": 4,
+      "bytes": 23968,
+      "sha256": "0515e3458898611a9cfaa59dc9dbdb3453c863ee276db5354467bb23fae25184"
+    }
+  ]
+}

@@ -1,0 +1,216 @@
+{
+  "profile": "light",
+  "tile": 160,
+  "assets": [
+    {
+      "file": "star-0.png",
+      "frames": 4,
+      "bytes": 31060,
+      "sha256": "5c6c94a8b63e05bc0f40e0e94f6c8d236a30f1c2f3adcfd017404785d134c543"
+    },
+    {
+      "file": "star-3.png",
+      "frames": 4,
+      "bytes": 32945,
+      "sha256": "65327d8e5b807e1bd46ecb9f6427f082797bd88c96bf70135329610bcfd20064"
+    },
+    {
+      "file": "star-4.png",
+      "frames": 4,
+      "bytes": 33167,
+      "sha256": "92edd4f641588f9a2a833aca8160ef814220c3d8c9f14a0fc9befb7a8ec11d7d"
+    },
+    {
+      "file": "bead-0.png",
+      "frames": 1,
+      "bytes": 6797,
+      "sha256": "87e8fc00dce17d77b3e7af9e018e3589b9a41f6b01babbea9356baea5ec51a1c"
+    },
+    {
+      "file": "bead-1.png",
+      "frames": 1,
+      "bytes": 7353,
+      "sha256": "2ea893ee88f4c06ac459dc8d0a54fa063eea088f79fc6b4542f339d4b421a95d"
+    },
+    {
+      "file": "bead-2.png",
+      "frames": 1,
+      "bytes": 6924,
+      "sha256": "08b3412b4286695490b2a42ce91d50414353069e1367c7b2b1dbd897d28032dd"
+    },
+    {
+      "file": "bead-3.png",
+      "frames": 1,
+      "bytes": 7379,
+      "sha256": "7b91083a8c250d24e20e37dda209773bd26e94206a45c65a9cf6815bd77d59bd"
+    },
+    {
+      "file": "bead-4.png",
+      "frames": 1,
+      "bytes": 7437,
+      "sha256": "f6b5d36536f0bd12b8f484107b5680c1b16a98d6f34274e4dd284071d4512c78"
+    },
+    {
+      "file": "bead-5.png",
+      "frames": 1,
+      "bytes": 6954,
+      "sha256": "83e592b89f5f2856a07cbea08a76efaac60279fb474878437885a0ceb7ec53c7"
+    },
+    {
+      "file": "ring-0.png",
+      "frames": 4,
+      "bytes": 27173,
+      "sha256": "4fc189563c420a66d14e5d3052986196cc66e86244798c1039e38957b4832743"
+    },
+    {
+      "file": "ring-1.png",
+      "frames": 4,
+      "bytes": 28718,
+      "sha256": "26ebb3fe29f7eafd767255e47e3052192cfe2a7fb970a3270f4b890866bbcde9"
+    },
+    {
+      "file": "ribbon-0.png",
+      "frames": 4,
+      "bytes": 20798,
+      "sha256": "6a41a1d3367d8689017995b9bab59a760c7ee5d745cbecebf470e6efa7ba900d"
+    },
+    {
+      "file": "ribbon-1.png",
+      "frames": 4,
+      "bytes": 22196,
+      "sha256": "430fff1e8980d3d7364f07c8e577ee59520b827a16303186054416e8181a1d30"
+    },
+    {
+      "file": "ribbon-2.png",
+      "frames": 4,
+      "bytes": 21122,
+      "sha256": "6a1a6b291e5a96147158489b10173e1eda7aa41aac088fdb6654827491d17080"
+    },
+    {
+      "file": "ribbon-3.png",
+      "frames": 4,
+      "bytes": 22329,
+      "sha256": "0865677d3677cc41e36cf6472d275b645a22e1d9e9005f1e17d43e6ae1d7d6ee"
+    },
+    {
+      "file": "ribbon-4.png",
+      "frames": 4,
+      "bytes": 22484,
+      "sha256": "a930c8dc369c501cb1c6f670a6de6ff12dcd49a492de393f10d4bc3190058f46"
+    },
+    {
+      "file": "ribbon-5.png",
+      "frames": 4,
+      "bytes": 21124,
+      "sha256": "46d20411ea9dda819a2b9c11e5c2a5a3b14aafc71d85883db1f1ad01f40247ba"
+    },
+    {
+      "file": "coil-1.png",
+      "frames": 4,
+      "bytes": 50274,
+      "sha256": "ef3d33cd6f0ddf74b801c399471f9bedd1288c68811e74a3e5c792b01c39b28d"
+    },
+    {
+      "file": "coil-2.png",
+      "frames": 4,
+      "bytes": 48193,
+      "sha256": "4915d76631e6d17e7d7242bb130c39e476589e26817488e520882def60d9e0a0"
+    },
+    {
+      "file": "sparkle-0.png",
+      "frames": 4,
+      "bytes": 23503,
+      "sha256": "d8f0b0d2b60859ea19e26183cd50fc26bd2bfda1612853777f5aabdb646d47bc"
+    },
+    {
+      "file": "fourstar-3.png",
+      "frames": 4,
+      "bytes": 28835,
+      "sha256": "3b970516ac5453fcf8ddd62d389c054cc1c7cec528a3e1ae52457512f9720bcf"
+    },
+    {
+      "file": "fourstar-4.png",
+      "frames": 4,
+      "bytes": 29033,
+      "sha256": "a60e53cb98719ed792a98a42876d2a25e48e2a9b83373188e132c6dbcd784473"
+    },
+    {
+      "file": "cube-1.png",
+      "frames": 4,
+      "bytes": 35162,
+      "sha256": "d43361bdab4bb75087d5de41e8c80811c6c1030a44ef1aaf7278da686c8682c5"
+    },
+    {
+      "file": "cube-3.png",
+      "frames": 4,
+      "bytes": 35373,
+      "sha256": "c82ebe324b493cdd039fefb5f0cd944ee4d983403647a506b25f298f897185e8"
+    },
+    {
+      "file": "cube-5.png",
+      "frames": 4,
+      "bytes": 32820,
+      "sha256": "da094e7fd37c42e86b1436da193e8bd3b1d5ac6f67c6964dca65734be8a3de9b"
+    },
+    {
+      "file": "triangle-0.png",
+      "frames": 4,
+      "bytes": 19405,
+      "sha256": "b859fb0161b564e7b9eac242d99f9b5728535b8c5e180af680ce9985f285241f"
+    },
+    {
+      "file": "triangle-4.png",
+      "frames": 4,
+      "bytes": 21322,
+      "sha256": "da6ef0121eaca0e3670317e3388520a40b023fe2501e65fa3c86f0b0db5d6f11"
+    },
+    {
+      "file": "cylinder-1.png",
+      "frames": 4,
+      "bytes": 23861,
+      "sha256": "d6c0944180e007bd3adbb6d464079bd1998b0b199eb3a84390cd168be48e76ee"
+    },
+    {
+      "file": "wave-3.png",
+      "frames": 4,
+      "bytes": 24797,
+      "sha256": "f674da1c6bafd0240dbfaaab7c7e5b43f7133a8259ab3dc86c3dc35499f48919"
+    },
+    {
+      "file": "wave-4.png",
+      "frames": 4,
+      "bytes": 24989,
+      "sha256": "97ad0ffdbddf5ac8ce3981ae1560554945f151f06494a11f02f4f6511832ad90"
+    },
+    {
+      "file": "twinkle-0.png",
+      "frames": 1,
+      "bytes": 6797,
+      "sha256": "eaa15baa54678644e18098c4ed5e1df4d9fbb9383d9dd1eb82d1ea2eeb08701d"
+    },
+    {
+      "file": "twinkle-1.png",
+      "frames": 1,
+      "bytes": 7353,
+      "sha256": "429ff90a0cf5d1d77c0140c95fa86a27ee3261ec60c8df15b96fb474b5ca6d3a"
+    },
+    {
+      "file": "drop-0.png",
+      "frames": 1,
+      "bytes": 11021,
+      "sha256": "6573192a2ebeb7c226278a51acba49e41041d0696e4ec9fd0cbaf20e6342b4a9"
+    },
+    {
+      "file": "capsule-0.png",
+      "frames": 1,
+      "bytes": 4410,
+      "sha256": "de951b3c4fa47a4776087681313c4486e1104f7f351beb498c1d4c20e4a18f2c"
+    },
+    {
+      "file": "popper-0.png",
+      "frames": 1,
+      "bytes": 10535,
+      "sha256": "e6fed5d9978b2ff1915daf7c92db8b4f9dc8815309ee871f2a45d4d6437378c8"
+    }
+  ]
+}

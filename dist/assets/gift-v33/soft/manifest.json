@@ -1,0 +1,42 @@
+{
+  "profile": "soft",
+  "tile": 160,
+  "assets": [
+    {
+      "file": "wave-0.png",
+      "frames": 4,
+      "bytes": 21267,
+      "sha256": "11d43ae6ed5d950896ec575cc31094f7c94be528ae9bf7188617cb9a1bb15cc0"
+    },
+    {
+      "file": "wave-1.png",
+      "frames": 4,
+      "bytes": 23075,
+      "sha256": "a1b9801728724ac95db9274cbba66326579e4896004812d708925cac7052a95a"
+    },
+    {
+      "file": "wave-2.png",
+      "frames": 4,
+      "bytes": 21567,
+      "sha256": "f919215fa4019f9cc1217d2da7d63b831be329730589846811ec0d0e24f9ca5e"
+    },
+    {
+      "file": "wave-3.png",
+      "frames": 4,
+      "bytes": 22765,
+      "sha256": "b0c6530fa6f1e2df3279f4d6fa427e20879a52645ac8f56904c2cac22a87bec7"
+    },
+    {
+      "file": "wave-4.png",
+      "frames": 4,
+      "bytes": 22553,
+      "sha256": "7dd7b3895e8c20d1ddd864bd9d5978c6479f2a5aa90fb0e0199355d9cb0e3129"
+    },
+    {
+      "file": "wave-5.png",
+      "frames": 4,
+      "bytes": 21914,
+      "sha256": "d442e0bfc1ad4ad179e50ea853fc2dd11193006c3bc3beeb532a95999b77c1d4"
+    }
+  ]
+}

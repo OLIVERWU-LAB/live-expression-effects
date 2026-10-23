@@ -1,0 +1,14 @@
+import test from'node:test';import assert from'node:assert/strict';import{StickerWorld}from'../dist/effects.mjs';import{ParticleQuality}from'../dist/particle-quality.mjs';
+const rng=s=>()=>((s=Math.imul(s,1664525)+1013904223>>>0)/4294967296);
+test('all cinema variants retain outer rays, inner rays and fine glints at low budgets',()=>{
+ for(const pattern of['cinema-original','cinema-refined','cinema-rings'])for(const limit of[150,180,260,700]){const w=new StickerWorld(rng(31));w.setStyle('cinema');w.setPattern(pattern);w.setEffect('laugh');w.limit=limit;w.burst(900,280,1,pattern);for(let i=0;i<35;i++)w.update(.01,1800,1800,null);const visible=w.particles.filter(p=>p.delay===0&&p.retireRemaining==null);assert.ok(visible.some(p=>p.innerRay),`${pattern}/${limit}: inner rays`);assert.ok(visible.some(p=>p.cinemaDust),`${pattern}/${limit}: fine glints`);assert.ok(visible.some(p=>!p.innerRay&&!p.cinemaDust),`${pattern}/${limit}: outer rays`);assert.ok(w.particles.length<=limit);if(limit===700)assert.equal(w.particles.length,366);}
+});
+test('overlapping low-budget fireworks keep the inner ray and glint layers, stay bounded and clear',()=>{
+ for(const pattern of['cinema-refined','cinema-rings']){const w=new StickerWorld(rng(31));w.setStyle('cinema');w.setPattern(pattern);w.setEffect('laugh');w.limit=150;for(let i=0;i<1500;i++){if(i%75===0&&i<900)w.burst(900,280,1,pattern);w.update(.02,1800,1800,null);assert.ok(w.particles.length<=150&&w.pendingParticles.length<=150);assert.ok(w.particles.every(p=>Number.isFinite(p.x+p.y)));if(i<900&&i%75===30){assert.ok(w.particles.some(p=>p.innerRay&&p.retireRemaining==null));assert.ok(w.particles.some(p=>p.cinemaDust&&p.retireRemaining==null));}}assert.equal(w.particles.length,0);assert.equal(w.pendingParticles.length,0);}
+});
+test('startup, background throttling and low frame rate with cheap rendering cannot permanently lower quality',()=>{
+ const q=new ParticleQuality();for(let i=0;i<60;i++)q.sample({now:i*1000,fps:1,drawMs:.7,active:true,gap:1000});assert.equal(q.limit,700);for(let i=60;i<120;i++)q.sample({now:i*1000,fps:20,drawMs:.7,active:true});assert.equal(q.limit,700);const cold=new ParticleQuality();for(let i=0;i<4;i++)cold.sample({now:i*1000,fps:15,drawMs:24,active:true});assert.equal(cold.limit,700);
+});
+test('sustained expensive rendering still reduces load and stable rendering restores quality without refresh',()=>{
+ const q=new ParticleQuality();for(let i=0;i<30;i++)q.sample({now:i*1000,fps:20,drawMs:22,active:true});assert.equal(q.limit,150);for(let i=30;i<100;i++)q.sample({now:i*1000,fps:60,drawMs:3,active:true});assert.equal(q.limit,700);const reduced=new ParticleQuality(180);for(let i=0;i<25;i++)reduced.sample({now:i*1000,fps:20,drawMs:22,active:true});for(let i=25;i<45;i++)reduced.sample({now:i*1000,fps:60,drawMs:3,active:true});assert.equal(reduced.limit,180);
+});
