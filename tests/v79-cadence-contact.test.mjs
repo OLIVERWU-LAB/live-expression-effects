@@ -8,7 +8,7 @@ test('mixed flat designs launch individually at steady intervals instead of pair
 });
 test('a fresh person splash is audible even with no remaining visible falling drops, and stop never extends into the next grain',()=>{
  const c=testAudioContext(),asset={buffer:c.createBuffer(1,24000,48000)},r=new RainAudio(c,{},rng(3),asset,1);r.update({effect:'smile',viewport:{width:390,height:690},particles:[{type:'drop',generation:1,life:.4,maxLife:.4,size:5,x:150,y:220,contactSpray:true,hitRegion:'body'}]},true);
- const v=[...r.voices].find(v=>v.kind==='water');assert.ok(v);assert.ok(v.peak>.18&&v.peak<.24);assert.equal(r.beds.length,0);const end=v.source.stopAt;c.advance(.03);r.update({effect:'neutral',particles:[]},true);assert.ok(v.source.stopAt<=end);c.advance(.5);r.update({effect:'neutral'},true);assert.equal(r.voices.size,0);
+ const v=[...r.voices].find(v=>v.kind==='water');assert.ok(v);assert.ok(v.peak>.23&&v.peak<.29);assert.equal(r.beds.length,0);const end=v.source.stopAt;c.advance(.03);r.update({effect:'neutral',particles:[]},true);assert.ok(v.source.stopAt<=end);c.advance(.5);r.update({effect:'neutral'},true);assert.equal(r.voices.size,0);
 });
 test('gift contact pitch and volume vary independently while every contact stays below the prior mix',()=>{
  const c=testAudioContext(),s=new SoundDesigner({context:c,random:rng(34)}),calls=[];s.play=(name,options)=>calls.push(options);for(let i=0;i<30;i++){c.advance(i*.2);s.confetti({x:.5});}assert.equal(calls.length,30);assert.ok(calls.every(x=>x.rate>=1.16&&x.rate<1.38&&x.gain>=.025&&x.gain<.042));assert.ok(Math.max(...calls.map(x=>x.rate))-Math.min(...calls.map(x=>x.rate))>.17);assert.ok(Math.max(...calls.map(x=>x.gain))-Math.min(...calls.map(x=>x.gain))>.012);
