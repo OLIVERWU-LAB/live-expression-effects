@@ -15,7 +15,7 @@ export class VisionSession {
    current.onerror=e=>{if(current!==this.worker)return;e.preventDefault?.();this.fail(new Error(e.message||'Recognition worker failed'),'worker');};
    current.onmessage=({data})=>{
     if(current!==this.worker)return;
-    if(data.type==='progress'){this.phase=data.phase;this.progress=data;if(!this.ready)this.watch(Math.max(1,Math.min(45000,300000-(this.now()-this.startedAt))),this.phase==='face-create'?'人脸模型启动超时':'识别资源下载已停滞');this.notify();}
+    if(data.type==='progress'){if(data.phase==='download'&&this.phase!=='download')this.downloads=new Map();this.phase=data.phase;this.progress=data;if(data.phase==='download'&&data.asset){this.downloads.set(data.asset,data);this.progress={...data,loaded:[...this.downloads.values()].reduce((n,p)=>n+(p.loaded||0),0),total:[...this.downloads.values()].reduce((n,p)=>n+(p.total||0),0)};}if(!this.ready)this.watch(Math.max(1,Math.min(45000,300000-(this.now()-this.startedAt))),this.phase==='face-create'?'人脸模型启动超时':'识别资源下载已停滞');this.notify();}
     if(data.type==='ready'){this.phase='detecting';this.progress=null;this.ready=true;this.failures=0;this.preparing=true;this.clearTimer(this.timer);this.resolve?.();this.resolve=null;this.reject=null;this.notify();}
     if(data.type==='models-ready'){this.preparing=false;if(this.pending)this.watch(12000,'Recognition frame timed out');this.notify();}
     if(data.type==='error'){if(data.phase==='frame'&&(!this.pending||data.frameId!==this.frameId))return;this.frameError(new Error(data.message),data.phase);return;}
