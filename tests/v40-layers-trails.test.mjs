@@ -3,7 +3,7 @@ const rng=s=>()=>((s=Math.imul(s,1664525)+1013904223>>>0)/4294967296);
 test('medallion comets outlive the old opening, grow a real curved trail and clear within their budget',()=>{
  const w=new StickerWorld(rng(17));w.setStyle('flat');w.setEffect('laugh');w.burst(900,550,1,'flat-medallion');let tracked,samples=[];
  for(let i=0;i<220;i++){w.update(.02,1800,1800,null);tracked??=w.particles.find(p=>p.longTrail&&p.flatRole==='comet');if(tracked&&tracked.life>0){const age=tracked.maxLife-tracked.life;if(samples.length<3&&age>=[.28,.9,1.55][samples.length])samples.push(flatTrailGeometry(tracked));assert.ok(tracked.trail.length<=84);}}
- assert.equal(samples.length,3);assert.ok(samples[1].points.at(-1).d>samples[0].points.at(-1).d*1.4);assert.ok(samples[2].points.at(-1).d>10);assert.ok(tracked.maxLife>=1.78&&tracked.maxLife<=1.96);assert.equal(w.particles.length,0);
+ assert.equal(samples.length,3);assert.ok(samples[1].points.at(-1).d>samples[0].points.at(-1).d*1.4);assert.ok(samples[2].points.at(-1).d>10);assert.ok(tracked.maxLife>=2.05&&tracked.maxLife<=2.23);assert.equal(w.particles.length,0);
  const p={...tracked,maxLife:2.5};assert.ok(flatTrailWindow({...p,life:1.3})>flatTrailWindow({...p,life:.15})*1.8);
 });
 test('the three radial styles restore a compact single opening while their five emitters continue',()=>{

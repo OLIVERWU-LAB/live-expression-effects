@@ -58,23 +58,23 @@ export function flatChildren(parent,random=Math.random){
    const a=parent.turn+i*2.39996323,speed=(70+random()*230)*local.scale;
    children.push(make(local,'dust',Math.cos(a)*speed,Math.sin(a)*speed,Math.min(parent.pattern==='flat-festival'?1.8:parent.pattern==='flat-star-crown'?2.2:3.5,(i%8===0?3.5:i%2===0?1.5+random()*.8:.50+random()*.70))*Math.sqrt(local.scale),1.65+random()*.24,i%2===0?'#FFFFFF':colors[i%3],random,{delay:.06+random()*.08,gravity:90*Math.sqrt(local.scale),luminosity:.20,flatFine:true,whiteFlash:i%2===0}));
   }
-  for(const child of children){child.vx+=parent.vx;child.vy+=parent.vy;child.clusterIndex=parent.clusterIndex;child.cascadeChild=true;const longTrail=parent.pattern==='flat-medallion'&&child.flatRole==='comet';child.life=child.maxLife=(longTrail?1.78:child.flatRing?1.68:child.flatFine?(parent.pattern==='flat-medallion'?1.45:1.65):1.32)+random()*(longTrail?.18:.22);child.drag=longTrail?.95:1.35;child.collisionDelay=.25;if(longTrail){child.longTrail=true;child.trailAge=1.10;child.tailLength=84;}}
+  for(const child of children){child.vx+=parent.vx;child.vy+=parent.vy;child.clusterIndex=parent.clusterIndex;child.cascadeChild=true;const longTrail=parent.pattern==='flat-medallion'&&child.flatRole==='comet';child.life=child.maxLife=(longTrail?2.05:child.flatRing?1.90:child.flatFine?(parent.pattern==='flat-medallion'?1.70:1.90):1.62)+random()*(longTrail?.18:.22);child.drag=longTrail?.95:1.35;child.collisionDelay=.25;if(longTrail){child.longTrail=true;child.trailAge=1.10;child.tailLength=84;child.trailTint=colors[child.flatBand===0?1:0];}}
   return children;
  }
  const out=[],root=Math.sqrt(parent.scale),T=parent.tempo,color=parent.color,accent=parent.accent;
  if(parent.flatRole==='seed'){
   for(let k=0;k<parent.petalCount;k++){
    const a=parent.turn+k/parent.petalCount*TAU,speed=(190+random()*18)*root/T;
-   out.push(make(parent,'petal',parent.vx+Math.cos(a)*speed,parent.vy+Math.sin(a)*speed,(10.5+random()*2)*root,1.24,color,random,{angle:a,drag:1.65/T}));
+   out.push(make(parent,'petal',parent.vx+Math.cos(a)*speed,parent.vy+Math.sin(a)*speed,(10.5+random()*2)*root,1.50,color,random,{angle:a,drag:1.65/T}));
   }
   out.push(make(parent,'core',parent.vx,parent.vy,3.4*root,.23,accent,random,{flatEmitAt:.16*T,turn:parent.turn,color,accent}));
  }else if(parent.flatRole==='core'&&parent.petalLayer===2){
   const tint=FLAT_COLORWAYS[parent.variant||0][2];
-  for(let k=0;k<12;k++){const a=parent.turn+k/12*TAU+.36,speed=53*root/T;out.push(make(parent,'petal',parent.vx+Math.cos(a)*speed,parent.vy+Math.sin(a)*speed,4.1*root,.96,tint,random,{angle:a,drag:1.6/T,innerPetal:true,petalLayer:3}));}
+  for(let k=0;k<12;k++){const a=parent.turn+k/12*TAU+.36,speed=53*root/T;out.push(make(parent,'petal',parent.vx+Math.cos(a)*speed,parent.vy+Math.sin(a)*speed,4.1*root,1.14,tint,random,{angle:a,drag:1.6/T,innerPetal:true,petalLayer:3}));}
  }else if(parent.flatRole==='core'){
   for(let k=0;k<16;k++){
    const a=parent.turn+k/16*TAU+.18,speed=100*root/T;
-   out.push(make(parent,'petal',parent.vx+Math.cos(a)*speed,parent.vy+Math.sin(a)*speed,5.2*root,.86,accent,random,{angle:a,drag:1.8/T,innerPetal:true}));
+   out.push(make(parent,'petal',parent.vx+Math.cos(a)*speed,parent.vy+Math.sin(a)*speed,5.2*root,1.05,accent,random,{angle:a,drag:1.8/T,innerPetal:true}));
   }
   out.push(make(parent,'core',parent.vx,parent.vy,2.4*root,.25,accent,random,{flatEmitAt:.19*T,turn:parent.turn,color,accent,petalLayer:2}));
   out.push(make(parent,'ring',parent.vx,parent.vy,24*root,1.56,accent,random,{angle:parent.turn}));
@@ -142,13 +142,18 @@ function flatStar(g,n,r){g.beginPath();for(let i=0;i<n*2;i++){const a=i*Math.PI/
 // collision therefore bend the tail naturally; it never pivots as a rigid stripe.
 export function flatTrailWindow(p){const age=p.maxLife-p.life;return p.longTrail?(.32+.72*clamp(age/1.05))*(.30+.70*clamp(p.life/.80)):(p.trailAge??.28);}
 export function flatTrailGeometry(p){
- const points=[{x:0,y:0,d:0}],age=p.maxLife-p.life,maxAge=flatTrailWindow(p),maxLength=p.longTrail?Infinity:100*p.scale;
+ const points=[{x:0,y:0,d:0}],age=p.maxLife-p.life,maxAge=flatTrailWindow(p),maxLength=p.longTrail?Math.max(22,180*(p.scale||1)):100*p.scale;
+ let lastAge=age;
  for(const q of p.trail||[]){
+  if(!Number.isFinite(q.x)||!Number.isFinite(q.y)||q.age!=null&&(!Number.isFinite(q.age)||q.age>lastAge+.001))break;
   if(q.age!=null&&age-q.age>maxAge)break;
   const prev=points.at(-1),x=q.x-p.x,y=q.y-p.y,step=Math.hypot(x-prev.x,y-prev.y);
+  if(p.longTrail&&step>Math.max(10,Math.hypot(p.vx||0,p.vy||0)*.10+8))break;
   if(step<.25)continue;
+  if(p.longTrail&&points.length>1){const a=points.at(-2),dx=prev.x-a.x,dy=prev.y-a.y;if((dx*(x-prev.x)+dy*(y-prev.y))/(Math.hypot(dx,dy)*step)<-.25)break;}
   if(prev.d+step>maxLength){const t=(maxLength-prev.d)/step;points.push({x:prev.x+(x-prev.x)*t,y:prev.y+(y-prev.y)*t,d:maxLength});break;}
   points.push({x,y,d:prev.d+step,age:q.age});
+  if(q.age!=null)lastAge=q.age;
  }
  if(points.length<2)return{points,left:[],right:[]};
  const total=points.at(-1).d,w=p.trailWidth??p.size,left=[],right=[];

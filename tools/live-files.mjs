@@ -1,4 +1,4 @@
-import{AUDIO_FILES}from'../dist/sound-assets.mjs';
+import{LIVE_AUDIO_FILES as AUDIO_FILES}from'../dist/sound-assets.mjs';
 import{GIFT_BANKS}from'../dist/gift-banks.mjs';
 // Ship the live entry and its dependencies, not past QA pages or unused material revisions.
 import{readFileSync,readdirSync,statSync}from'node:fs';import{resolve,dirname,relative}from'node:path';import{fileURLToPath}from'node:url';

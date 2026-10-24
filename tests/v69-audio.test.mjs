@@ -1,12 +1,12 @@
 import test from 'node:test';import assert from 'node:assert/strict';
 import {readFileSync,statSync}from'node:fs';
-import{SoundDesigner,MIX}from'../dist/sound-sampled.mjs';import{AUDIO_FILES}from'../dist/sound-assets.mjs';import{liveFiles}from'../tools/live-files.mjs';
+import{SoundDesigner,MIX}from'../dist/sound-sampled.mjs';import{AUDIO_FILES,LIVE_AUDIO_FILES}from'../dist/sound-assets.mjs';import{liveFiles}from'../tools/live-files.mjs';
 function context(){
  const starts=[],params=()=>({value:0,setValueAtTime(){},setTargetAtTime(){},cancelScheduledValues(){},linearRampToValueAtTime(){}}),node=()=>({connect(){},disconnect(){}});
  return{currentTime:10,state:'running',destination:{},starts,createGain:()=>({...node(),gain:params()}),createDynamicsCompressor:()=>({...node(),threshold:params(),knee:params(),ratio:params(),attack:params(),release:params()}),createBiquadFilter:()=>({...node(),frequency:params(),Q:params()}),createStereoPanner:()=>({...node(),pan:params()}),createBufferSource(){const s={...node(),playbackRate:params(),start(when,offset){starts.push({source:s,when,offset,buffer:s.buffer,rate:s.playbackRate.value});},stop(){s.stopped=true;}};return s;},async decodeAudioData(){const data=new Float32Array(4800);data.fill(.2,400);return{duration:.1,length:4800,numberOfChannels:1,sampleRate:48000,getChannelData:()=>data};},async resume(){this.state='running';},async suspend(){this.state='suspended';}};
 }
 async function sound(){const c=context();let fetches=0;const s=new SoundDesigner({context:c,random:()=>.5,fetcher:async()=>{fetches++;return{ok:true,arrayBuffer:async()=>new ArrayBuffer(1)};}});assert.equal(await s.load(),true);return{s,c,get fetches(){return fetches;}};}
-test('reference clips remain available under 240 KB for the hybrid engine',()=>{const files=liveFiles();let bytes=0;for(const file of Object.values(AUDIO_FILES)){assert.ok(files.includes(file));bytes+=statSync(new URL('../dist/'+file,import.meta.url)).size;}assert.ok(bytes<240000,bytes);});
+test('reference clips remain available under 240 KB for the hybrid engine',()=>{const files=liveFiles();let bytes=0;for(const file of Object.values(AUDIO_FILES)){assert.equal(files.includes(file),Object.values(LIVE_AUDIO_FILES).includes(file));bytes+=statSync(new URL('../dist/'+file,import.meta.url)).size;}assert.ok(bytes<240000,bytes);});
 test('audio fetch/decode is shared, bounded to two jobs, and never repeated during playback',async()=>{
  const c=context();let active=0,peak=0,fetches=0;const s=new SoundDesigner({context:c,fetcher:async()=>{fetches++;active++;peak=Math.max(peak,active);await new Promise(r=>setTimeout(r,1));active--;return{ok:true,arrayBuffer:async()=>new ArrayBuffer(1)};}});
  await Promise.all([s.load(),s.load(),s.load()]);assert.equal(fetches,6);assert.equal(peak,2);assert.ok(s.assetsReady);assert.ok(s.buffers.get('explode').offset>0,'leading silence is trimmed');

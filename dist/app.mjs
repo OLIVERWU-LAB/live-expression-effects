@@ -3,7 +3,7 @@ import {cameraFrameReader} from './camera-frame.mjs';
 import {fitFlatViewport} from './flat-budget.mjs';
 import {VisionSession} from './vision-session.mjs';
 import{ParticleQuality}from'./particle-quality.mjs';
-import {applyLiveStyle,lockedState} from './live-playback.mjs';
+import {applyLiveStyle,lockedState,flatLaunchBusy} from './live-playback.mjs';
 import {REFERENCE_NAMES} from './reference-bursts.mjs';
 import { ExpressionController, clamp, headPolygon, previewHead } from './core.mjs';
 import { StickerWorld, SilhouetteCollider } from './effects.mjs';
@@ -35,7 +35,7 @@ let lastMetric = null, segmentationReady = false, handsReady = false, handLandma
 applyLiveStyle(world,'cinema');
 world.giftMaterialStyle='random';
 renderer.gift.material=world.giftMaterialStyle;
-stage.dataset.build='v74';
+stage.dataset.build='v75';
 const readFaceFrame=cameraFrameReader(480),readGeometryFrame=cameraFrameReader(320);
 let lastGeometryCapture=0,lastGeometryVideoTime=-1;
 const vision=new VisionSession({
@@ -73,7 +73,7 @@ $('loading-retry').addEventListener('click',()=>{
  else renderer.gift.load(world.giftMaterialStyle).then(syncLoading);syncLoading();
 });
 $('loading-diagnostics').addEventListener('click',async()=>{
- const detail=JSON.stringify({version:74,browser:navigator.userAgent,source:mode,startup:cameraStartup,startupError:cameraStartupError,wanted,suspended,workerCreated:!!vision.worker,phase:vision.phase,error:vision.lastError,ready:vision.ready,resultReceived:vision.hasResult,pending:vision.pending,attempts:vision.attempt,audio:{ready:sound.assetsReady,loaded:sound.loaded,error:sound.error,enabled:sound.enabled},video:{width:video.videoWidth,height:video.videoHeight,time:video.currentTime,readyState:video.readyState,paused:video.paused},events:log.slice(-18)},null,2);
+ const detail=JSON.stringify({version:75,browser:navigator.userAgent,source:mode,startup:cameraStartup,startupError:cameraStartupError,wanted,suspended,workerCreated:!!vision.worker,phase:vision.phase,error:vision.lastError,ready:vision.ready,resultReceived:vision.hasResult,pending:vision.pending,attempts:vision.attempt,audio:{ready:sound.assetsReady,loaded:sound.loaded,error:sound.error,enabled:sound.enabled},video:{width:video.videoWidth,height:video.videoHeight,time:video.currentTime,readyState:video.readyState,paused:video.paused},events:log.slice(-18)},null,2);
  try{await navigator.clipboard.writeText(detail);$('loading-diagnostics').textContent='已复制诊断';}catch{window.prompt('复制以下诊断信息',detail);}
 });
 function syncStyle() {
@@ -269,12 +269,12 @@ function frame(now) {
   if(world.style==='flat'&&world.effect==='laugh'&&!world.particles.length&&!world.pendingParticles.length&&!world.rockets.length)world.limit=quality.limit;
   if (active && state === 'smile') world.rain(dt * (reduced ? .45 : 1), width, height, expression.smile);
   world.head=currentHeadBounds();
-  const reviewBusy=(lockedEffect==='fireworks'||world.style==='flat')&&(world.style==='cinema'?world.rockets.length>0:(world.rockets.length||world.launchers.length||world.particles.length||world.blooms.length||world.afterglows.length||world.innerBursts.length));
+  const reviewBusy=world.style==='flat'?flatLaunchBusy(world):lockedEffect==='fireworks'&&(world.style==='cinema'?world.rockets.length>0:(world.rockets.length||world.launchers.length||world.particles.length||world.blooms.length||world.afterglows.length||world.innerBursts.length));
   if(active&&state==='laugh'&&(world.style!=='gift'||renderer.gift.ready)&&!reviewBusy&&now>=nextLaunchAt){
     const plan=planBurst(width,height,world.head,burstSide++),layout=world.style==='flat'?fitFlatViewport(plan,width,height,world.head):plan;
     if(layout&&world.launch(layout.x,layout.y,width,height,layout.scale,layout)){
       stage.dataset.launchCount=String(++fireworkLaunches);
-      launchGap=world.style==='cinema'?1500+Math.random()*160:lockedEffect?450:world.style==='gift'?1750+Math.random()*200:world.style==='flat'?(world.lastPattern==='flat-petals-slow'?2600:1750):1100+Math.random()*250;
+      launchGap=world.style==='cinema'?1500+Math.random()*160:world.style==='flat'?1150:lockedEffect?450:world.style==='gift'?1750+Math.random()*200:1100+Math.random()*250;
       nextLaunchAt=now+(reduced?2800:launchGap);record('firework-launch',{zone:layout.zone,radius:Math.round(layout.radius)});
     }else nextLaunchAt=now+160;
   }
@@ -311,7 +311,7 @@ let dragStart = null;
 stage.addEventListener('pointerdown', e => { if (mode !== 'preview' || e.target.closest('button,input,aside,.hud')) return; pointerDown = true; dragStart = e.pointerId; stage.setPointerCapture(e.pointerId); move(e); });
 function move(e) { if (!pointerDown || mode !== 'preview') return; previewX = clamp(e.clientX / width, .18, .82); previewY = clamp(e.clientY / height, .2, .58); }
 stage.addEventListener('pointermove', move); stage.addEventListener('pointerup', () => pointerDown = false); stage.addEventListener('pointercancel', () => pointerDown = false);
-$('export-session').addEventListener('click', () => { const data = { version: 74, exportedAt: new Date().toISOString(), metrics: mode === 'idle' ? lastMetric : metrics(), note: 'Aggregate performance and interaction events only; no images or face geometry.', events: log }; const url = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })); const a = document.createElement('a'); a.href = url; a.download = 'expression-session.json'; a.click(); setTimeout(() => URL.revokeObjectURL(url), 1000); });
+$('export-session').addEventListener('click', () => { const data = { version: 75, exportedAt: new Date().toISOString(), metrics: mode === 'idle' ? lastMetric : metrics(), note: 'Aggregate performance and interaction events only; no images or face geometry.', events: log }; const url = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })); const a = document.createElement('a'); a.href = url; a.download = 'expression-session.json'; a.click(); setTimeout(() => URL.revokeObjectURL(url), 1000); });
 document.addEventListener('visibilitychange', () => document.hidden ? pause() : resume());
 window.addEventListener('pagehide', e => { pause(); if (!e.persisted) { releaseTracks(); vision.dispose();geometry.dispose(); } });
 window.addEventListener('pageshow', e => { if (e.persisted) resume(); });
