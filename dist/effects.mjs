@@ -341,7 +341,7 @@ export class StickerWorld {
       if(p.type!=='drop')p.vx+=(p.drift||0)*step;
       p.x += p.vx * step; p.y += p.vy * step; p.angle += (p.spin || 0) * step;
       const impactVX = p.vx, impactVY = p.vy;
-      const collision = !(p.flatFx&&p.flatRole==='ring')&&!p.giftSplash&&!p.noRecollision&&(p.type==='drop'||(!p.hasCollided&&p.vy>0&&p.wallAge>=(p.collisionDelay||0))) && p.touched === 0 && (collider?.collide ? collider.collide(p, old) : collide(p, old, collider, velocity));
+      const collision = !(p.flatFx&&p.flatRole==='ring')&&!p.giftSplash&&!p.noRecollision&&(p.type==='drop'||(!p.hasCollided&&((p.referenceGift&&!p.secondary)||(p.vy>0&&p.wallAge>=(p.collisionDelay||0))))) && p.touched === 0 && (collider?.collide ? collider.collide(p, old) : collide(p, old, collider, velocity));
       if (collision) {
         this.collisions++;if(p.hitRegion==='head')this.headCollisions++;p.hitAge=0; p.touched = .20;
         if(p.trail){this.keepTrail(p,.35);p.trail.length=0;}

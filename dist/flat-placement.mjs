@@ -25,14 +25,14 @@ export function placeFlatBouquet(layout,width,height,head){
  for(let step=0;step<16;step++){
   const scale=Math.max(.22,nominal*Math.pow(.9,step));let best=null;
   for(let variant=0;variant<8;variant++){
-   const flatSeed=(seed+Math.imul(variant,2654435761))>>>0,sites=flatFlowerSites(scale,flatSeed),edge=16+(portrait?120:60)*scale;
+   const flatSeed=(seed+Math.imul(variant,2654435761))>>>0,sites=flatFlowerSites(scale,flatSeed),edge=16+60*scale;
    const minX=Math.max(...sites.map(p=>edge-p.x-Math.min(0,p.vx*.55))),maxX=Math.min(...sites.map(p=>width-edge-p.x-Math.max(0,p.vx*.55))),minY=Math.max(...sites.map(p=>edge-p.y-Math.min(0,p.vy*.55))),maxY=Math.min(...sites.map(p=>(portrait?Math.min(height*.58,head.top+(head.bottom-head.top)*.28):height*.62)-edge-p.y));
    if(maxX<minX||maxY<minY)continue;
    const xs=Array.from({length:9},(_,i)=>minX+(maxX-minX)*i/8),ys=Array.from({length:9},(_,i)=>minY+(maxY-minY)*i/8);
-   xs.push(clamp(targetX,minX,maxX));ys.push(clamp(head.top-Math.max(...sites.map(p=>p.y+gap+65*scale*p.flowerScale)),minY,maxY));
+   xs.push(clamp(targetX,minX,maxX));ys.push(clamp(head.top-Math.max(...sites.map(p=>p.y+gap+(portrait?65:90)*scale*p.flowerScale)),minY,maxY));
    for(const x of xs)for(const y of ys){
     const clearance=layout?.clearance??gap;if(boundsDistance(x,y,head)<clearance+6)continue;
-    if(sites.some(p=>boundsDistance(x+p.x,y+p.y,head)<gap+65*scale*p.flowerScale))continue;
+    if(sites.some(p=>boundsDistance(x+p.x,y+p.y,head)<gap+(portrait?65:90)*scale*p.flowerScale))continue;
     const score=Math.hypot((x-targetX)/width,(y-targetY)/height)+variant*.002;
     if(!best||score<best.score)best={...layout,x,y,scale,radius:scale*205,zone,flatSeed,flatPlacement:true,clearance,score};
    }
