@@ -109,13 +109,13 @@ export class Renderer {
     const g=this.ctx;g.save();g.globalCompositeOperation='destination-out';g.drawImage(this.occlusion,0,0,this.width,this.height);
     // A small extra head guard also covers hair when the model matte is soft or late.
     if(head){g.fillStyle='#fff';g.beginPath();g.ellipse((head.left+head.right)/2,(head.top+head.bottom)/2,(head.right-head.left)/2+8,(head.bottom-head.top)/2+8,0,0,Math.PI*2);g.fill();}
-    g.restore();
+    g.restore();g.beginPath();
   }
   collisionForeground(world){
     if(!['gift','cinema','flat','glow'].includes(world.style))return;
     const particles=world.particles.filter(p=>p.hasCollided&&p.life>0&&!(p.flatFx&&p.flatRole==='ring'));if(!particles.length)return;const g=this.ctx,b=world.head;
-    g.save();if(b){const cx=(b.left+b.right)/2,cy=(b.top+b.bottom)/2,rx=(b.right-b.left)*.405,ry=(b.bottom-b.top)*.405;g.beginPath();g.rect(-100,-100,this.width+200,this.height+200);g.moveTo(cx+rx,cy);g.ellipse(cx,cy,rx,ry,0,0,Math.PI*2);g.clip('evenodd');}
-    const impacts={...world,particles,blooms:[]};if(world.style==='gift')this.gift.draw(g,impacts);else if(world.style==='flat')drawFlatFireworks(g,impacts);else this.cinema.draw(g,impacts);g.restore();
+    g.save();if(b){const cx=(b.left+b.right)/2,cy=(b.top+b.bottom)/2,rx=(b.right-b.left)*.405,ry=(b.bottom-b.top)*.405;g.beginPath();g.rect(-100,-100,this.width+200,this.height+200);g.moveTo(cx+rx,cy);g.ellipse(cx,cy,rx,ry,0,0,Math.PI*2);g.clip('evenodd');g.beginPath();}
+    const impacts={...world,particles,blooms:[]};if(world.style==='gift')this.gift.draw(g,impacts);else if(world.style==='flat')drawFlatFireworks(g,impacts);else this.cinema.draw(g,impacts);g.restore();g.beginPath();
   }
   stickers(world){
     const g=this.ctx;

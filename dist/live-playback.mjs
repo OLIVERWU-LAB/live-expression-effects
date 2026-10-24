@@ -13,5 +13,9 @@ export function lockedState(expression,lock,mode){
 // still waits for the full rocket flight, rather than cutting the old particles.
 export function flatLaunchBusy(world){
  if(world.rockets.length||world.launchers.length)return true;
- return world.particles.some(p=>p.life>0&&(p.flatEmitAt!=null||(!['dust','dash','ring'].includes(p.flatRole)&&!p.flatFine&&p.life>.58)));
+ return world.particles.some(p=>p.life>0&&(p.flatEmitAt!=null||(!['dust','dash','ring'].includes(p.flatRole)&&!p.flatFine&&p.life>1.20)));
 }
+
+// Recover ordinary 12–20 FPS frame time with at most two physics slices.
+// A long interruption never replays a backlog on return.
+export function simulationSlices(gap,style){const elapsed=Math.max(0,Math.min(gap>250?.05:gap/1000,style==='flat'?.10:.05)),count=Math.max(1,Math.ceil(elapsed/.05));return Array(count).fill(elapsed/count);}

@@ -36,6 +36,6 @@ export class RainAudio{
   this.beds.forEach((v,i)=>{v.level=(i?.035:.15)*density*swell;v.gain.setTargetAtTime(v.level,now,.14);});
   // Aggregate beads; reserve the audible contact for the person, not the pool.
   const person=hit?.hitRegion&&hit.hitRegion!=='water';
-  if(hit&&now-(person?this.lastPersonHit:this.lastWaterHit)>(person?.11:.26)&&this.voices.size<6){this.lastHit=now;if(person)this.lastPersonHit=now;else this.lastWaterHit=now;this.voice({kind:'water',gain:person?.22+Math.min(hit.size,8)*.012:.075+Math.min(hit.size,8)*.004,pan:clamp((hit.x/width-.5)*1.4,-.7,.7),high:550,low:6500,duration:.10+this.random()*.035});}
+  if(hit&&now-(person?this.lastPersonHit:this.lastWaterHit)>(person?.17:.26)&&this.voices.size<6){this.lastHit=now;if(person)this.lastPersonHit=now;else this.lastWaterHit=now;this.voice({kind:'water',gain:person?.20+Math.min(hit.size,8)*.009:.075+Math.min(hit.size,8)*.004,pan:clamp((hit.x/width-.5)*1.4,-.7,.7),high:550,low:6500,duration:.10+this.random()*.035});}
  }
 }

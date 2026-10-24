@@ -219,7 +219,7 @@ export class StickerWorld {
   launch(x,y,width,height,scale=1,layout=null) {
     if (this.effect !== 'laugh' || this.rockets.length >= 3) return false;
     const gift=this.style==='gift',pattern=this.nextPattern(),preferredX=layout?.launchX??width*(.24+this.random()*.52),origin=gift?giftLaunchOrigin(preferredX,x,width,height,this.head):{x:preferredX,y:height+22},sx=origin.x,sy=origin.y;
-    const duration=(gift?.52:.58)+this.random()*.10;
+    const duration=(gift?.52:this.style==='flat'?.46:.58)+this.random()*.10;
     this.rockets.push({sx,sy,tx:x,ty:y,x:sx,y:sy,arc:clamp((sy-y)*(.045+this.random()*.025),12,40),age:0,delayRemaining:0,duration,scale,pattern,variant:pattern==='willow'?3:Math.floor(this.random()*5),trail:[],trailClock:0,radius:layout?.radius||scale*205,planned:!!layout,clearance:layout?.clearance??84});
     this.event('launch',{x:sx/width,pattern,duration});return true;
   }
@@ -259,7 +259,7 @@ export class StickerWorld {
     this.afterglows.push({carrier:p.carrier,tint:p.cinematic&&!p.handDrawn?(p.trailTint||p.tint):p.tint,fireworkStage:p.fireworkStage,points:p.trail.map(q=>({...q})),x:p.x,y:p.y,life,maxLife:life,variant:p.variant,size:p.size,light:fireworkEnvelope(p).light || .04});
   }
   update(dt, width, height, collider, velocity) {
-    dt = clamp(dt, 0, .05);const particleRate=this.effect==='laugh'?(this.style==='gift'?1.35:this.style==='flat'?.88:!(['cinema','glow'].includes(this.style)&&referencePattern(this.style,this.lastPattern))?1.20:1):1,particleDT=dt*particleRate;
+    dt = clamp(dt, 0, .05);const particleRate=this.effect==='laugh'?(this.style==='gift'?1.35:this.style==='flat'?1.14:!(['cinema','glow'].includes(this.style)&&referencePattern(this.style,this.lastPattern))?1.20:1):1,particleDT=dt*particleRate;
     this.simulationTime+=particleDT;
     if(this.head&&(this.style==='gift'||['cinema','glow'].includes(this.style)||this.style==='flat'))collider=withHeadCollider(collider,this.head);
     for(const tail of this.afterglows)tail.life-=particleDT;
