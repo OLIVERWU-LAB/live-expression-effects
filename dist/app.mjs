@@ -1,3 +1,5 @@
+import {fitFlatViewport} from './flat-budget.mjs';
+import {VisionSession} from './vision-session.mjs';
 import{ParticleQuality}from'./particle-quality.mjs';
 import {applyLiveStyle,liveStyle,lockedState} from './live-playback.mjs';
 import {REFERENCE_NAMES} from './reference-bursts.mjs';
@@ -10,6 +12,7 @@ import {BOUQUET_NAME} from './bouquet.mjs';
 import { SoundDesigner } from './sound.mjs';
 const $ = id => document.getElementById(id), stage = $('stage'), video = $('camera');
 const renderer = new Renderer($('scene')), world = new StickerWorld(), expression = new ExpressionController();
+renderer.gift.tileSize=matchMedia('(max-width: 600px)').matches?96:0;
 const sound = new SoundDesigner();
 try { sound.setEnabled(localStorage.getItem('expression-sound') !== 'off'); } catch {}
 function syncSound() { const on = sound.enabled && sound.ready; $('sound-toggle').setAttribute('aria-pressed', String(on)); $('sound-toggle').setAttribute('aria-label', on ? '关闭声音' : '开启声音'); $('sound-toggle').title = on ? '关闭声音' : '开启声音'; $('sound-status').textContent = !sound.enabled ? '静音' : !sound.ready ? '点击右上角开启' : world.style==='cinema' ? '呼啸 · 爆裂 · 余响' : '轻响 · 弹跳 · 铃音'; }
@@ -17,8 +20,8 @@ sound.onstate = syncSound; syncSound();
 function activateAudio() { if(sound.enabled) sound.unlock().then(syncSound); }
 const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const quality=new ParticleQuality(reduced?180:700);world.limit=quality.limit;
-let mode = 'idle', wanted = false, stream = null, worker = null, engineReady = false, enginePromise = null, engineResolve, engineReject, engineTimer, frameTimer;
-let pending = false, cameraRequest = null, cameraEpoch = 0, suspended = document.hidden, lastVideoTime = -1, lastInference = 0, interval = 65;
+let mode = 'idle', wanted = false, stream = null, engineReady = false;
+let cameraRequest = null, cameraEpoch = 0, suspended = document.hidden, lastVideoTime = -1, lastInference = 0, interval = 65;
 let width = 1, height = 1, landmarks = null, mask = null, maskTime = 0, faceTime = -Infinity, polygon = null, silhouette = null, silhouetteKey = '', lastCenter = null;
 let lockedEffect=null,fireworkLaunches=0;
 let state = 'neutral', previewStrength = .35, previewX = .5, previewY = .37, pointerDown = false;
@@ -28,10 +31,25 @@ applyLiveStyle(world,'cinema');
 try { applyLiveStyle(world,liveStyle(localStorage.getItem('expression-visual-style'))); } catch {}
 world.giftMaterialStyle='random';
 renderer.gift.material=world.giftMaterialStyle;
-stage.dataset.build='v64';
+stage.dataset.build='v65';
+const vision=new VisionSession({
+ createWorker:()=>new Worker(new URL('./vision.worker.js',import.meta.url)),
+ createBitmap:()=>createImageBitmap(video,{resizeWidth:480,resizeHeight:Math.max(1,Math.round(480*video.videoHeight/video.videoWidth))}),
+ active:()=>wanted&&mode==='camera'&&!suspended,
+ onState:status=>{engineReady=status.ready;if(mode==='camera'&&!status.ready){$('status-copy').textContent=status.attempt?'正在恢复表情识别…':'识别准备中';}syncLoading();},
+ onError:(error,phase)=>{record('vision-error',{phase,message:String(error)});if(phase!=='dropped-frame'){segmentationReady=false;handsReady=false;mask=null;silhouette=null;handLandmarks=[];hands=null;faceTime=-Infinity;}},
+ onEvent:handleVisionEvent
+});
+function syncLoading(){
+ const live=mode!=='idle'&&!suspended,recognition=live&&mode==='camera'&&(!engineReady||vision.preparing),gift=live&&world.style==='gift'&&!renderer.gift.ready;
+ const text=recognition?(vision.attempt?'正在恢复表情识别…':'正在加载识别组件…'):gift?(renderer.gift.error?'礼物素材加载失败':'正在加载礼物素材…'):'';
+ $('loading').hidden=!text;$('loading-copy').textContent=text;$('loading-retry').hidden=recognition||!gift||!renderer.gift.error;stage.setAttribute('aria-busy',String(!!text));
+}
+$('loading-retry').addEventListener('click',()=>{renderer.gift.load(world.giftMaterialStyle).then(syncLoading);syncLoading();});
 function syncStyle() {
   stage.dataset.style=world.style;
-  if(world.style==='gift')renderer.gift.load(world.giftMaterialStyle);
+  if(world.style==='gift')renderer.gift.load(world.giftMaterialStyle).then(syncLoading);
+  syncLoading();
   stage.dataset.giftMaterial=world.giftMaterialStyle;
   for(const b of document.querySelectorAll('.version-switch [data-style]'))b.setAttribute('aria-pressed',String(b.dataset.style===world.style));
   syncPlayback();
@@ -59,44 +77,32 @@ new ResizeObserver(resize).observe(stage);
 function showSession(source) {
   mode = source; $('welcome').hidden = true; $('hud').hidden = false; $('preview-strength').hidden = source !== 'preview'; stage.dataset.mode=source;
   $('stop-camera').hidden = false; $('resume-camera').hidden = source === 'camera'; $('resume-camera').textContent='预览'; $('source-label').textContent = source === 'camera' ? 'LIVE CAMERA' : 'PREVIEW';
+  syncLoading();
   $('live-dot').classList.add('active'); $('bottom-note').textContent = source === 'camera' ? '本地识别 · 5–45% 落雨 / 45–100% 烟花' : '模拟预览 · 拖动画面移动人物';
 }
 function releaseTracks() { cameraEpoch++; stream?.getTracks().forEach(t => t.stop()); stream = null; video.srcObject = null; stage.classList.remove('camera-active'); }
 function stop() {
-  record('session-ended', metrics()); lastMetric = metrics(); wanted = false; storage.set(false); releaseTracks(); mode = 'idle'; stage.dataset.mode='idle'; resetSignals(); world.clear();
+  record('session-ended', metrics()); lastMetric = metrics(); wanted = false; vision.pause(); storage.set(false); releaseTracks(); mode = 'idle'; stage.dataset.mode='idle'; resetSignals(); world.clear();
   $('welcome').hidden = false; $('hud').hidden = true; $('face-hint').hidden = true; $('stop-camera').hidden = true; $('resume-camera').hidden = true;
   $('source-label').textContent = 'CAMERA OFF'; $('status-copy').textContent = '表情互动特效'; $('live-dot').classList.remove('active'); $('bottom-note').textContent = '开启摄像头以使用表情控制。'; stage.classList.remove('rain', 'firework');
-  $('start-camera').disabled = false; notify();
+  $('start-camera').disabled = false; notify();syncLoading();
   // Keep the initialized engine in memory for a later start in this same page.
 }
 function usePreview() {
-  wanted = false; storage.set(false); releaseTracks(); resetSignals(); world.clear(); sessionStart = performance.now(); log = []; showSession('preview');
+  wanted = false; vision.pause(); storage.set(false); releaseTracks(); resetSignals(); world.clear(); sessionStart = performance.now(); log = []; showSession('preview');
   previewX = .5; previewY = .37; previewStrength = .35; $('preview-strength').value = 35; $('status-copy').textContent = '模拟信号 · 非摄像头识别'; notify(); record('preview-start');
 }
-function failure(error, phase = 'frame') {
-  record('vision-error', { phase, message: String(error) });
-  clearTimeout(engineTimer); clearTimeout(frameTimer); pending = false; engineReady = false;
-  worker?.terminate(); worker = null; segmentationReady = false; handsReady=false;handLandmarks=[];hands=null; const reject = engineReject; enginePromise = null; engineResolve = null; engineReject = null; reject?.(new Error(String(error)));
-  if (mode === 'camera') { resetSignals(); $('status-copy').textContent = '画面已就绪 · 识别需重试'; $('resume-camera').textContent = '重试识别'; $('resume-camera').hidden = false; notify('画面已开启，但识别组件暂未就绪。可点击右上角重试识别。'); }
-}
-function ensureEngine() {
-  if (engineReady) return Promise.resolve();
-  if (enginePromise) return enginePromise;
-  enginePromise = new Promise((resolve, reject) => { engineResolve = resolve; engineReject = reject; });
-  worker = new Worker(new URL('./vision.worker.js', import.meta.url));
-  engineTimer = setTimeout(() => failure('Model initialization timeout', 'init'), 45000);
-  worker.onerror = e => { e.preventDefault(); failure(e.message || 'Worker failed', 'init'); };
-  worker.onmessage = ({ data }) => {
+function ensureEngine(){return vision.start();}
+function handleVisionEvent(data){
     if (data.type === 'ready') {
-      engineReady = true; clearTimeout(engineTimer); $('cache-status').textContent = data.cacheAvailable === false ? '浏览器未开放持久缓存' : data.cached ? '已从本机缓存读取' : '已保存，后续优先复用';
-      record('engine-ready', { cached: !!data.cached, cacheHits: data.cacheHits, cacheWrites: data.cacheWrites }); engineResolve?.(); engineResolve = null; engineReject = null;
+      $('cache-status').textContent = data.cacheAvailable === false ? '浏览器未开放持久缓存' : data.cached ? '已从本机缓存读取' : '已保存，后续优先复用';
+      record('engine-ready', { cached: !!data.cached, cacheHits: data.cacheHits, cacheWrites: data.cacheWrites });
     } else if (data.type === 'segmentation-ready') { segmentationReady = true; record('silhouette-ready', { labels: data.labels }); }
-    else if (data.type === 'segmentation-error') { segmentationReady = false; record('silhouette-error', { message: data.message }); if (mode === 'camera') notify('人物轮廓暂未就绪，目前使用头部轮廓。重新开启识别后可重试。'); }
+    else if (data.type === 'segmentation-error') { segmentationReady = false; record('silhouette-error', { message: data.message }); if (mode === 'camera') notify('人物轮廓暂未就绪，目前使用头部轮廓。表情识别会继续运行。'); }
     else if(data.type==='hands-ready'){handsReady=true;record('hands-ready');}
     else if(data.type==='hands-error'){handsReady=false;handLandmarks=[];hands=null;record('hands-error',{message:data.message});}
-    else if (data.type === 'error') failure(data.message, data.phase);
     else if (data.type === 'result') {
-      pending = false; clearTimeout(frameTimer); inferenceMs = inferenceMs ? inferenceMs * .8 + data.inferenceMs * .2 : data.inferenceMs; interval = clamp(inferenceMs * 1.2, 50, 160);
+      inferenceMs = inferenceMs ? inferenceMs * .8 + data.inferenceMs * .2 : data.inferenceMs; interval = clamp(inferenceMs * 1.2, 50, 160);
       if (mode !== 'camera' || suspended) return;
       if(data.hands!==null&&data.hands!==undefined){handLandmarks=data.hands;handTime=performance.now();handKey='';}
       if (data.mask) { mask = data.mask; maskTime = performance.now(); silhouetteKey = ''; }
@@ -105,8 +111,6 @@ function ensureEngine() {
         const result = expression.sample(data.smile, faceTime); setState(result.state);
       } else { landmarks = null; expression.reset(); setState('neutral'); }
     }
-  };
-  worker.postMessage({ type: 'init' }); return enginePromise;
 }
 function setState(next) {
   next=lockedState(next,lockedEffect,mode);
@@ -127,7 +131,7 @@ async function acquireCamera() {
 async function startCamera(automatic = false) {
   if (!isSecureContext || !navigator.mediaDevices?.getUserMedia) { notify('请通过 HTTPS 或 localhost，在支持摄像头的浏览器中体验。'); return; }
   if (!window.Worker || !window.createImageBitmap || !window.OffscreenCanvas) { notify('当前浏览器缺少本地识别能力，请使用新版 Chrome、Edge 或 Safari。'); return; }
-  wanted = true; storage.set(true); notify(); $('start-camera').disabled = true;
+  wanted = true; vision.resume(); storage.set(true); notify(); $('start-camera').disabled = true;
   if (mode !== 'camera') { world.clear(); resetSignals(); sessionStart = performance.now(); log = []; }
   try {
     // Show video as soon as permission is granted; model readiness never gates the camera picture.
@@ -139,19 +143,14 @@ async function startCamera(automatic = false) {
     record(automatic ? 'camera-auto-resumed' : 'camera-started');
   } catch (error) {
     $('start-camera').disabled = false;
-    if (stream) return; // Recognition errors keep the picture and retry affordance.
+    if (stream) return; // The session retries recognition automatically while retaining the picture.
     const messages = { NotAllowedError: '请允许此网站使用摄像头，然后再试一次。', NotFoundError: '没有找到摄像头，可以先看效果预览。', NotReadableError: '摄像头可能正被其他应用占用，请关闭占用后再试。' };
     notify(messages[error.name] || '摄像头暂时无法开启，请检查设备后重试。'); wanted = false; storage.set(false);
   }
 }
 function capture(now) {
-  if (mode !== 'camera' || suspended || !engineReady || pending || video.readyState < 2 || video.currentTime === lastVideoTime || now - lastInference < interval) return;
-  pending = true; lastInference = now; lastVideoTime = video.currentTime; const current = worker;
-  frameTimer = setTimeout(() => failure('Frame inference watchdog exceeded'), 7000);
-  createImageBitmap(video, { resizeWidth: 480, resizeHeight: Math.max(1, Math.round(480 * video.videoHeight / video.videoWidth)) }).then(bitmap => {
-    if (current !== worker || mode !== 'camera' || suspended) { bitmap.close(); pending = false; clearTimeout(frameTimer); return; }
-    current.postMessage({ type: 'frame', bitmap, trackHands:state==='smile', timestamp: performance.now() }, [bitmap]);
-  }).catch(e => failure(e.message));
+  if(mode!=='camera'||suspended||!engineReady||vision.pending||video.readyState<2||video.currentTime===lastVideoTime||now-lastInference<interval)return;
+  if(vision.capture(video,{trackHands:state==='smile',timestamp:performance.now()})){lastInference=now;lastVideoTime=video.currentTime;}
 }
 function previewPolygon() {
   const r = Math.min(width * .13, height * .14), cx = width * previewX, cy = height * previewY, ry = r * 1.28;
@@ -163,10 +162,10 @@ function previewPolygon() {
 }
 function collisionGeometry(now, dt) {
   if (mode === 'preview') { hands=null; polygon = previewPolygon(); silhouette = null; return polygon; }
-  let next = landmarks && now - faceTime < 600 ? headPolygon(landmarks, video.videoWidth, video.videoHeight, width, height) : null;
+  let next = landmarks && now - faceTime < 1800 ? headPolygon(landmarks, video.videoWidth, video.videoHeight, width, height) : null;
   if (next && polygon?.length === next.length) { const a = 1 - Math.exp(-dt / .045); next = next.map((p, i) => ({ x: polygon[i].x + (p.x - polygon[i].x) * a, y: polygon[i].y + (p.y - polygon[i].y) * a })); }
   polygon = next;
-  if (mask && now - maskTime < 700 && video.videoWidth) {
+  if (mask && now - maskTime < 1800 && video.videoWidth) {
     const key = `${maskTime}-${width}-${height}`;
     if (key !== silhouetteKey) { silhouette = new SilhouetteCollider(mask, video.videoWidth, video.videoHeight, width, height); silhouetteKey = key; }
   } else silhouette = null;
@@ -184,11 +183,12 @@ function currentHeadBounds() {
 }
 function updateUI(now) {
   if (now - uiTime < 100) return; uiTime = now;
+  syncLoading();
   stage.dataset.giftAssets=renderer.gift.ready?'ready':renderer.gift.error?'failed':'loading';
   const value = Math.round(expression.smile * 100); $('strength-value').textContent = String(value); $('gauge-cursor').style.left = `calc(${value}% + ${5-value*.1}px)`; $('smile-gauge').setAttribute('aria-valuenow',String(value)); $('smile-gauge').setAttribute('aria-valuetext',`${value}% ${names[state]}`); $('effect-name').textContent = names[state];
   stage.classList.toggle('rain', state === 'smile'); stage.classList.toggle('firework', state === 'laugh');
   $('face-hint').hidden = !!lockedEffect || mode !== 'camera' || !engineReady || suspended || now - faceTime < 900;
-  if (mode === 'camera' && engineReady && !suspended) $('status-copy').textContent = now - faceTime < 600 ? '本地识别中' : '等待笑脸进入画面';
+  if (mode === 'camera' && engineReady && !suspended) $('status-copy').textContent = now - faceTime < 1800 ? '本地识别中' : '等待笑脸进入画面';
   document.querySelectorAll('[data-strength]').forEach(b => b.classList.toggle('active', +b.dataset.strength === Math.round(previewStrength * 100)));
   $('diag-fps').textContent = fps ? `${Math.round(fps)} fps` : '—'; $('diag-inference').textContent = inferenceMs ? `${Math.round(inferenceMs)} ms` : '—';
   $('diag-particles').textContent = `${world.particles.length} / ${world.limit}`; $('diag-collisions').textContent = String(world.collisions); $('diag-water').textContent = `${Math.round(world.water.level)} px`; $('diag-render').textContent = `${renderer.drawMs.toFixed(1)} ms`; $('optics-status').textContent = renderer.optics && !renderer.optics.lost ? '粒子合成 · 人物受光' : '基础绘制（光学降级）';
@@ -202,14 +202,15 @@ function frame(now) {
   frames++; if (!fpsTime) fpsTime = now;
   if(now-fpsTime>=1000){fps=frames*1000/(now-fpsTime);fpsTime=now;frames=0;sampledFPS=true;}
   if (mode === 'preview') setState(expression.sample(previewStrength, now).state);
-  else if (mode === 'camera' && now - faceTime > 650) { expression.reset(); setState('neutral'); landmarks = null; }
-  const collider = collisionGeometry(now, dt), active = mode === 'preview' || (mode === 'camera' && (!!lockedEffect || (engineReady && now - faceTime < 650)));
-  if(sampledFPS){const before=world.limit;world.limit=quality.sample({now,fps,drawMs:renderer.drawMs,active,visible:!document.hidden,gap});if(before!==world.limit)record('particle-budget-adjusted',{limit:world.limit});}
+  else if (mode === 'camera' && now - faceTime > 1800) { expression.reset(); setState('neutral'); landmarks = null; }
+  const collider = collisionGeometry(now, dt), active = mode === 'preview' || (mode === 'camera' && (!!lockedEffect || (engineReady && now - faceTime < 1800)));
+  if(sampledFPS){const before=world.limit;world.limit=quality.sample({now,fps,drawMs:renderer.drawMs,active,visible:!document.hidden,gap});if(world.style==='flat'&&world.effect==='laugh'&&(world.particles.length||world.pendingParticles.length||world.rockets.length))world.limit=before;if(before!==world.limit)record('particle-budget-adjusted',{limit:world.limit});}
+  if(world.style==='flat'&&world.effect==='laugh'&&!world.particles.length&&!world.pendingParticles.length&&!world.rockets.length)world.limit=quality.limit;
   if (active && state === 'smile') world.rain(dt * (reduced ? .45 : 1), width, height, expression.smile);
   world.head=currentHeadBounds();
-  const reviewBusy=lockedEffect==='fireworks'&&(world.style==='cinema'?world.rockets.length>0:(world.rockets.length||world.launchers.length||world.particles.length||world.blooms.length||world.afterglows.length||world.innerBursts.length));
+  const reviewBusy=(lockedEffect==='fireworks'||world.style==='flat')&&(world.style==='cinema'?world.rockets.length>0:(world.rockets.length||world.launchers.length||world.particles.length||world.blooms.length||world.afterglows.length||world.innerBursts.length));
   if(active&&state==='laugh'&&(world.style!=='gift'||renderer.gift.ready)&&!reviewBusy&&now>=nextLaunchAt){
-    const layout=planBurst(width,height,world.head,burstSide++);
+    const plan=planBurst(width,height,world.head,burstSide++),layout=world.style==='flat'?fitFlatViewport(plan,width,height):plan;
     if(layout&&world.launch(layout.x,layout.y,width,height,layout.scale,layout)){
       stage.dataset.launchCount=String(++fireworkLaunches);
       launchGap=world.style==='cinema'?1500+Math.random()*160:lockedEffect?450:world.style==='gift'?1750+Math.random()*200:world.style==='flat'?(world.lastPattern==='flat-petals-slow'?2600:1750):1100+Math.random()*250;
@@ -226,12 +227,11 @@ async function resume() {
   if (!wanted || mode !== 'camera') return;
   if (stream?.getVideoTracks().some(t => t.readyState === 'live')) { stream.getVideoTracks().forEach(t => t.enabled = true); try { await video.play(); } catch { await startCamera(true); } }
   else await startCamera(true);
-  if (pending) frameTimer = setTimeout(() => failure('Resume frame watchdog'), 7000);
-  if (!engineReady && enginePromise) engineTimer = setTimeout(() => failure('Resume initialization timeout', 'init'), 45000);
+  vision.resume();
   $('status-copy').textContent = engineReady ? '本地识别中' : '识别准备中'; record('resumed');
 }
 function pause() {
-  sound.pause(); suspended = true; clearTimeout(frameTimer); clearTimeout(engineTimer); video.pause(); stream?.getVideoTracks().forEach(t => t.enabled = false); resetSignals(); $('status-copy').textContent = '已暂停 · 返回继续'; record('paused');
+  sound.pause(); suspended = true; vision.pause(); video.pause(); stream?.getVideoTracks().forEach(t => t.enabled = false); resetSignals(); $('status-copy').textContent = '已暂停 · 返回继续'; record('paused');
 }
 
 $('toggle-ui').addEventListener('click',()=>{const hidden=stage.classList.toggle('ui-hidden');$('toggle-ui').setAttribute('aria-pressed',String(hidden));$('toggle-ui').setAttribute('aria-label',hidden?'显示界面':'隐藏界面');$('toggle-ui').title=hidden?'显示界面':'隐藏界面';});
@@ -250,9 +250,9 @@ let dragStart = null;
 stage.addEventListener('pointerdown', e => { if (mode !== 'preview' || e.target.closest('button,input,aside,.hud')) return; pointerDown = true; dragStart = e.pointerId; stage.setPointerCapture(e.pointerId); move(e); });
 function move(e) { if (!pointerDown || mode !== 'preview') return; previewX = clamp(e.clientX / width, .18, .82); previewY = clamp(e.clientY / height, .2, .58); }
 stage.addEventListener('pointermove', move); stage.addEventListener('pointerup', () => pointerDown = false); stage.addEventListener('pointercancel', () => pointerDown = false);
-$('export-session').addEventListener('click', () => { const data = { version: 64, exportedAt: new Date().toISOString(), metrics: mode === 'idle' ? lastMetric : metrics(), note: 'Aggregate performance and interaction events only; no images or face geometry.', events: log }; const url = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })); const a = document.createElement('a'); a.href = url; a.download = 'expression-session.json'; a.click(); setTimeout(() => URL.revokeObjectURL(url), 1000); });
+$('export-session').addEventListener('click', () => { const data = { version: 65, exportedAt: new Date().toISOString(), metrics: mode === 'idle' ? lastMetric : metrics(), note: 'Aggregate performance and interaction events only; no images or face geometry.', events: log }; const url = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })); const a = document.createElement('a'); a.href = url; a.download = 'expression-session.json'; a.click(); setTimeout(() => URL.revokeObjectURL(url), 1000); });
 document.addEventListener('visibilitychange', () => document.hidden ? pause() : resume());
-window.addEventListener('pagehide', e => { pause(); if (!e.persisted) { releaseTracks(); worker?.terminate(); } });
+window.addEventListener('pagehide', e => { pause(); if (!e.persisted) { releaseTracks(); vision.dispose(); } });
 window.addEventListener('pageshow', e => { if (e.persisted) resume(); });
 async function autoStart() {
   // Existing camera permission can resume even on the first visit to this revision;

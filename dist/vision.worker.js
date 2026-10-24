@@ -56,7 +56,7 @@ async function initialize() {
       handModel = await api.HandLandmarker.createFromOptions(localFiles, {baseOptions:{modelAssetBuffer:handBytes,delegate:'CPU'},runningMode:'VIDEO',numHands:2,minHandDetectionConfidence:.5,minHandPresenceConfidence:.5,minTrackingConfidence:.5});
       postMessage({type:'hands-ready',cacheHits,cacheWrites});
     } catch (error) { postMessage({type:'hands-error',message:String(error.message||error)}); }
-  } finally { URL.revokeObjectURL(loaderURL); }
+  } finally { URL.revokeObjectURL(loaderURL); postMessage({type:'models-ready'}); }
 }
 self.onmessage = async ({ data }) => {
   if (data.type === 'init') { try { await initialize(); } catch (error) { postMessage({ type: 'error', phase: 'init', message: String(error.message || error) }); } return; }
@@ -68,18 +68,24 @@ self.onmessage = async ({ data }) => {
     const shapes = result.faceBlendshapes?.[0]?.categories || [], score = name => shapes.find(c => c.categoryName === name)?.score || 0;
     let mask = null;
     if (segmenter && data.timestamp - lastSegment >= 180) {
-      segmenter.segmentForVideo(bitmap, data.timestamp, segmentation => { latestMask = copyMask(segmentation); });
-      lastSegment = data.timestamp; mask = latestMask;
+      try {
+        segmenter.segmentForVideo(bitmap, data.timestamp, segmentation => { latestMask = copyMask(segmentation); });
+        lastSegment = data.timestamp; mask = latestMask;
+      } catch(error) {
+        // Optional silhouette errors must not interrupt expression inference.
+        try { segmenter.close(); } catch {}
+        segmenter=null;latestMask=null;postMessage({type:'segmentation-error',message:String(error.message||error)});
+      }
     }
     let hands = null;
     if(handModel && data.trackHands && data.timestamp-lastHands>=90){
       try { hands=handModel.detectForVideo(bitmap,data.timestamp).landmarks;lastHands=data.timestamp; }
       catch(error){handModel.close();handModel=null;postMessage({type:'hands-error',message:String(error.message||error)});hands=[];}
     }
-    const message = { hands, type: 'result', timestamp: data.timestamp, inferenceMs: performance.now() - start, face: result.faceLandmarks?.[0] || null, smile: (score('mouthSmileLeft') + score('mouthSmileRight')) / 2, mask };
+    const message = { hands, frameId:data.frameId, type: 'result', timestamp: data.timestamp, inferenceMs: performance.now() - start, face: result.faceLandmarks?.[0] || null, smile: (score('mouthSmileLeft') + score('mouthSmileRight')) / 2, mask };
     postMessage(message, mask ? [mask.data.buffer, mask.alpha.buffer] : []);
     // The transferred array is owned by the main thread; never reuse it.
     if (mask) latestMask = null;
-  } catch (error) { postMessage({ type: 'error', phase: 'frame', message: String(error.message || error) }); }
+  } catch (error) { postMessage({ type: 'error', phase: 'frame', frameId:data.frameId, message: String(error.message || error) }); }
   finally { bitmap?.close(); }
 };

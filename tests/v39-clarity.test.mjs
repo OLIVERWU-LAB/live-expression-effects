@@ -12,8 +12,8 @@ test('gift contact rain keeps two short-lived beads and its own cached blue volu
  try{const r=new GiftRenderer();r.ready=true;const draws=[];const g=context({drawImage(im){draws.push(im);}});r.draw(g,{particles:[{...w.particles[0],generation:0,contactSpray:false}],blooms:[]});r.draw(g,w);assert.equal(tiles.length,3);assert.ok(tiles[0].pointed>0);assert.ok(tiles.slice(1).every(c=>c.pointed===0&&c.circle===1&&c.gradients===1&&c.highlight===1));assert.ok(draws.slice(1).every(im=>im.counts.circle===1));r.draw(g,w);assert.equal(tiles.length,3,'collision frames reuse the same tiles');}finally{globalThis.OffscreenCanvas=old;}
  for(let i=0;i<30;i++)w.update(.02,1000,900,{collide(){throw Error('contact beads cannot collide again');}});assert.equal(w.particles.length,0);
 });
-test('realistic rain is subtly wider while contact splash, trajectory, ripple and glow remain unchanged',()=>{
- const p={type:'drop',x:500,y:300,vx:120,vy:600,size:12,life:1,maxLife:2,depth:.5,rainLength:60},widths=[],ends=[],g=context({stroke(){widths.push(this.lineWidth);},moveTo(x,y){ends.push([x,y]);},lineTo(x,y){ends.push([x,y]);}});drawLineRain(g,p,'glow');drawLineRain(g,p,'cinema');assert.ok(Math.abs(widths[1]/widths[0]-1.22)<1e-9);assert.deepEqual(ends.slice(0,2),ends.slice(2));
+test('realistic rain is visibly wider while contact splash, trajectory, ripple and glow remain unchanged',()=>{
+ const p={type:'drop',x:500,y:300,vx:120,vy:600,size:12,life:1,maxLife:2,depth:.5,rainLength:60},widths=[],ends=[],g=context({stroke(){widths.push(this.lineWidth);},moveTo(x,y){ends.push([x,y]);},lineTo(x,y){ends.push([x,y]);}});drawLineRain(g,p,'glow');drawLineRain(g,p,'cinema');assert.ok(Math.abs(widths[1]/widths[0]-1.7)<1e-9);assert.deepEqual(ends.slice(0,2),ends.slice(2));
  widths.length=0;drawLineRain(g,{...p,rainRipple:true},'glow');drawLineRain(g,{...p,rainRipple:true},'cinema');assert.equal(widths[0],widths[1]);
  const ps=contactRain(p,rng(3),'cinema');assert.equal(ps.filter(p=>p.contactSpray).length,2);assert.equal(ps.filter(p=>p.rainRipple).length,1);assert.ok(ps.every(p=>p.noRecollision));
 });
