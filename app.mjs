@@ -1,23 +1,23 @@
-import {performanceProfile} from './performance-profile.mjs?v=e5a4b44faf95';
-import {cameraFrameReader} from './camera-frame.mjs?v=e5a4b44faf95';
-import {fitFlatViewport} from './flat-budget.mjs?v=e5a4b44faf95';
-import {VisionSession} from './vision-session.mjs?v=e5a4b44faf95';
-import{ParticleQuality}from'./particle-quality.mjs?v=e5a4b44faf95';
-import {applyLiveStyle,lockedState} from './live-playback.mjs?v=e5a4b44faf95';
-import {REFERENCE_NAMES} from './reference-bursts.mjs?v=e5a4b44faf95';
-import { ExpressionController, clamp, headPolygon, previewHead } from './core.mjs?v=e5a4b44faf95';
-import { StickerWorld, SilhouetteCollider } from './effects.mjs?v=e5a4b44faf95';
-import {HandCollider,withHands} from './hands.mjs?v=e5a4b44faf95';
-import { Renderer } from './renderer.mjs?v=e5a4b44faf95';
-import { SHELLS, planBurst } from './pyro.mjs?v=e5a4b44faf95';
-import {BOUQUET_NAME} from './bouquet.mjs?v=e5a4b44faf95';
-import { SoundDesigner } from './sound.mjs?v=e5a4b44faf95';
+import {performanceProfile} from './performance-profile.mjs?v=ba6e7831e1b4';
+import {cameraFrameReader} from './camera-frame.mjs?v=ba6e7831e1b4';
+import {fitFlatViewport} from './flat-budget.mjs?v=ba6e7831e1b4';
+import {VisionSession} from './vision-session.mjs?v=ba6e7831e1b4';
+import{ParticleQuality}from'./particle-quality.mjs?v=ba6e7831e1b4';
+import {applyLiveStyle,lockedState} from './live-playback.mjs?v=ba6e7831e1b4';
+import {REFERENCE_NAMES} from './reference-bursts.mjs?v=ba6e7831e1b4';
+import { ExpressionController, clamp, headPolygon, previewHead } from './core.mjs?v=ba6e7831e1b4';
+import { StickerWorld, SilhouetteCollider } from './effects.mjs?v=ba6e7831e1b4';
+import {HandCollider,withHands} from './hands.mjs?v=ba6e7831e1b4';
+import { Renderer } from './renderer.mjs?v=ba6e7831e1b4';
+import { SHELLS, planBurst } from './pyro.mjs?v=ba6e7831e1b4';
+import {BOUQUET_NAME} from './bouquet.mjs?v=ba6e7831e1b4';
+import { SoundDesigner } from './sound.mjs?v=ba6e7831e1b4';
 const $ = id => document.getElementById(id), stage = $('stage'), video = $('camera');
 const renderer = new Renderer($('scene')), world = new StickerWorld(), expression = new ExpressionController();
 renderer.gift.tileSize=matchMedia('(max-width: 600px)').matches?96:0;
 const sound = new SoundDesigner();
 try { sound.setEnabled(localStorage.getItem('expression-sound') !== 'off'); } catch {}
-function syncSound() { const on = sound.enabled && sound.ready; $('sound-toggle').setAttribute('aria-pressed', String(on)); $('sound-toggle').setAttribute('aria-label', on ? '关闭声音' : '开启声音'); $('sound-toggle').title = on ? '关闭声音' : '开启声音'; $('sound-status').textContent = !sound.enabled ? '静音' : !sound.ready ? '点击右上角开启' : '升空 · 爆裂 · 碎光'; }
+function syncSound() { const on = sound.enabled && sound.ready; $('sound-toggle').setAttribute('aria-pressed', String(on)); $('sound-toggle').setAttribute('aria-label', on ? '关闭声音' : '开启声音'); $('sound-toggle').title = on ? '关闭声音' : '开启声音'; $('sound-status').textContent = !sound.enabled ? '静音' : !sound.ready ? '点击右上角开启' : '雨声 · 升空 · 爆裂'; }
 sound.onstate = ()=>{syncSound();syncLoading();}; syncSound();
 function activateAudio() { sound.unlock().then(syncSound); }
 const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -35,11 +35,11 @@ let lastMetric = null, segmentationReady = false, handsReady = false, handLandma
 applyLiveStyle(world,'cinema');
 world.giftMaterialStyle='random';
 renderer.gift.material=world.giftMaterialStyle;
-stage.dataset.build='v72';
+stage.dataset.build='v73';
 const readFaceFrame=cameraFrameReader(480),readGeometryFrame=cameraFrameReader(320);
 let lastGeometryCapture=0,lastGeometryVideoTime=-1;
 const vision=new VisionSession({
- createWorker:()=>new Worker(new URL('./vision.worker.js?v=e5a4b44faf95',import.meta.url)),
+ createWorker:()=>new Worker(new URL('./vision.worker.js?v=ba6e7831e1b4',import.meta.url)),
  createBitmap:()=>readFaceFrame(video),
  initOptions:{role:'face'},
  active:()=>wanted&&mode==='camera'&&!suspended,
@@ -48,7 +48,7 @@ const vision=new VisionSession({
  onEvent:handleVisionEvent
 });
 const geometry=new VisionSession({
- createWorker:()=>new Worker(new URL('./vision.worker.js?v=e5a4b44faf95',import.meta.url)),
+ createWorker:()=>new Worker(new URL('./vision.worker.js?v=ba6e7831e1b4',import.meta.url)),
  createBitmap:()=>readGeometryFrame(video),initOptions:{role:'geometry'},
  onState:()=>syncLoading(),
  active:()=>wanted&&mode==='camera'&&!suspended&&engineReady,
@@ -73,7 +73,7 @@ $('loading-retry').addEventListener('click',()=>{
  else renderer.gift.load(world.giftMaterialStyle).then(syncLoading);syncLoading();
 });
 $('loading-diagnostics').addEventListener('click',async()=>{
- const detail=JSON.stringify({version:72,browser:navigator.userAgent,source:mode,startup:cameraStartup,startupError:cameraStartupError,wanted,suspended,workerCreated:!!vision.worker,phase:vision.phase,error:vision.lastError,ready:vision.ready,resultReceived:vision.hasResult,pending:vision.pending,attempts:vision.attempt,audio:{ready:sound.assetsReady,loaded:sound.loaded,error:sound.error,enabled:sound.enabled},video:{width:video.videoWidth,height:video.videoHeight,time:video.currentTime,readyState:video.readyState,paused:video.paused},events:log.slice(-18)},null,2);
+ const detail=JSON.stringify({version:73,browser:navigator.userAgent,source:mode,startup:cameraStartup,startupError:cameraStartupError,wanted,suspended,workerCreated:!!vision.worker,phase:vision.phase,error:vision.lastError,ready:vision.ready,resultReceived:vision.hasResult,pending:vision.pending,attempts:vision.attempt,audio:{ready:sound.assetsReady,loaded:sound.loaded,error:sound.error,enabled:sound.enabled},video:{width:video.videoWidth,height:video.videoHeight,time:video.currentTime,readyState:video.readyState,paused:video.paused},events:log.slice(-18)},null,2);
  try{await navigator.clipboard.writeText(detail);$('loading-diagnostics').textContent='已复制诊断';}catch{window.prompt('复制以下诊断信息',detail);}
 });
 function syncStyle() {
@@ -100,7 +100,7 @@ const names = { neutral: '待机', smile: '雨滴', laugh: '烟花' };
 const storage = { get() { try { return localStorage.getItem('expression-camera-intent'); } catch { return null; } }, set(value) { try { localStorage.setItem('expression-camera-intent', value ? 'yes' : 'no'); } catch {} } };
 function record(type, detail = {}) { log.push({ elapsedMs: Math.round(performance.now() - sessionStart), type, ...detail }); if (log.length > 200) log.shift(); }
 function notify(text = '') { $('notice').textContent = text; $('notice').hidden = !text; }
-function metrics() { return { source: mode, renderFps: +fps.toFixed(1), inferenceMs: inferenceMs ? +inferenceMs.toFixed(1) : null, particleCount: world.particles.length, particleLimit: world.limit, innerRayCount:world.particles.filter(p=>p.innerRay).length,innerGlintCount:world.particles.filter(p=>p.cinemaDust).length, collisions: world.collisions, waterDepthPx: +world.water.level.toFixed(1), silhouetteReady: segmentationReady, handTrackingReady: handsReady, trackedHands: hands?.count || 0, visualStyle: world.style, renderMs: +renderer.drawMs.toFixed(2), opticalComposition: !!renderer.optics && !renderer.optics.lost, rockets: world.rockets.length, launches:fireworkLaunches,afterglows: world.afterglows.length, pattern: world.lastPattern, soundEnabled: sound.enabled, audioReady: sound.ready, audioVoices: sound.voices.size }; }
+function metrics() { return { source: mode, renderFps: +fps.toFixed(1), inferenceMs: inferenceMs ? +inferenceMs.toFixed(1) : null, particleCount: world.particles.length, particleLimit: world.limit, innerRayCount:world.particles.filter(p=>p.innerRay).length,innerGlintCount:world.particles.filter(p=>p.cinemaDust).length, collisions: world.collisions, waterDepthPx: +world.water.level.toFixed(1), silhouetteReady: segmentationReady, handTrackingReady: handsReady, trackedHands: hands?.count || 0, visualStyle: world.style, renderMs: +renderer.drawMs.toFixed(2), opticalComposition: !!renderer.optics && !renderer.optics.lost, rockets: world.rockets.length, launches:fireworkLaunches,afterglows: world.afterglows.length, pattern: world.lastPattern, soundEnabled: sound.enabled, audioReady: sound.ready, audioVoices: sound.voices.size+(sound.rain?.voices.size||0) }; }
 function resetSignals() { neutralHintSince=null;$('smile-hint').hidden=true; handLandmarks=[];hands=null;handTime=-Infinity;handKey=''; sound.stopAll(); sound.setScene('neutral', world.style); expression.reset(); state = 'neutral'; landmarks = null; mask = null; polygon = null; silhouette = null; faceTime = -Infinity; lastCenter = null; world.setEffect('neutral'); }
 function resize() { const r = stage.getBoundingClientRect(); width = r.width; height = r.height;world.viewport={width,height}; renderer.resize(width, height); silhouetteKey = ''; polygon = null; }
 new ResizeObserver(resize).observe(stage);
@@ -254,7 +254,7 @@ function updateUI(now) {
   $('diag-fps').textContent = fps ? `${Math.round(fps)} fps` : '—'; $('diag-inference').textContent = inferenceMs ? `${Math.round(inferenceMs)} ms` : '—';
   $('diag-particles').textContent = `${world.particles.length} / ${world.limit}`; $('diag-collisions').textContent = String(world.collisions); $('diag-water').textContent = `${Math.round(world.water.level)} px`; $('diag-render').textContent = `${renderer.drawMs.toFixed(1)} ms`; $('optics-status').textContent = renderer.optics && !renderer.optics.lost ? '粒子合成 · 人物受光' : '基础绘制（光学降级）';
   $('hand-status').textContent=!handsReady?'轮廓碰撞':hands?.count?`${hands.count} 只手 · 已跟踪`:'已就绪';
-  $('diag-rockets').textContent = String(world.rockets.length); $('diag-pattern').textContent = (REFERENCE_NAMES[world.lastPattern]||(world.lastPattern==='bouquet'?BOUQUET_NAME:SHELLS[world.lastPattern]?.name)) || '—'; $('diag-audio').textContent = String(sound.voices.size); syncSound();
+  $('diag-rockets').textContent = String(world.rockets.length); $('diag-pattern').textContent = (REFERENCE_NAMES[world.lastPattern]||(world.lastPattern==='bouquet'?BOUQUET_NAME:SHELLS[world.lastPattern]?.name)) || '—'; $('diag-audio').textContent = String(sound.voices.size+(sound.rain?.voices.size||0)); syncSound();
   $('diag-source').textContent = mode === 'camera' ? '真实摄像头' : mode === 'preview' ? '模拟预览' : '未启动';
 }
 function frame(now) {
@@ -311,7 +311,7 @@ let dragStart = null;
 stage.addEventListener('pointerdown', e => { if (mode !== 'preview' || e.target.closest('button,input,aside,.hud')) return; pointerDown = true; dragStart = e.pointerId; stage.setPointerCapture(e.pointerId); move(e); });
 function move(e) { if (!pointerDown || mode !== 'preview') return; previewX = clamp(e.clientX / width, .18, .82); previewY = clamp(e.clientY / height, .2, .58); }
 stage.addEventListener('pointermove', move); stage.addEventListener('pointerup', () => pointerDown = false); stage.addEventListener('pointercancel', () => pointerDown = false);
-$('export-session').addEventListener('click', () => { const data = { version: 72, exportedAt: new Date().toISOString(), metrics: mode === 'idle' ? lastMetric : metrics(), note: 'Aggregate performance and interaction events only; no images or face geometry.', events: log }; const url = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })); const a = document.createElement('a'); a.href = url; a.download = 'expression-session.json'; a.click(); setTimeout(() => URL.revokeObjectURL(url), 1000); });
+$('export-session').addEventListener('click', () => { const data = { version: 73, exportedAt: new Date().toISOString(), metrics: mode === 'idle' ? lastMetric : metrics(), note: 'Aggregate performance and interaction events only; no images or face geometry.', events: log }; const url = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })); const a = document.createElement('a'); a.href = url; a.download = 'expression-session.json'; a.click(); setTimeout(() => URL.revokeObjectURL(url), 1000); });
 document.addEventListener('visibilitychange', () => document.hidden ? pause() : resume());
 window.addEventListener('pagehide', e => { pause(); if (!e.persisted) { releaseTracks(); vision.dispose();geometry.dispose(); } });
 window.addEventListener('pageshow', e => { if (e.persisted) resume(); });

@@ -1,5 +1,5 @@
 export const personRimGain=style=>['flat','gift'].includes(style)?0:style==='cinema'?1.6:style==='gift'?1.7:1;
-import {fireworkLights} from './lighting.mjs?v=e5a4b44faf95';
+import {fireworkLights} from './lighting.mjs?v=ba6e7831e1b4';
 // Independent WebGL composition: base camera, transparent VFX and a low-resolution
 // person matte. No camera readback; no images leave this browser.
 const vertex = `attribute vec2 aPosition;varying vec2 vUV;void main(){vUV=vec2(aPosition.x*.5+.5,.5-aPosition.y*.5);gl_Position=vec4(aPosition,0.,1.);}`;

@@ -1,5 +1,5 @@
-import{refinedDissolveStart}from'./cinema-refined-particles.mjs?v=e5a4b44faf95';
-import{OriginalCinemaRenderer}from'./cinema-original-renderer.mjs?v=e5a4b44faf95';import{ringEnvelope}from'./cinema-original-particles.mjs?v=e5a4b44faf95';import{particleVisibility}from'./particle-visibility.mjs?v=e5a4b44faf95';import{clamp}from'./core.mjs?v=e5a4b44faf95';import{mixHex}from'./emission.mjs?v=e5a4b44faf95';
+import{refinedDissolveStart}from'./cinema-refined-particles.mjs?v=ba6e7831e1b4';
+import{OriginalCinemaRenderer}from'./cinema-original-renderer.mjs?v=ba6e7831e1b4';import{ringEnvelope}from'./cinema-original-particles.mjs?v=ba6e7831e1b4';import{particleVisibility}from'./particle-visibility.mjs?v=ba6e7831e1b4';import{clamp}from'./core.mjs?v=ba6e7831e1b4';import{mixHex}from'./emission.mjs?v=ba6e7831e1b4';
 const TAU=Math.PI*2;
 const canvas=(w,h)=>typeof OffscreenCanvas!=='undefined'?new OffscreenCanvas(w,h):Object.assign(document.createElement('canvas'),{width:w,height:h});
 const phase=(seed,salt)=>.5+.5*Math.sin(seed*1.731+salt);

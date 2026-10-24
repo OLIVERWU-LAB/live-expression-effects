@@ -1,14 +1,14 @@
-import {drawWaterSurface} from './water-renderer.mjs?v=e5a4b44faf95';
-import {GIFT_BANKS} from './gift-banks.mjs?v=e5a4b44faf95';
-import {loadGiftImage} from './gift-loader.mjs?v=e5a4b44faf95';
-import {loadGiftBank} from './gift-loader.mjs?v=e5a4b44faf95';
-import {mixHex} from './emission.mjs?v=e5a4b44faf95';
-import {particleVisibility} from './particle-visibility.mjs?v=e5a4b44faf95';
-import {GIFT_MATERIALS,GIFT_RANDOM_MATERIALS} from './gift-materials.mjs?v=e5a4b44faf95';
-import {activeGiftAssets,giftAssetPath} from './gift-shapes.mjs?v=e5a4b44faf95';
-import {GIFT_ASSETS,giftBeadEnvelope} from './reference-bursts.mjs?v=e5a4b44faf95';
-import {clamp} from './core.mjs?v=e5a4b44faf95';
-import {GIFT_KINDS,GIFT_COLORS,giftMaterial,giftSplashEnvelope,giftFlashEnvelope,drawGiftConfetti} from './gift-style.mjs?v=e5a4b44faf95';
+import {drawWaterSurface} from './water-renderer.mjs?v=ba6e7831e1b4';
+import {GIFT_BANKS} from './gift-banks.mjs?v=ba6e7831e1b4';
+import {loadGiftImage} from './gift-loader.mjs?v=ba6e7831e1b4';
+import {loadGiftBank} from './gift-loader.mjs?v=ba6e7831e1b4';
+import {mixHex} from './emission.mjs?v=ba6e7831e1b4';
+import {particleVisibility} from './particle-visibility.mjs?v=ba6e7831e1b4';
+import {GIFT_MATERIALS,GIFT_RANDOM_MATERIALS} from './gift-materials.mjs?v=ba6e7831e1b4';
+import {activeGiftAssets,giftAssetPath} from './gift-shapes.mjs?v=ba6e7831e1b4';
+import {GIFT_ASSETS,giftBeadEnvelope} from './reference-bursts.mjs?v=ba6e7831e1b4';
+import {clamp} from './core.mjs?v=ba6e7831e1b4';
+import {GIFT_KINDS,GIFT_COLORS,giftMaterial,giftSplashEnvelope,giftFlashEnvelope,drawGiftConfetti} from './gift-style.mjs?v=ba6e7831e1b4';
 const TAU=Math.PI*2;
 export function giftFrameIndex(phase,frames){return Math.round(((phase%TAU)+TAU)%TAU/TAU*frames)%frames;}
 export class GiftRenderer{
