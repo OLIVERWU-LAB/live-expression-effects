@@ -1,9 +1,9 @@
 // Archived v35 drawing, with pressure-fade compatibility and isolated subclass hooks.
-import {HandGlowRenderer} from './handglow.mjs?v=ba6e7831e1b4';
-import {clamp} from './core.mjs?v=ba6e7831e1b4';
-import {mixHex} from './emission.mjs?v=ba6e7831e1b4';
-import {ringEnvelope} from './cinema-original-particles.mjs?v=ba6e7831e1b4';
-import {particleVisibility} from './particle-visibility.mjs?v=ba6e7831e1b4';
+import {HandGlowRenderer} from './handglow.mjs?v=2503cd2b7925';
+import {clamp} from './core.mjs?v=2503cd2b7925';
+import {mixHex} from './emission.mjs?v=2503cd2b7925';
+import {ringEnvelope} from './cinema-original-particles.mjs?v=2503cd2b7925';
+import {particleVisibility} from './particle-visibility.mjs?v=2503cd2b7925';
 const TAU=Math.PI*2;
 export class OriginalCinemaRenderer{
  constructor(){this.glows=new Map();this.hand=new HandGlowRenderer();}
