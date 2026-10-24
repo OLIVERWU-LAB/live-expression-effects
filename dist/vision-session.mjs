@@ -1,7 +1,8 @@
 // One worker and one transferred frame at a time. A failed worker is replaced
 // automatically; late messages/bitmaps never touch its successor's watchdog.
 export class VisionSession {
- constructor({createWorker,createBitmap,onEvent=()=>{},onState=()=>{},onError=()=>{},active=()=>true,setTimer=setTimeout,clearTimer=clearTimeout,initOptions={},now=()=>performance.now()}){
+ // Native Window timers must keep their global receiver, not the session object.
+ constructor({createWorker,createBitmap,onEvent=()=>{},onState=()=>{},onError=()=>{},active=()=>true,setTimer=(...args)=>globalThis.setTimeout(...args),clearTimer=(...args)=>globalThis.clearTimeout(...args),initOptions={},now=()=>performance.now()}){
   Object.assign(this,{createWorker,createBitmap,onEvent,onState,onError,active,setTimer,clearTimer,initOptions,now});this.worker=null;this.ready=false;this.preparing=false;this.pending=false;this.sequence=0;this.failures=0;this.attempt=0;this.timer=null;this.retry=null;this.paused=false;this.phase='idle';this.lastError=null;this.hasResult=false;this.startedAt=0;
  }
  notify(){this.onState({ready:this.ready,preparing:this.preparing,recovering:!!this.retry,attempt:this.attempt,phase:this.phase,lastError:this.lastError,hasResult:this.hasResult});}
