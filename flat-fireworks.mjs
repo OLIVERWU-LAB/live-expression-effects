@@ -1,6 +1,6 @@
-import {particleVisibility} from './particle-visibility.mjs?v=5dc30a03a159';
-import {clamp} from './core.mjs?v=5dc30a03a159';
-import {handShell,handRing} from './handglow-particles.mjs?v=5dc30a03a159';
+import {particleVisibility} from './particle-visibility.mjs?v=8acdb352c57c';
+import {clamp} from './core.mjs?v=8acdb352c57c';
+import {handShell,handRing} from './handglow-particles.mjs?v=8acdb352c57c';
 const TAU=Math.PI*2;
 export const FLAT_LAUNCH_BLUE='#59C9F2';
 export const FLAT_PATTERN='flat-petals';
@@ -29,12 +29,13 @@ export function flatShell(x,y,scale=1,random=Math.random,pattern=FLAT_PATTERN){
  if(pattern==='flat-reprise'){const shell=handShell('cinema-rings',x,y,scale,random);return{...shell,particles:flattenReprise(shell.particles,FLAT_COLORWAYS[shell.variant],null)};}
  const tempo=flatTempo(pattern),root=Math.sqrt(scale),phase=random()*TAU,hue=Math.floor(random()*3),parent={x,y,scale,tempo,pattern,variant:hue,seed:random()*100};
  if(FLAT_CASCADES.includes(pattern)){
-  // One launch -> five moving white carriers -> five staggered flowers.
+  // One launch -> five moving carriers -> five distinct, staggered flowers.
+  // Open the carrier spread before ignition; every blossom keeps radial rays.
   // No final flower coordinates are stored; the moving carrier owns the origin.
   const particles=[];
   for(let j=0;j<5;j++){
    const a=phase+j*2.39996323,speed=(j===0?200:1150+random()*280)*scale,open=j===0?.20+random()*.01:.22+j*.125+random()*.025;
-   const motion=flatCarrierVelocity(Math.cos(a)*speed,Math.sin(a)*speed-35*root,open*tempo,130*root/(tempo*tempo));
+   const motion=flatCarrierVelocity(Math.cos(a)*speed*(j?1.85:1),Math.sin(a)*speed*(j?1.20:1)-35*root,open*tempo,130*root/(tempo*tempo));
    particles.push(make(parent,'seed',motion.vx,motion.vy,3.7*root,open+.09,'#FFF8E8',random,{delay:.08,collisionDelay:1,flatEmitAt:open*tempo,tailLength:14,trailAge:.14,drag:motion.drag,flatStopSpeed:28,turn:phase+j*.22,cascade:true,clusterIndex:j,flowerScale:[.68,.92,1.16,.78,1.02][j],variant:(hue+j)%FLAT_COLORWAYS.length}));
   }
   return{particles,variant:hue};

@@ -1,7 +1,7 @@
-import {REFINED_CINEMA_PATTERN} from './cinema-refined-particles.mjs?v=5dc30a03a159';
-import {ORIGINAL_CINEMA_PATTERN} from './cinema-original-particles.mjs?v=5dc30a03a159';
-import {GIFT_RANDOM_MATERIALS,giftMaterialTint} from './gift-materials.mjs?v=5dc30a03a159';
-import {clamp} from './core.mjs?v=5dc30a03a159';
+import {REFINED_CINEMA_PATTERN} from './cinema-refined-particles.mjs?v=8acdb352c57c';
+import {ORIGINAL_CINEMA_PATTERN} from './cinema-original-particles.mjs?v=8acdb352c57c';
+import {GIFT_RANDOM_MATERIALS,giftMaterialTint} from './gift-materials.mjs?v=8acdb352c57c';
+import {clamp} from './core.mjs?v=8acdb352c57c';
 export const GIFT_PATTERNS=Object.freeze(['gift-twinkle']);
 export const CINEMA_PATTERNS=Object.freeze(['cinema-shell','cinema-rings']);
 export const ACTIVE_CINEMA_PATTERNS=Object.freeze(['cinema-rings']);
@@ -30,7 +30,7 @@ export function giftShell(pattern,x,y,scale=1,random=Math.random,material=null){
  const particles=GIFT_LAYOUT.map(([kind,color,px,py,diameter,angle],i)=>{
   const dx=(px-600)/500*radius,dy=(py-600)/500*radius;
   const xx=dx*Math.cos(rotation)-dy*Math.sin(rotation),yy=dx*Math.sin(rotation)+dy*Math.cos(rotation),life=3.20+random()*.40;
-  return particle(x+(random()-.5)*3,y+(random()-.5)*3,(xx/E*(1+([1.04,.82,1.14][preset]-1)*scatter)*(1-spread+random()*spread*2)+Math.cos(Math.atan2(yy,xx))*Math.hypot(xx,yy)*scatter*(.17*Math.sin(2*Math.atan2(yy,xx)+phase)+.10*Math.sin(3*Math.atan2(yy,xx)+phase2))),(yy-driftY)/E*(1-spread+random()*spread*2)+Math.sin(phase+i*.7)*35*Math.sqrt(scale)*scatter,diameter/1000*radius*.64,life,color%5,random,{type:'charm',pattern,referenceGift:true,giftMaterial:{kind,color},tint:giftSurfaceColor(kind,color),angle:angle*Math.PI/180,spin:(random()-.5)*.9,drag,gravity:g,scale,luminosity:.55,trail:[],tailLength:0,delay:random()*.045,layoutPreset:preset,layoutScatter:scatter,
+  return particle(x+(random()-.5)*3,y+(random()-.5)*3,(xx/E*(1+([1.04,.82,1.14][preset]-1)*scatter)*(1-spread+random()*spread*2)+Math.cos(Math.atan2(yy,xx))*Math.hypot(xx,yy)*scatter*(.17*Math.sin(2*Math.atan2(yy,xx)+phase)+.10*Math.sin(3*Math.atan2(yy,xx)+phase2))),(yy-driftY)/E*(1-spread+random()*spread*2)+Math.sin(phase+i*.7)*35*Math.sqrt(scale)*scatter,diameter/1000*radius*.64,life,color%5,random,{type:'charm',pattern,referenceGift:true,giftMaterial:{kind,color},tint:giftSurfaceColor(kind,color),angle:angle*Math.PI/180,spin:(random()-.5)*.9,drag,gravity:g,scale,luminosity:.55,trail:[],tailLength:0,delay:random()*.045,layoutPreset:preset,layoutScatter:scatter,collisionDelay:0,
    giftSplitAt:null});
  });
  let finish=material;

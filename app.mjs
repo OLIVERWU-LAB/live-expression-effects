@@ -1,15 +1,15 @@
-import {performanceProfile} from './performance-profile.mjs?v=5dc30a03a159';
-import {cameraFrameReader} from './camera-frame.mjs?v=5dc30a03a159';
-import {fitFlatViewport} from './flat-budget.mjs?v=5dc30a03a159';
-import {VisionSession} from './vision-session.mjs?v=5dc30a03a159';
-import{ParticleQuality}from'./particle-quality.mjs?v=5dc30a03a159';
-import {applyLiveStyle,lockedState,flatLaunchBusy,flatLaunchGap,simulationSlices} from './live-playback.mjs?v=5dc30a03a159';
-import { ExpressionController, clamp, headPolygon, previewHead } from './core.mjs?v=5dc30a03a159';
-import { StickerWorld, SilhouetteCollider } from './effects.mjs?v=5dc30a03a159';
-import {HandCollider,withHands} from './hands.mjs?v=5dc30a03a159';
-import { Renderer } from './renderer.mjs?v=5dc30a03a159';
-import { planBurst } from './pyro.mjs?v=5dc30a03a159';
-import { SoundDesigner } from './sound.mjs?v=5dc30a03a159';
+import {performanceProfile} from './performance-profile.mjs?v=8acdb352c57c';
+import {cameraFrameReader} from './camera-frame.mjs?v=8acdb352c57c';
+import {fitFlatViewport} from './flat-budget.mjs?v=8acdb352c57c';
+import {VisionSession} from './vision-session.mjs?v=8acdb352c57c';
+import{ParticleQuality}from'./particle-quality.mjs?v=8acdb352c57c';
+import {applyLiveStyle,lockedState,flatLaunchBusy,flatLaunchGap,simulationSlices} from './live-playback.mjs?v=8acdb352c57c';
+import { ExpressionController, clamp, headPolygon, previewHead } from './core.mjs?v=8acdb352c57c';
+import { StickerWorld, SilhouetteCollider } from './effects.mjs?v=8acdb352c57c';
+import {HandCollider,withHands} from './hands.mjs?v=8acdb352c57c';
+import { Renderer } from './renderer.mjs?v=8acdb352c57c';
+import { planBurst } from './pyro.mjs?v=8acdb352c57c';
+import { SoundDesigner } from './sound.mjs?v=8acdb352c57c';
 const $ = id => document.getElementById(id), stage = $('stage'), video = $('camera');
 const renderer = new Renderer($('scene')), world = new StickerWorld(), expression = new ExpressionController();
 renderer.gift.tileSize=matchMedia('(max-width: 600px)').matches?96:0;
@@ -37,7 +37,7 @@ stage.dataset.build='release';
 const readFaceFrame=cameraFrameReader(480),readGeometryFrame=cameraFrameReader(320);
 let lastGeometryCapture=0,lastGeometryVideoTime=-1;
 const vision=new VisionSession({
- createWorker:()=>new Worker(new URL('./vision.worker.js?v=5dc30a03a159',import.meta.url)),
+ createWorker:()=>new Worker(new URL('./vision.worker.js?v=8acdb352c57c',import.meta.url)),
  createBitmap:()=>readFaceFrame(video),
  initOptions:{role:'face'},
  active:()=>wanted&&mode==='camera'&&!suspended,
@@ -46,7 +46,7 @@ const vision=new VisionSession({
  onEvent:handleVisionEvent
 });
 const geometry=new VisionSession({
- createWorker:()=>new Worker(new URL('./vision.worker.js?v=5dc30a03a159',import.meta.url)),
+ createWorker:()=>new Worker(new URL('./vision.worker.js?v=8acdb352c57c',import.meta.url)),
  createBitmap:()=>readGeometryFrame(video),initOptions:{role:'geometry'},
  onState:()=>syncLoading(),
  active:()=>wanted&&mode==='camera'&&!suspended&&engineReady,
