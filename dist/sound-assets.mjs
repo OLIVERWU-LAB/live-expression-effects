@@ -13,7 +13,7 @@ export const AUDIO_URLS=Object.fromEntries(Object.entries(AUDIO_FILES).map(([key
 // archived source references; they are neither shipped nor fetched.
 export const RECORDING_FILES={
   "launch": "assets/audio/launch-a8ce255f9028.m4a",
-  "water": "assets/audio/water-3da727f0f04e.m4a",
+  "water": "assets/audio/contact-3ce4677dd264.m4a",
   "paperLight": "assets/audio/paperLight-e1feffbe0b24.m4a"
 };
 export const LIVE_AUDIO_FILES={explode:AUDIO_FILES.explode,sparks:AUDIO_FILES.sparks,...RECORDING_FILES};
