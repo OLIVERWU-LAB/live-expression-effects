@@ -1,6 +1,6 @@
-import {particleVisibility} from './particle-visibility.mjs?v=af1483e5221b';
-import {clamp} from './core.mjs?v=af1483e5221b';
-import {handShell,handRing} from './handglow-particles.mjs?v=af1483e5221b';
+import {particleVisibility} from './particle-visibility.mjs?v=dbf3082da9f6';
+import {clamp} from './core.mjs?v=dbf3082da9f6';
+import {handShell,handRing} from './handglow-particles.mjs?v=dbf3082da9f6';
 const TAU=Math.PI*2;
 export const FLAT_LAUNCH_BLUE='#59C9F2';
 export const FLAT_PATTERN='flat-petals';
@@ -58,7 +58,7 @@ export function flatChildren(parent,random=Math.random){
    const a=parent.turn+i*2.39996323,speed=(70+random()*230)*local.scale;
    children.push(make(local,'dust',Math.cos(a)*speed,Math.sin(a)*speed,Math.min(parent.pattern==='flat-festival'?1.8:parent.pattern==='flat-star-crown'?2.2:3.5,(i%8===0?3.5:i%2===0?1.5+random()*.8:.50+random()*.70))*Math.sqrt(local.scale*.62/.78),1.65+random()*.24,i%2===0?'#FFFFFF':colors[i%3],random,{delay:.06+random()*.08,gravity:90*Math.sqrt(local.scale),luminosity:.20,flatFine:true,whiteFlash:i%2===0}));
   }
-  for(const child of children){child.vx+=parent.vx;child.vy+=parent.vy;child.clusterIndex=parent.clusterIndex;child.cascadeChild=true;const longTrail=parent.pattern==='flat-medallion'&&child.flatRole==='comet';child.life=child.maxLife=(longTrail?2.05:child.flatRing?1.90:child.flatFine?(parent.pattern==='flat-medallion'?1.70:1.90):1.62)+random()*(longTrail?.18:.22);child.drag=longTrail?.95:1.35;child.collisionDelay=.38;if(longTrail){child.longTrail=true;child.trailAge=1.10;child.tailLength=84;child.trailTint=colors[child.flatBand===0?1:0];}}
+  for(const child of children){child.vx+=parent.vx;child.vy+=parent.vy;child.clusterIndex=parent.clusterIndex;child.cascadeChild=true;const longTrail=parent.pattern==='flat-medallion'&&child.flatRole==='comet';child.life=child.maxLife=(longTrail?2.05:child.flatRing?1.90:child.flatFine?(parent.pattern==='flat-medallion'?1.70:1.90):1.62)+random()*(longTrail?.18:.22);child.drag=longTrail?.95:1.35;child.collisionDelay=.38;if(longTrail){child.longTrail=true;child.trailAge=1.10;child.tailLength=84;child.trailTint=colors[child.flatBand===0?1:0];}if(parent.pattern==='flat-star-crown'&&child.tailLength){child.trailAge=.56;child.tailLength=40;child.trailDistance=170;}}
   return children;
  }
  const out=[],root=Math.sqrt(parent.scale),T=parent.tempo,color=parent.color,accent=parent.accent;
@@ -90,8 +90,8 @@ function radialShell(parent,phase,random){
  let band=0;const emit=(role,count,speed,size,palette,offset=0,extra={})=>{
   const flatBand=band++;
   for(let i=0;i<count;i++){
-   const a=phase+(i+offset)/count*TAU,velocity=(speed+(i%2?8:-8))*s;
-   p.push(make(parent,role,Math.cos(a)*velocity,Math.sin(a)*velocity-22*r,size*(i%2?.9:1)*r,2.05+random()*.24,palette[i%palette.length],random,{angle:a,flatBand,tempo:1,gravity:115*r,drag:1.0,tailLength:['comet','ribbon','leaf','spoke'].includes(role)?24:0,trailAge:.28,cap:'#FFF2D6',...extra}));
+   const a=phase+(i+offset)/count*TAU,medallionRay=key==='flat-medallion'&&role==='comet',velocity=(speed+(i%2?8:-8))*s*(medallionRay?.92:1);
+   p.push(make(parent,role,Math.cos(a)*velocity,Math.sin(a)*velocity-22*r,size*(i%2?.9:1)*r,2.05+random()*.24,palette[i%palette.length],random,{angle:a,flatBand,tempo:1,gravity:(medallionRay?145:115)*r,drag:1.0,tailLength:['comet','ribbon','leaf','spoke'].includes(role)?24:0,trailAge:.28,cap:'#FFF2D6',...extra}));
   }
  };
  if(key==='flat-medallion'){
@@ -142,7 +142,7 @@ function flatStar(g,n,r){g.beginPath();for(let i=0;i<n*2;i++){const a=i*Math.PI/
 // collision therefore bend the tail naturally; it never pivots as a rigid stripe.
 export function flatTrailWindow(p){const age=p.maxLife-p.life;return p.longTrail?(.32+.72*clamp(age/1.05))*(.30+.70*clamp(p.life/.80)):(p.trailAge??.28);}
 export function flatTrailGeometry(p){
- const points=[{x:0,y:0,d:0}],age=p.maxLife-p.life,maxAge=flatTrailWindow(p),maxLength=p.longTrail?Math.max(22,180*(p.scale||1)):100*p.scale;
+ const points=[{x:0,y:0,d:0}],age=p.maxLife-p.life,maxAge=flatTrailWindow(p),maxLength=p.longTrail?Math.max(22,180*(p.scale||1)):(p.trailDistance??100)*p.scale;
  let lastAge=age;
  for(const q of p.trail||[]){
   if(!Number.isFinite(q.x)||!Number.isFinite(q.y)||q.age!=null&&(!Number.isFinite(q.age)||q.age>lastAge+.001))break;

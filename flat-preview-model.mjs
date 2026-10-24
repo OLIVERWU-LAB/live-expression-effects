@@ -1,5 +1,5 @@
-import{StickerWorld}from'./effects.mjs?v=af1483e5221b';
-import{ACTIVE_FLAT_PATTERNS,drawFlatFireworks,drawFlatLaunch}from'./flat-fireworks.mjs?v=af1483e5221b';
+import{StickerWorld}from'./effects.mjs?v=dbf3082da9f6';
+import{ACTIVE_FLAT_PATTERNS,drawFlatFireworks,drawFlatLaunch}from'./flat-fireworks.mjs?v=dbf3082da9f6';
 
 const names={'flat-petals':'花瓣涟漪','flat-medallion':'同心礼花','flat-star-crown':'星冠绽放','flat-festival':'锦簇花火'};
 export const PREVIEW_STYLES=Object.freeze(ACTIVE_FLAT_PATTERNS.map((pattern,i)=>Object.freeze({pattern,number:String(i+1).padStart(2,'0'),name:names[pattern]})));
