@@ -1,13 +1,14 @@
 // Sample around each circle, separately for every flower and radial band.
 // Never remove a carrier: that would remove an entire future blossom.
 const sample=(a,n)=>n>=a.length?a:n?Array.from({length:n},(_,i)=>a[Math.floor(i*a.length/n)]):[];
-const key=p=>[p.clusterIndex??'opening',p.flatRole,p.flatBand??(p.petalLayer|| (p.innerPetal?2:1)),!!p.crownSatellite].join(':');
+const key=p=>[p.clusterIndex??'opening',p.flatRole,p.flatBand??(p.petalLayer|| (p.innerPetal?2:1)),!!p.crownSatellite,p.flatMobile?(p.flatTailSpark?'tail':p.whiteFlash?'white':'color'):''].join(':');
 const groupsOf=particles=>{const groups=new Map();for(const p of particles){const k=key(p);if(!groups.has(k))groups.set(k,[]);groups.get(k).push(p);}return [...groups.values()];};
 export function prioritizeFlat(particles,budget){
  const emitters=particles.filter(p=>p.flatEmitAt!=null),rest=particles.filter(p=>p.flatEmitAt==null);
  if(emitters.length>=budget)return emitters;
  const all=groupsOf(rest),room=Math.min(rest.length,Math.max(0,budget-emitters.length));if(!all.length)return emitters;
- const counts=all.map(g=>Math.floor(room*g.length/Math.max(1,rest.length)));
+ const reserve=all.map(g=>g[0].flatMobile?Math.min(g.length,g[0].whiteFlash?4:1):0),reserved=reserve.reduce((a,b)=>a+b,0);
+ const counts=reserved<=room?all.map((g,i)=>reserve[i]+Math.floor((room-reserved)*(g.length-reserve[i])/Math.max(1,rest.length-reserved))):all.map(g=>Math.floor(room*g.length/Math.max(1,rest.length)));
  for(let i=0,n=room-counts.reduce((a,b)=>a+b,0);n>0;i=(i+1)%all.length)if(counts[i]<all[i].length){counts[i]++;n--;}
  return [...emitters,...all.flatMap((g,i)=>sample(g,counts[i]))];
 }
@@ -16,26 +17,27 @@ export function thinFlat(particles){
  return groupsOf(particles).flatMap(g=>{
   const p=g[0];if(p.flatEmitAt!=null)return g;
   const detail=p.flatRole==='dust'||p.flatFine||p.crownSatellite;
-  const minimum=p.flatRole==='petal'?(p.petalLayer===3?6:8):['comet','ribbon','leaf','spoke','star'].includes(p.flatRole)?(p.crownSatellite?2:Math.min(6,g.length)):1;
-  return sample(g,Math.min(g.length,Math.max(minimum,Math.round(g.length*(detail?density*density:density)))));
+  const importantFlash=p.flatMobile&&p.whiteFlash;
+  // Reserve room for all five flowers' future inner layers and ending glints.
+  // Taking eight petals per ring on a 150-slot device fills it before flower 5.
+  const low=p.flatMobile&&density<.3;
+  const minimum=importantFlash?(p.flatTailSpark?2:low?3:6):p.flatRole==='petal'?(low?(p.petalLayer===3?3:p.innerPetal?4:6):(p.petalLayer===3?6:8)):['comet','ribbon','leaf','spoke','star'].includes(p.flatRole)?(p.crownSatellite?2:Math.min(low?4:6,g.length)):1;
+  return sample(g,Math.min(g.length,Math.max(minimum,Math.round(g.length*(detail&&!importantFlash?density*density:density)))));
  });
 }
-export function fitFlatViewport(layout,width,height){
+export function fitFlatViewport(layout,width,height,head){
  if(!layout||width>=650||height<=width)return layout;
- const horizontal=Math.max(8,Math.min(layout.x,width-layout.x)-12),above=Math.max(8,layout.y-16);
- return{...layout,scale:Math.min(layout.scale,horizontal/500,above/330)};
+ // Fit the entire radial composition once. The distance from an individual
+ // edge must not collapse the launch or redirect the five carriers afterwards.
+ const x=Math.max(width*.42,Math.min(width*.58,layout.x));
+ let y=Math.max(layout.y,Math.min(width*.40,height*.25));
+ if(head){y=Math.min(y,head.top-(layout.clearance??32)-2);const distance=Math.hypot(Math.max(head.left-x,0,x-head.right),Math.max(head.top-y,0,y-head.bottom));if(y<28||distance<(layout.clearance??32))return{...layout,scale:Math.min(layout.scale,width/600)};}
+ const scale=Math.min(layout.scale,width/600,Math.max(.28,y/300));
+ return{...layout,x,y,scale};
 }
-// A portrait composition needs five complete small flowers, not a desktop
-// bouquet cropped by the top of the screen. Only carrier velocities change.
-export function fitPortraitFlowers(shell,viewport,head){
+// Keep the same radial vectors, braking, sizes and staggered birth times as PC.
+// Only tiny white details get a CSS-pixel visibility floor on a narrow portrait.
+export function markPortraitFlat(shell,viewport){
  if(!viewport||viewport.width>=650||viewport.height<=viewport.width)return;
- const {width:w,height:h}=viewport,seeds=shell.particles.filter(p=>p.flatRole==='seed');if(seeds.length!==5)return;
- const sky=Math.max(96,Math.min(h*.32,(head?.top??h*.30)-12)),radius=Math.max(20,Math.min(w*.085,sky*.23));
- const xs=[.50,.17,.83,.32,.68],ys=[.26,.32,.32,.72,.72];
- for(let i=0;i<seeds.length;i++){
-  const p=seeds[i];p.drag=12;p.flatStopSpeed=0;const T=p.flatEmitAt,tx=w*xs[i],ty=Math.max(radius+10,sky*ys[i]),d=p.drag||0,E=d?(1-Math.exp(-d*T))/d:T;
-  const gravityShift=d?p.gravity*(T-E)/d:.5*p.gravity*T*T;
-  p.vx=(tx-p.x)/E;p.vy=(ty-p.y-gravityShift)/E;
-  p.scale=p.cascade?radius/(100*(p.flowerScale||1)):Math.pow(radius/88,2);p.size=Math.max(1.5,3.2*Math.sqrt(p.scale));
- }
+ for(const p of shell.particles){p.flatMobile=true;if(p.whiteFlash)p.size=Math.max(p.size,p.flatTailSpark?1.35:1.15);}
 }

@@ -1,0 +1,23 @@
+import test from'node:test';import assert from'node:assert/strict';import{StickerWorld}from'../dist/effects.mjs';import{flatShell,ACTIVE_FLAT_PATTERNS}from'../dist/flat-fireworks.mjs';import{fitFlatViewport,markPortraitFlat}from'../dist/flat-budget.mjs';import{planBurst,burstIsSafe}from'../dist/pyro.mjs';
+const rng=s=>()=>((s=Math.imul(s,1664525)+1013904223>>>0)/4294967296);
+const raindrops=(style,width,height)=>{const w=new StickerWorld(rng(31));w.viewport={width,height};w.setStyle(style);w.setEffect('smile');w.rain(0,width,height,.35);return w.particles;};
+test('portrait rain scales only its diameter, preserves size contrast, and retains desktop sizes and initial count',()=>{
+ for(const[style,factor]of[['gift',.75],['flat',.60],['cinema',1]]){const phone=raindrops(style,390,690),desktop=raindrops(style,1000,690),wide=raindrops(style,1280,800);assert.equal(phone.length,desktop.length);assert.ok(new Set(phone.map(p=>p.size)).size>10);phone.forEach((p,i)=>{assert.ok(Math.abs(p.size-desktop[i].size*factor)<1e-10);assert.equal(p.gravity,desktop[i].gravity);assert.equal(p.vy,desktop[i].vy);});desktop.forEach((p,i)=>assert.equal(p.size,wide[i].size));}
+});
+test('phone contact droplets remain round and their largest flat particle is bounded at the smaller mobile scale',()=>{
+ for(const style of['flat','gift']){const w=new StickerWorld(rng(32));w.viewport={width:390,height:690};w.setStyle(style);w.setEffect('smile');w.split({type:'drop',x:180,y:200,vx:30,vy:600,impactVX:30,impactVY:600,size:style==='flat'?13:12,volume:0,life:2,maxLife:2,variant:0,hitNormal:{x:0,y:-1},hitRegion:'head'});assert.ok(w.particles.length>=2);assert.ok(w.particles.every(p=>p.generation>0&&p.noRecollision));if(style==='flat')assert.ok(w.particles.every(p=>p.flatRound&&p.size<=5.1));}
+});
+test('portrait marking never remaps the original radial velocity, drag or staggered emission time',()=>{
+ for(const pattern of ACTIVE_FLAT_PATTERNS)for(const seed of[1,7,31]){const a=flatShell(160,150,.51,rng(seed),pattern),before=a.particles.map(p=>[p.vx,p.vy,p.drag,p.flatEmitAt,p.delay,p.scale,p.size]);markPortraitFlat(a,{width:390,height:690});assert.deepEqual(a.particles.map(p=>[p.vx,p.vy,p.drag,p.flatEmitAt,p.delay,p.scale,p.size]),before);assert.equal(new Set(a.particles.map(p=>Math.floor((Math.atan2(p.vy,p.vx)+Math.PI)/(Math.PI/2)))).size>=3,true);}
+});
+test('one portrait apex remains head-safe and large enough near a side; desktop layout is unchanged',()=>{
+ for(const width of[320,390,430])for(const top of[100,160,210,300])for(let side=0;side<4;side++){const height=690,head={left:width*.29,right:width*.72,top,bottom:top+250},raw=planBurst(width,height,head,side,rng(side));if(!raw)continue;const p=fitFlatViewport(raw,width,height,head);assert.ok(burstIsSafe(p,head));assert.ok(p.scale>=.28);assert.ok(p.x>=24&&p.x<=width-24);}
+ const p={x:28,y:174,scale:.74,clearance:55};assert.ok(fitFlatViewport(p,390,690,{left:115,right:280,top:210,bottom:460}).scale>.45);assert.equal(fitFlatViewport(p,1280,800),p);
+});
+test('every phone flower retains white glints and inner layers through its natural end at both low and normal budgets',()=>{
+ for(const pattern of ACTIVE_FLAT_PATTERNS)for(const limit of[150,300,420])for(const dt of[1/60,1/24]){
+  const w=new StickerWorld(rng(31));w.setStyle('flat');w.setEffect('laugh');w.limit=limit;w.viewport={width:390,height:690};w.head={left:115,right:280,top:210,bottom:460};const p=fitFlatViewport(planBurst(390,690,w.head,1,rng(3)),390,690,w.head);w.burst(p.x,p.y,p.scale,pattern);const glints=new Set(),roles=new Map();let queue=0,seenLate=0;
+  for(let f=0;f<Math.ceil(6/dt);f++){const before=[...w.particles];w.update(dt,390,690,null);queue=Math.max(queue,w.pendingParticles.length);assert.ok(w.particles.length<=limit);for(const q of before)if(q.flatRole!=='dust'&&!q.flatFine&&!w.particles.includes(q))assert.ok(q.life<=0,'structural component removed while alive');for(const q of w.particles){if(q.clusterIndex==null)continue;if(!roles.has(q.clusterIndex))roles.set(q.clusterIndex,new Set());roles.get(q.clusterIndex).add(q.flatRole==='petal'?`petal-${q.petalLayer|| (q.innerPetal?2:1)}`:q.flatRole);if(q.whiteFlash){assert.ok(q.size>=1.15);glints.add(q.clusterIndex);if(f*dt>1.7&&q.x>0&&q.x<390&&q.y>0&&q.y<690)seenLate++;}}}
+  assert.equal(roles.size,5);assert.equal(glints.size,5,`${pattern}/${limit}/${dt}: flash clusters ${[...glints]}`);assert.ok(seenLate>10);assert.equal(queue,0);assert.equal(w.particles.length,0);if(pattern==='flat-petals')for(const group of roles.values())assert.ok(group.has('petal-1')&&group.has('petal-2')&&group.has('petal-3'),`${pattern}/${limit}/${dt}: ${[...group]}`);
+ }
+});

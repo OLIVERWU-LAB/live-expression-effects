@@ -20,7 +20,8 @@ export const FLAT_COLORWAYS=Object.freeze([
 export const flatTempo=pattern=>pattern==='flat-petals-slow'?1.65:.95;
 function make(parent,role,vx,vy,size,life,tint,random,extra={}){
  const tempo=parent.tempo||1,scale=parent.scale||1;
- return{type:'spark',flatFx:true,flatRole:role,pattern:parent.pattern,x:parent.x,y:parent.y,vx,vy,size,life:life*tempo,maxLife:life*tempo,tempo,scale,variant:parent.variant||0,tint,seed:random()*100,angle:Math.atan2(vy,vx),spin:0,gravity:130*Math.sqrt(scale)/(tempo*tempo),drag:.85/tempo,delay:0,trail:[],tailLength:0,trailClock:0,touched:0,collisionDelay:.55,luminosity:.48,birthX:parent.x,birthY:parent.y,emitterId:parent.seed,clusterIndex:parent.clusterIndex,flatBand:parent.flatBand,flatDensity:parent.flatDensity,noRecollision:role==='ring',backgroundOnly:role==='ring',...extra};
+ const p={type:'spark',flatFx:true,flatMobile:parent.flatMobile,flatRole:role,pattern:parent.pattern,x:parent.x,y:parent.y,vx,vy,size,life:life*tempo,maxLife:life*tempo,tempo,scale,variant:parent.variant||0,tint,seed:random()*100,angle:Math.atan2(vy,vx),spin:0,gravity:130*Math.sqrt(scale)/(tempo*tempo),drag:.85/tempo,delay:0,trail:[],tailLength:0,trailClock:0,touched:0,collisionDelay:.55,luminosity:.48,birthX:parent.x,birthY:parent.y,emitterId:parent.seed,clusterIndex:parent.clusterIndex,flatBand:parent.flatBand,flatDensity:parent.flatDensity,noRecollision:role==='ring',backgroundOnly:role==='ring',...extra};
+ if(p.flatMobile&&p.whiteFlash)p.size=Math.max(p.size,p.flatTailSpark?1.35:1.15);return p;
 }
 // Old flower choreography retained, but only five live carriers are created here.
 // Their actual, integrated positions now own every later explosion centre.

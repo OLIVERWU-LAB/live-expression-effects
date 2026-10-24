@@ -42,9 +42,9 @@ test('mobile atlas decode preserves pose count while bounding the decoded tile t
  globalThis.fetch=async()=>({ok:true,blob:async()=>new Blob([bytes])});globalThis.createImageBitmap=async(blob,o)=>(options=o,{width:o.resizeWidth,height:o.resizeHeight});try{const image=await loadGiftImage('test.png',96);assert.equal(image.width/image.height,16);assert.deepEqual(options,{resizeHeight:96,resizeWidth:1536,resizeQuality:'high'});}finally{globalThis.fetch=oldFetch;globalThis.createImageBitmap=oldBitmap;}
 });
 
-test('portrait layout fits the five main blossoms without changing launch centre, timing or desktop scale',()=>{
- const plan={x:195,y:140,scale:.74,radius:152},layout=fitFlatViewport(plan,390,844);assert.equal(layout.x,plan.x);assert.equal(layout.y,plan.y);assert.equal(fitFlatViewport(plan,1200,800),plan);
- for(const key of ACTIVE_FLAT_PATTERNS)for(const seed of[1,7,31]){const w=new StickerWorld(rng(seed));w.setStyle('flat');w.setEffect('laugh');w.burst(layout.x,layout.y,layout.scale,key);for(let i=0;i<180;i++){w.update(1/60,390,844,null);for(const p of w.particles)if(!p.flatFine&&p.flatRole!=='dust'&&p.flatRole!=='ring'&&!p.initialOpening&&p.life>.3&&!(p.delay>0)){assert.ok(p.x-p.size>=0&&p.x+p.size<=390,`${key}: horizontal ${p.x}`);assert.ok(p.y-p.size>=0,`${key}: top ${p.y}`);}}}
+test('portrait fits the launch as one composition and retains natural particle lifetimes and desktop scale',()=>{
+ const plan={x:195,y:140,scale:.74,radius:152},layout=fitFlatViewport(plan,390,844);assert.equal(layout.x,plan.x);assert.ok(layout.y>=plan.y);assert.ok(layout.scale>.4);assert.equal(fitFlatViewport(plan,1200,800),plan);
+ for(const key of ACTIVE_FLAT_PATTERNS)for(const seed of[1,7,31]){const w=new StickerWorld(rng(seed));w.setStyle('flat');w.setEffect('laugh');w.viewport={width:390,height:844};w.burst(layout.x,layout.y,layout.scale,key);const seen=new Set();for(let i=0;i<240;i++){const before=[...w.particles];w.update(1/60,390,844,null);for(const p of before)if(!w.particles.includes(p))assert.ok(p.life<=0,'leaving an edge must not delete a live component');for(const p of w.particles)if(p.clusterIndex!=null)seen.add(p.clusterIndex);}assert.equal(seen.size,5);}
 });
 
 test('an optional silhouette inference failure leaves real worker face results running',async()=>{
