@@ -11,10 +11,11 @@ export function lockedState(expression,lock,mode){
 }
 // Overlap the next ascent with live flowers. Admission stays bounded; no live
 // structural particle is cleared to force the next bouquet.
+export const flatLaunchGap=(random=Math.random)=>1400+random()*100;
 export function flatLaunchBusy(world){
- if(world.rockets.length||world.pendingParticles?.some(p=>p.flatEmitAt!=null))return true;
- // Allow overlapping full blooms, while reserving room on the smallest budget.
- return world.particles.filter(p=>p.life>0&&p.retireRemaining==null).length>(world.limit||700)*.72;
+ // Count pressure used to make two quick launches followed by a long pause.
+ // Keep the single-rocket/queued-emitter guard; particle admission stays in world.
+ return !!world.rockets.length||!!world.pendingParticles?.some(p=>p.flatEmitAt!=null);
 }
 
 // Recover ordinary 12–20 FPS frame time with at most two physics slices.

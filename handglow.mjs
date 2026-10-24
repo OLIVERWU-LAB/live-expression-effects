@@ -1,6 +1,6 @@
-import {particleVisibility} from './particle-visibility.mjs?v=064c3c3a6f0f';
-import {clamp} from './core.mjs?v=064c3c3a6f0f';
-import {mixHex} from './emission.mjs?v=064c3c3a6f0f';
+import {particleVisibility} from './particle-visibility.mjs?v=13860ecd5a21';
+import {clamp} from './core.mjs?v=13860ecd5a21';
+import {mixHex} from './emission.mjs?v=13860ecd5a21';
 const TAU=Math.PI*2;
 // Cached rough-edged luminous ink: discrete chunks, never a copy of cinema rays.
 export class HandGlowRenderer{

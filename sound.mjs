@@ -1,6 +1,6 @@
-import{SoundDesigner as SampledSoundDesigner}from'./sound-bank.mjs?v=064c3c3a6f0f';
-import{RainAudio}from'./rain-audio.mjs?v=064c3c3a6f0f';
-import{clamp}from'./core.mjs?v=064c3c3a6f0f';import{particleVisibility}from'./particle-visibility.mjs?v=064c3c3a6f0f';import{refinedDissolveStart}from'./cinema-refined-particles.mjs?v=064c3c3a6f0f';
+import{SoundDesigner as SampledSoundDesigner}from'./sound-bank.mjs?v=13860ecd5a21';
+import{RainAudio}from'./rain-audio.mjs?v=13860ecd5a21';
+import{clamp}from'./core.mjs?v=13860ecd5a21';import{particleVisibility}from'./particle-visibility.mjs?v=13860ecd5a21';import{refinedDissolveStart}from'./cinema-refined-particles.mjs?v=13860ecd5a21';
 export const MIX=Object.freeze({master:.38,maxVoices:24,echoDelay:.065});
 // Recorded launch, water, paper, booms and glitter are decoded before playback.
 // Envelopes follow actual events; glitter never loops or repeats cut fragments.
@@ -28,7 +28,7 @@ export class SoundDesigner extends SampledSoundDesigner{
  small(e){if(!this.allow('small',.065))return;this.play('explode',{gain:(e.style==='flat'?.14:.11)+this.random()*.07,rate:1.06+this.random()*.16,highpass:180,lowpass:6000,pan:(e.x-.5)*1.3,priority:3,fade:.25});}
  shimmer(e,ending=true){if(e.style==='gift')return;const name='sparks',old=this.shimmers.get(name);if(old&&this.voiceInfo.has(old))return;if(!this.allow(name+'-start',1.4))return;const source=this.play(name,{gain:.030,rate:.98+this.random()*.065,pan:(e.x-.5),priority:1,dynamic:true,lowpass:6500,highpass:650});if(source)this.shimmers.set(name,source);}
  glitter(e){this.shimmer(e,true);}
- confetti(e){if(!this.allow('paper',.16))return;this.play('paperLight',{gain:(.14+this.random()*.025)/3,rate:.97+this.random()*.06,fade:.10,pan:(e.x-.5)*1.2,highpass:1700,lowpass:9500,priority:2});}
+ confetti(e){if(!this.allow('paper',.16))return;this.play('paperLight',{gain:.025+this.random()*.017,rate:1.16+this.random()*.22,fade:.10,pan:(e.x-.5)*1.2,highpass:1700,lowpass:9500,priority:2});}
  handle(events){if(!this.ready||!this.enabled)return;for(const e of events){if(e.type==='launch')this.launch(e);else if(e.type==='burst'){if(e.style==='flat')this.small(e);else this.big(e);}else if(e.type==='crackle'){if(e.style==='gift'&&e.collision)this.confetti(e);else if(e.style==='flat'&&e.stage===2)this.big(e);else if(e.stage>=3)this.glitter(e);else this.small(e);}else if(e.type==='glitter')this.glitter(e);else if(e.type==='flight-blocked')for(const[source,v]of this.voiceInfo)if(v.name==='launch')this.fade(source,.18);}}
  update(dt,world){this.prune();if(!world||!this.ready||!this.enabled){this.rain?.stop();return;}this.rain??=new RainAudio(this.context,this.master,this.random,this.buffers.get('water'),this.normalization.get('water'));this.rain.update(world,true);const now=this.context.currentTime;if(now-this.lastAnalysis<.05)return;this.lastAnalysis=now;let lit=0,spreadX=0;
   if(this.style!=='gift')for(const p of world.particles){if(p.life<=0||p.delay>0||(world.viewport&&(p.x<0||p.x>world.viewport.width||p.y<0||p.y>world.viewport.height)))continue;let weight=0;const age=p.maxLife-p.life;

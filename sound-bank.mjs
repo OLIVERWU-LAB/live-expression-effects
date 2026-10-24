@@ -1,4 +1,4 @@
-import {LIVE_AUDIO_URLS as AUDIO_URLS} from './sound-assets.mjs?v=064c3c3a6f0f';
+import {LIVE_AUDIO_URLS as AUDIO_URLS} from './sound-assets.mjs?v=13860ecd5a21';
 // Decode once before the show. Playback only creates lightweight source nodes;
 // no fetch, decoding, JS timer, convolution or per-particle sound work here.
 export const MIX=Object.freeze({master:.38,maxVoices:24,echoDelay:.055,decodeConcurrency:2});
@@ -27,7 +27,7 @@ export class SoundDesigner {
     // allSettled prevents a slow failed batch racing the user's next retry.
     const result=await Promise.allSettled(Array.from({length:MIX.decodeConcurrency},decode));for(const r of result)if(r.status==='rejected')throw r.reason;
     for(const[name,buffer]of pending){
-     let peak=0,first=buffer.length;for(let ch=0;ch<buffer.numberOfChannels;ch++){const data=buffer.getChannelData(ch);for(let i=0;i<data.length;i++)peak=Math.max(peak,Math.abs(data[i]));}
+     let peak=0,first=buffer.length,invalid=0;for(let ch=0;ch<buffer.numberOfChannels;ch++){const data=buffer.getChannelData(ch);for(let i=0;i<data.length;i++){if(!Number.isFinite(data[i])){data[i]=0;invalid++;}else peak=Math.max(peak,Math.abs(data[i]));}}if(invalid>Math.max(2,buffer.length*buffer.numberOfChannels*.01))throw Error('音效解码异常：'+name);
      const threshold=Math.max(.00001,peak*.008);for(let ch=0;ch<buffer.numberOfChannels;ch++){const data=buffer.getChannelData(ch);for(let i=0;i<Math.min(first,data.length);i++)if(Math.abs(data[i])>threshold){first=i;break;}}
      this.buffers.set(name,{buffer,offset:Math.max(0,first/buffer.sampleRate-.002)});this.normalization.set(name,Math.min(64,.8/Math.max(.001,peak)));
     }
