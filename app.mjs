@@ -1,16 +1,16 @@
-import {cameraFrameReader} from './camera-frame.mjs?v=7838a126173a';
-import {fitFlatViewport} from './flat-budget.mjs?v=7838a126173a';
-import {VisionSession} from './vision-session.mjs?v=7838a126173a';
-import{ParticleQuality}from'./particle-quality.mjs?v=7838a126173a';
-import {applyLiveStyle,lockedState} from './live-playback.mjs?v=7838a126173a';
-import {REFERENCE_NAMES} from './reference-bursts.mjs?v=7838a126173a';
-import { ExpressionController, clamp, headPolygon, previewHead } from './core.mjs?v=7838a126173a';
-import { StickerWorld, SilhouetteCollider } from './effects.mjs?v=7838a126173a';
-import {HandCollider,withHands} from './hands.mjs?v=7838a126173a';
-import { Renderer } from './renderer.mjs?v=7838a126173a';
-import { SHELLS, planBurst } from './pyro.mjs?v=7838a126173a';
-import {BOUQUET_NAME} from './bouquet.mjs?v=7838a126173a';
-import { SoundDesigner } from './sound.mjs?v=7838a126173a';
+import {cameraFrameReader} from './camera-frame.mjs?v=c5a4e5600643';
+import {fitFlatViewport} from './flat-budget.mjs?v=c5a4e5600643';
+import {VisionSession} from './vision-session.mjs?v=c5a4e5600643';
+import{ParticleQuality}from'./particle-quality.mjs?v=c5a4e5600643';
+import {applyLiveStyle,lockedState} from './live-playback.mjs?v=c5a4e5600643';
+import {REFERENCE_NAMES} from './reference-bursts.mjs?v=c5a4e5600643';
+import { ExpressionController, clamp, headPolygon, previewHead } from './core.mjs?v=c5a4e5600643';
+import { StickerWorld, SilhouetteCollider } from './effects.mjs?v=c5a4e5600643';
+import {HandCollider,withHands} from './hands.mjs?v=c5a4e5600643';
+import { Renderer } from './renderer.mjs?v=c5a4e5600643';
+import { SHELLS, planBurst } from './pyro.mjs?v=c5a4e5600643';
+import {BOUQUET_NAME} from './bouquet.mjs?v=c5a4e5600643';
+import { SoundDesigner } from './sound.mjs?v=c5a4e5600643';
 const $ = id => document.getElementById(id), stage = $('stage'), video = $('camera');
 const renderer = new Renderer($('scene')), world = new StickerWorld(), expression = new ExpressionController();
 renderer.gift.tileSize=matchMedia('(max-width: 600px)').matches?96:0;
@@ -36,7 +36,7 @@ stage.dataset.build='v68';
 const readFaceFrame=cameraFrameReader(480),readGeometryFrame=cameraFrameReader(320);
 let lastGeometryCapture=0,lastGeometryVideoTime=-1;
 const vision=new VisionSession({
- createWorker:()=>new Worker(new URL('./vision.worker.js?v=7838a126173a',import.meta.url)),
+ createWorker:()=>new Worker(new URL('./vision.worker.js?v=c5a4e5600643',import.meta.url)),
  createBitmap:()=>readFaceFrame(video),
  initOptions:{role:'face'},
  active:()=>wanted&&mode==='camera'&&!suspended,
@@ -45,7 +45,7 @@ const vision=new VisionSession({
  onEvent:handleVisionEvent
 });
 const geometry=new VisionSession({
- createWorker:()=>new Worker(new URL('./vision.worker.js?v=7838a126173a',import.meta.url)),
+ createWorker:()=>new Worker(new URL('./vision.worker.js?v=c5a4e5600643',import.meta.url)),
  createBitmap:()=>readGeometryFrame(video),initOptions:{role:'geometry'},
  active:()=>wanted&&mode==='camera'&&!suspended&&engineReady,
  onError:(error,phase)=>{record('geometry-error',{phase,message:String(error)});if(phase!=='dropped-frame'){segmentationReady=false;handsReady=false;mask=null;silhouette=null;hands=null;}},
