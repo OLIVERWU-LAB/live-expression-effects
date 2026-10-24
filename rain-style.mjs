@@ -1,12 +1,12 @@
-import {clamp} from './core.mjs?v=8a63e3112740';
-import {mixHex} from './emission.mjs?v=8a63e3112740';
+import {clamp} from './core.mjs?v=e5a4b44faf95';
+import {mixHex} from './emission.mjs?v=e5a4b44faf95';
 // Flux through the top and upstream edge keeps a slanted rain field filled.
 export function lineRainEntry(width,height,depth,roll){
  const vx=145+depth*90,vy=440+depth*280,leftShare=vx*height/(vy*Math.max(1,width)+vx*height);
  return roll<leftShare?{x:-24,y:-45+roll/leftShare*(height+45),vx,vy}:{x:(roll-leftShare)/(1-leftShare)*width,y:-45,vx,vy};
 }
 export const lineRainCoverage=(width,height)=>1+(145+.675*90)*height/((440+.675*280)*Math.max(1,width));
-export const FLAT_RAIN_COLORS=Object.freeze(['#73CBEA','#7DBFE7','#66BFDF','#8BCFEA','#76B2E2']);
+export const FLAT_RAIN_COLORS=Object.freeze(['#439DCA','#58AED6','#378BB9','#69B9DE','#4A9FD0']);
 // Two visible contact droplets, born outside the resolved surface; never recurse.
 export function contactRain(parent,random=Math.random,style='gift'){
  const line=style==='cinema'||style==='glow',n=parent.hitNormal||{x:0,y:-1};
@@ -42,5 +42,5 @@ export function drawFlatRain(g,p){
 export function rainRate(style,width,height,strength){
  const digital=['cinema','glow'].includes(style),gift=style==='gift',portrait=height>width&&width<650;
  const base=clamp(width/(digital?28:gift?24:34),10,digital?100:gift?75:45);
- return Math.max(base,portrait?(digital?52:gift?38:48):0)*(gift?1.4:digital?lineRainCoverage(width,height):1)*(.75+strength*.6);
+ return Math.max(base,portrait?(digital?84:gift?38:82):0)*(gift?1.4:digital?lineRainCoverage(width,height)*1.20:1.15)*(.75+strength*.6);
 }

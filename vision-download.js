@@ -1,6 +1,7 @@
 /* Asset transport only; camera frames are never sent over the network. */
 self.loadVisionAsset=async function(input,fetcher,progress=()=>{},phase='runtime'){
- const original=new URL(input,self.location.href),name=original.pathname.split('/').pop(),entry=self.VISION_PACK?.[name],packed=!!entry&&typeof DecompressionStream==='function';
+ const original=new URL(input,self.location.href),name=original.pathname.split('/').pop(),entry=self.VISION_PACK?.[name],packed=!!entry&&entry.packed!==false&&typeof DecompressionStream==='function';
+ if(entry&&self.VISION_ASSETS.compressedOnly&&!packed)throw new Error('浏览器缺少压缩资源支持，请更新 Chrome、Edge 或 Safari。');
  const address=packed?new URL(name+'.gz',self.VISION_ASSETS.compressed).href:original.href,controller=new AbortController();let timer;
  const arm=()=>{clearTimeout(timer);timer=setTimeout(()=>controller.abort(),20000);};arm();
  try{

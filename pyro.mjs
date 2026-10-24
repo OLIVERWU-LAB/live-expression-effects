@@ -1,5 +1,5 @@
-import {roundColor} from './dandelion.mjs?v=8a63e3112740';
-import { clamp } from './core.mjs?v=8a63e3112740';
+import {roundColor} from './dandelion.mjs?v=e5a4b44faf95';
+import { clamp } from './core.mjs?v=e5a4b44faf95';
 // Warm/cool paper colours with a quiet cream, rather than arbitrary RGB hues.
 export const PAPER_COLORS=['#FF7897','#62DDD2','#FFD477','#ACA0F3','#FFF3D9'];
 export const FIRE_COLORS=['#73BFE6','#FF9872','#AE8BE0','#FFD18A','#8DD7B6'];
@@ -24,9 +24,9 @@ export function boundsDistance(x,y,b){return Math.hypot(Math.max(b.left-x,0,x-b.
 // Reserve an opening region around the whole head, not just a few pixels at the core.
 export function burstIsSafe(plan,head,gap=84){return !head||boundsDistance(plan.x,plan.y,head)>=(plan.clearance??gap);}
 export function planBurst(w,h,head,side=0,random=Math.random){
- const edge=24,top=w<650?104:78;
+ const portrait=w<650&&h>w,edge=24,top=portrait?28:w<650?104:78;
  const b=head||{left:w*.37,right:w*.63,top:h*.28,bottom:h*.55},cx=(b.left+b.right)/2,headHeight=b.bottom-b.top,headWidth=b.right-b.left;
- const clearance=clamp(headHeight*.48,84,150),radius=Math.min(260,w*.39,h*.36),candidates=[];const reserve=clamp(headHeight*.10,16,28);
+ const clearance=portrait?clamp(headHeight*.22,32,68):clamp(headHeight*.48,84,150),radius=Math.min(260,w*.39,h*.36),candidates=[];const reserve=clamp(headHeight*.10,16,28);
  const push=(x,y,zone)=>{const p={x,y,radius,scale:radius/205,zone,clearance};if(x>=edge&&x<=w-edge&&y>=top&&y<=h*.54&&burstIsSafe(p,b))candidates.push(p);};
  for(const margin of [reserve,0]){
  const plannedGap=clearance+margin;

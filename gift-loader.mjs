@@ -7,7 +7,7 @@ export async function loadGiftBank(entries,tileSize=0,load=loadGiftImage){
  if(error){for(const image of images.values())image.close?.();throw error;}return images;
 }
 export async function loadGiftImage(url,tileSize=0){
- if(tileSize&&typeof createImageBitmap==='function'){
+ if(tileSize&&typeof createImageBitmap==='function'&&!url.split('?')[0].endsWith('.webp')){
   const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),30000);
   try{
    const response=await fetch(url,{signal:controller.signal});if(!response.ok)throw new Error('Gift asset HTTP '+response.status);

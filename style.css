@@ -43,4 +43,6 @@
 
 /* Vertical spectral accents and filled, monochrome control symbols. */
 .zone-rain{background:linear-gradient(180deg,#4dc1ff 0%,#2fb3ff 100%)}.zone-fire{background:linear-gradient(180deg,#ffa048 0%,#ffd027 100%)}
-.pattern-picker svg.filled-icon{fill:currentColor;stroke:none}.hud .smile-icon{fill:currentColor;stroke:none;color:#f4f5f8;opacity:.96}
+.pattern-picker svg.control-glyph,.hud svg.control-glyph{fill:currentColor;stroke:none;color:#f4f5f8}.pattern-picker button[aria-pressed=true] svg.control-glyph{color:#242427}.hud .smile-icon{color:#f4f5f8;opacity:.96}
+
+.smile-hint{position:absolute;left:50%;top:43%;transform:translate(-50%,-50%);z-index:2;font-size:16px;font-weight:450;letter-spacing:.3px;color:#ffffffd9;text-shadow:0 1px 12px #0009;pointer-events:none}.ui-hidden .smile-hint{visibility:hidden}

@@ -1,1 +1,1 @@
-self.VISION_ASSETS={runtime:'./vendor/vision_bundle.cjs',compressed:new URL('./vendor/compressed/',self.location.href).href,wasm:new URL('./vendor/wasm',self.location.href).href,model:new URL('./vendor/face_landmarker.task',self.location.href).href};
+self.VISION_ASSETS={compressedOnly:true,runtime:'./vendor/vision_bundle.cjs',compressed:new URL('./vendor/compressed/',self.location.href).href,wasm:new URL('./vendor/wasm',self.location.href).href,model:new URL('./vendor/face_landmarker.task',self.location.href).href};

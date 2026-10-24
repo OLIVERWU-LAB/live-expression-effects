@@ -1,5 +1,5 @@
-export const personRimGain=style=>style==='flat'?0:style==='cinema'?1.6:style==='gift'?1.7:1;
-import {fireworkLights} from './lighting.mjs?v=8a63e3112740';
+export const personRimGain=style=>['flat','gift'].includes(style)?0:style==='cinema'?1.6:style==='gift'?1.7:1;
+import {fireworkLights} from './lighting.mjs?v=e5a4b44faf95';
 // Independent WebGL composition: base camera, transparent VFX and a low-resolution
 // person matte. No camera readback; no images leave this browser.
 const vertex = `attribute vec2 aPosition;varying vec2 vUV;void main(){vUV=vec2(aPosition.x*.5+.5,.5-aPosition.y*.5);gl_Position=vec4(aPosition,0.,1.);}`;
@@ -12,8 +12,9 @@ uniform float uNight,uTime,uDigital,uWater,uRimGain;
 uniform vec4 uLights[5];uniform vec3 uColors[5];
 vec3 background(vec2 uv){
   vec2 sampleUV=uv;
-  float depth=(uv.y*uResolution.y-(uResolution.y-uWater))/max(1.,uWater);
-  if(uDigital>.5&&depth>0.){sampleUV.x+=sin(uv.y*110.+uTime*.0018)*.002*min(1.,depth*5.);sampleUV.y+=sin(uv.x*75.+uTime*.0012)*.0015;}
+  float depthPx=uv.y*uResolution.y-(uResolution.y-uWater);
+  if(depthPx>0.){float bend=smoothstep(0.,24.,depthPx);sampleUV.x+=(sin(uv.y*uResolution.y*.045+uTime*.0011)*1.3+sin(uv.y*uResolution.y*.018-uTime*.0007)*.6)/uResolution.x*bend;sampleUV.y+=sin(uv.x*uResolution.x*.022+uTime*.001)*.55/uResolution.y*bend;}
+
   vec3 c=texture2D(uBase,clamp(sampleUV,vec2(.001),vec2(.999))).rgb;
   // Neutral black exposure only; preserve camera hue and readable faces.
   c*=1.-.32*uNight;
