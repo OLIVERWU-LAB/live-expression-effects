@@ -32,7 +32,7 @@ export function fitFlatViewport(layout,width,height,head){
  const x=Math.max(width*.42,Math.min(width*.58,layout.x));
  let y=Math.max(layout.y,Math.min(width*.40,height*.25));
  if(head){y=Math.min(y,head.top-(layout.clearance??32)-2);const distance=Math.hypot(Math.max(head.left-x,0,x-head.right),Math.max(head.top-y,0,y-head.bottom));if(y<28||distance<(layout.clearance??32))return{...layout,scale:Math.min(layout.scale,width/600)};}
- const scale=Math.min(layout.scale,width/600,Math.max(.28,y/300));
+ const scale=Math.min(layout.scale,width/550,Math.max(.31,y/275));
  return{...layout,x,y,scale};
 }
 // Keep the same radial vectors, braking, sizes and staggered birth times as PC.

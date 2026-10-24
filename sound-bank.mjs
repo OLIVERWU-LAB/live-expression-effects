@@ -1,4 +1,4 @@
-import {AUDIO_URLS} from './sound-assets.mjs?v=2503cd2b7925';
+import {LIVE_AUDIO_URLS as AUDIO_URLS} from './sound-assets.mjs?v=4f8722bd807f';
 // Decode once before the show. Playback only creates lightweight source nodes;
 // no fetch, decoding, JS timer, convolution or per-particle sound work here.
 export const MIX=Object.freeze({master:.38,maxVoices:24,echoDelay:.055,decodeConcurrency:2});

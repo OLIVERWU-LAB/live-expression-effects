@@ -9,3 +9,9 @@ export function applyLiveStyle(world,value){
 export function lockedState(expression,lock,mode){
  return mode==='idle'?expression:lock==='rain'?'smile':lock==='fireworks'?'laugh':expression;
 }
+// Start the next ascent during the previous flower's brief fade; its new burst
+// still waits for the full rocket flight, rather than cutting the old particles.
+export function flatLaunchBusy(world){
+ if(world.rockets.length||world.launchers.length)return true;
+ return world.particles.some(p=>p.life>0&&(p.flatEmitAt!=null||(!['dust','dash','ring'].includes(p.flatRole)&&!p.flatFine&&p.life>.58)));
+}
