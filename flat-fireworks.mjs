@@ -1,11 +1,11 @@
-import {particleVisibility} from './particle-visibility.mjs?v=dbf3082da9f6';
-import {clamp} from './core.mjs?v=dbf3082da9f6';
-import {handShell,handRing} from './handglow-particles.mjs?v=dbf3082da9f6';
+import {particleVisibility} from './particle-visibility.mjs?v=055eb6cdc316';
+import {clamp} from './core.mjs?v=055eb6cdc316';
+import {handShell,handRing} from './handglow-particles.mjs?v=055eb6cdc316';
 const TAU=Math.PI*2;
 export const FLAT_LAUNCH_BLUE='#59C9F2';
 export const FLAT_PATTERN='flat-petals';
 export const FLAT_PATTERNS=Object.freeze([FLAT_PATTERN,'flat-petals-slow','flat-medallion','flat-star-crown','flat-swirl','flat-ribbons','flat-sparkle','flat-festival']);
-export const ACTIVE_FLAT_PATTERNS=Object.freeze([FLAT_PATTERN,'flat-medallion','flat-star-crown','flat-festival']);
+export const ACTIVE_FLAT_PATTERNS=Object.freeze(['flat-medallion','flat-star-crown','flat-festival']);
 export const FLAT_CASCADES=Object.freeze(['flat-medallion','flat-star-crown','flat-festival']);
 export const FLAT_NAME='花瓣涟漪';
 export const FLAT_PALETTE=Object.freeze(['#59C9F2','#FF7975','#FFE394','#FFF8E8']);

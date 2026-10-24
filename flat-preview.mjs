@@ -1,5 +1,5 @@
-import{FlatPreview,PREVIEW_STYLES,PREVIEW_DURATION,paintFlatPreview}from'./flat-preview-model.mjs?v=dbf3082da9f6';
-const $=id=>document.getElementById(id),grid=$('styles'),dialog=$('detail'),storageKey='flat-style-choices-v81';
+import{FlatPreview,PREVIEW_STYLES,PREVIEW_DURATION,paintFlatPreview}from'./flat-preview-model.mjs?v=055eb6cdc316';
+const $=id=>document.getElementById(id),grid=$('styles'),dialog=$('detail'),storageKey='flat-style-choices-v83';
 let choices={};try{choices=JSON.parse(localStorage.getItem(storageKey)||'{}')||{};}catch{}
 const cards=PREVIEW_STYLES.map(style=>{
  const card=document.createElement('article');card.className='card';card.innerHTML=`<div class="card-head"><h2><span class="number">${style.number}</span>${style.name}</h2><button class="expand" type="button" aria-label="放大查看 ${style.number} ${style.name}">放大查看</button></div><canvas width="720" height="630" aria-label="${style.number} ${style.name} 动态预览"></canvas><div class="choices" aria-label="${style.number} 选择"><button type="button" data-choice="keep" aria-pressed="false">保留</button><button type="button" data-choice="remove" aria-pressed="false">不要</button></div>`;grid.append(card);

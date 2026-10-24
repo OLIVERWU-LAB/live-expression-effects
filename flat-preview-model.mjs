@@ -1,8 +1,9 @@
-import{StickerWorld}from'./effects.mjs?v=dbf3082da9f6';
-import{ACTIVE_FLAT_PATTERNS,drawFlatFireworks,drawFlatLaunch}from'./flat-fireworks.mjs?v=dbf3082da9f6';
+import{StickerWorld}from'./effects.mjs?v=055eb6cdc316';
+import{ACTIVE_FLAT_PATTERNS,drawFlatFireworks,drawFlatLaunch}from'./flat-fireworks.mjs?v=055eb6cdc316';
 
 const names={'flat-petals':'花瓣涟漪','flat-medallion':'同心礼花','flat-star-crown':'星冠绽放','flat-festival':'锦簇花火'};
-export const PREVIEW_STYLES=Object.freeze(ACTIVE_FLAT_PATTERNS.map((pattern,i)=>Object.freeze({pattern,number:String(i+1).padStart(2,'0'),name:names[pattern]})));
+const numbers={'flat-medallion':'02','flat-star-crown':'03','flat-festival':'04'};
+export const PREVIEW_STYLES=Object.freeze(ACTIVE_FLAT_PATTERNS.map(pattern=>Object.freeze({pattern,number:numbers[pattern],name:names[pattern]})));
 export const PREVIEW_WIDTH=1200,PREVIEW_HEIGHT=1050,PREVIEW_DURATION=4.8;
 const randomFor=seed=>()=>((seed=Math.imul(seed,1664525)+1013904223>>>0)/4294967296);
 
