@@ -1,7 +1,7 @@
 import {fitFlatViewport} from './flat-budget.mjs';
 import {VisionSession} from './vision-session.mjs';
 import{ParticleQuality}from'./particle-quality.mjs';
-import {applyLiveStyle,liveStyle,lockedState} from './live-playback.mjs';
+import {applyLiveStyle,lockedState} from './live-playback.mjs';
 import {REFERENCE_NAMES} from './reference-bursts.mjs';
 import { ExpressionController, clamp, headPolygon, previewHead } from './core.mjs';
 import { StickerWorld, SilhouetteCollider } from './effects.mjs';
@@ -28,10 +28,9 @@ let state = 'neutral', previewStrength = .35, previewX = .5, previewY = .37, poi
 let lastFrame = 0, uiTime = 0, nextLaunchAt = 0, burstSide = 0, launchGap = 1800, fps = 0, fpsTime = 0, frames = 0, inferenceMs = 0, log = [], sessionStart = performance.now();
 let lastMetric = null, segmentationReady = false, handsReady = false, handLandmarks = [], handTime = -Infinity, hands = null, handKey = '';
 applyLiveStyle(world,'cinema');
-try { applyLiveStyle(world,liveStyle(localStorage.getItem('expression-visual-style'))); } catch {}
 world.giftMaterialStyle='random';
 renderer.gift.material=world.giftMaterialStyle;
-stage.dataset.build='v65';
+stage.dataset.build='v66';
 const vision=new VisionSession({
  createWorker:()=>new Worker(new URL('./vision.worker.js',import.meta.url)),
  createBitmap:()=>createImageBitmap(video,{resizeWidth:480,resizeHeight:Math.max(1,Math.round(480*video.videoHeight/video.videoWidth))}),
@@ -245,12 +244,12 @@ $('preview-strength').addEventListener('input', e => previewStrength = +e.target
 for (const b of document.querySelectorAll('[data-strength]')) b.addEventListener('click', () => { previewStrength = +b.dataset.strength / 100; $('preview-strength').value = b.dataset.strength; });
 $('settings-button').addEventListener('click', () => $('settings').hidden = !$('settings').hidden); $('close-settings').addEventListener('click', () => $('settings').hidden = true);
 $('fullscreen').addEventListener('click', async () => { try { if (document.fullscreenElement) await document.exitFullscreen(); else if (stage.requestFullscreen) await stage.requestFullscreen(); else notify('画面已铺满窗口；当前浏览器不支持进一步隐藏系统栏。'); } catch { notify('当前浏览器限制了系统全屏，画面仍会铺满可用窗口。'); } });
-for (const b of document.querySelectorAll('.version-switch [data-style]')) b.addEventListener('click', () => { sound.stopAll(); applyLiveStyle(world,b.dataset.style);world.clear();state='neutral';syncStyle();setState(expression.state);syncSound();nextLaunchAt=0; try { localStorage.setItem('expression-visual-style', world.style); } catch {} record('visual-style', {style: world.style}); });
+for (const b of document.querySelectorAll('.version-switch [data-style]')) b.addEventListener('click', () => { sound.stopAll(); applyLiveStyle(world,b.dataset.style);world.clear();state='neutral';syncStyle();setState(expression.state);syncSound();nextLaunchAt=0; record('visual-style', {style: world.style}); });
 let dragStart = null;
 stage.addEventListener('pointerdown', e => { if (mode !== 'preview' || e.target.closest('button,input,aside,.hud')) return; pointerDown = true; dragStart = e.pointerId; stage.setPointerCapture(e.pointerId); move(e); });
 function move(e) { if (!pointerDown || mode !== 'preview') return; previewX = clamp(e.clientX / width, .18, .82); previewY = clamp(e.clientY / height, .2, .58); }
 stage.addEventListener('pointermove', move); stage.addEventListener('pointerup', () => pointerDown = false); stage.addEventListener('pointercancel', () => pointerDown = false);
-$('export-session').addEventListener('click', () => { const data = { version: 65, exportedAt: new Date().toISOString(), metrics: mode === 'idle' ? lastMetric : metrics(), note: 'Aggregate performance and interaction events only; no images or face geometry.', events: log }; const url = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })); const a = document.createElement('a'); a.href = url; a.download = 'expression-session.json'; a.click(); setTimeout(() => URL.revokeObjectURL(url), 1000); });
+$('export-session').addEventListener('click', () => { const data = { version: 66, exportedAt: new Date().toISOString(), metrics: mode === 'idle' ? lastMetric : metrics(), note: 'Aggregate performance and interaction events only; no images or face geometry.', events: log }; const url = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })); const a = document.createElement('a'); a.href = url; a.download = 'expression-session.json'; a.click(); setTimeout(() => URL.revokeObjectURL(url), 1000); });
 document.addEventListener('visibilitychange', () => document.hidden ? pause() : resume());
 window.addEventListener('pagehide', e => { pause(); if (!e.persisted) { releaseTracks(); vision.dispose(); } });
 window.addEventListener('pageshow', e => { if (e.persisted) resume(); });
