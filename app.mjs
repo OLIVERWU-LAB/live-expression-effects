@@ -1,17 +1,17 @@
-import {performanceProfile} from './performance-profile.mjs?v=718cb088c5cf';
-import {cameraFrameReader} from './camera-frame.mjs?v=718cb088c5cf';
-import {fitFlatViewport} from './flat-budget.mjs?v=718cb088c5cf';
-import {VisionSession} from './vision-session.mjs?v=718cb088c5cf';
-import{ParticleQuality}from'./particle-quality.mjs?v=718cb088c5cf';
-import {applyLiveStyle,lockedState,flatLaunchBusy,flatLaunchGap,simulationSlices} from './live-playback.mjs?v=718cb088c5cf';
-import {REFERENCE_NAMES} from './reference-bursts.mjs?v=718cb088c5cf';
-import { ExpressionController, clamp, headPolygon, previewHead } from './core.mjs?v=718cb088c5cf';
-import { StickerWorld, SilhouetteCollider } from './effects.mjs?v=718cb088c5cf';
-import {HandCollider,withHands} from './hands.mjs?v=718cb088c5cf';
-import { Renderer } from './renderer.mjs?v=718cb088c5cf';
-import { SHELLS, planBurst } from './pyro.mjs?v=718cb088c5cf';
-import {BOUQUET_NAME} from './bouquet.mjs?v=718cb088c5cf';
-import { SoundDesigner } from './sound.mjs?v=718cb088c5cf';
+import {performanceProfile} from './performance-profile.mjs?v=af1483e5221b';
+import {cameraFrameReader} from './camera-frame.mjs?v=af1483e5221b';
+import {fitFlatViewport} from './flat-budget.mjs?v=af1483e5221b';
+import {VisionSession} from './vision-session.mjs?v=af1483e5221b';
+import{ParticleQuality}from'./particle-quality.mjs?v=af1483e5221b';
+import {applyLiveStyle,lockedState,flatLaunchBusy,flatLaunchGap,simulationSlices} from './live-playback.mjs?v=af1483e5221b';
+import {REFERENCE_NAMES} from './reference-bursts.mjs?v=af1483e5221b';
+import { ExpressionController, clamp, headPolygon, previewHead } from './core.mjs?v=af1483e5221b';
+import { StickerWorld, SilhouetteCollider } from './effects.mjs?v=af1483e5221b';
+import {HandCollider,withHands} from './hands.mjs?v=af1483e5221b';
+import { Renderer } from './renderer.mjs?v=af1483e5221b';
+import { SHELLS, planBurst } from './pyro.mjs?v=af1483e5221b';
+import {BOUQUET_NAME} from './bouquet.mjs?v=af1483e5221b';
+import { SoundDesigner } from './sound.mjs?v=af1483e5221b';
 const $ = id => document.getElementById(id), stage = $('stage'), video = $('camera');
 const renderer = new Renderer($('scene')), world = new StickerWorld(), expression = new ExpressionController();
 renderer.gift.tileSize=matchMedia('(max-width: 600px)').matches?96:0;
@@ -35,11 +35,11 @@ let lastMetric = null, segmentationReady = false, handsReady = false, handLandma
 applyLiveStyle(world,'cinema');
 world.giftMaterialStyle='random';
 renderer.gift.material=world.giftMaterialStyle;
-stage.dataset.build='v80';
+stage.dataset.build='v81';
 const readFaceFrame=cameraFrameReader(480),readGeometryFrame=cameraFrameReader(320);
 let lastGeometryCapture=0,lastGeometryVideoTime=-1;
 const vision=new VisionSession({
- createWorker:()=>new Worker(new URL('./vision.worker.js?v=718cb088c5cf',import.meta.url)),
+ createWorker:()=>new Worker(new URL('./vision.worker.js?v=af1483e5221b',import.meta.url)),
  createBitmap:()=>readFaceFrame(video),
  initOptions:{role:'face'},
  active:()=>wanted&&mode==='camera'&&!suspended,
@@ -48,7 +48,7 @@ const vision=new VisionSession({
  onEvent:handleVisionEvent
 });
 const geometry=new VisionSession({
- createWorker:()=>new Worker(new URL('./vision.worker.js?v=718cb088c5cf',import.meta.url)),
+ createWorker:()=>new Worker(new URL('./vision.worker.js?v=af1483e5221b',import.meta.url)),
  createBitmap:()=>readGeometryFrame(video),initOptions:{role:'geometry'},
  onState:()=>syncLoading(),
  active:()=>wanted&&mode==='camera'&&!suspended&&engineReady,
@@ -73,7 +73,7 @@ $('loading-retry').addEventListener('click',()=>{
  else renderer.gift.load(world.giftMaterialStyle).then(syncLoading);syncLoading();
 });
 $('loading-diagnostics').addEventListener('click',async()=>{
- const detail=JSON.stringify({version:80,browser:navigator.userAgent,source:mode,startup:cameraStartup,startupError:cameraStartupError,wanted,suspended,workerCreated:!!vision.worker,phase:vision.phase,error:vision.lastError,ready:vision.ready,resultReceived:vision.hasResult,pending:vision.pending,attempts:vision.attempt,audio:{ready:sound.assetsReady,loaded:sound.loaded,error:sound.error,enabled:sound.enabled},video:{width:video.videoWidth,height:video.videoHeight,time:video.currentTime,readyState:video.readyState,paused:video.paused},events:log.slice(-18)},null,2);
+ const detail=JSON.stringify({version:81,browser:navigator.userAgent,source:mode,startup:cameraStartup,startupError:cameraStartupError,wanted,suspended,workerCreated:!!vision.worker,phase:vision.phase,error:vision.lastError,ready:vision.ready,resultReceived:vision.hasResult,pending:vision.pending,attempts:vision.attempt,audio:{ready:sound.assetsReady,loaded:sound.loaded,error:sound.error,enabled:sound.enabled},video:{width:video.videoWidth,height:video.videoHeight,time:video.currentTime,readyState:video.readyState,paused:video.paused},events:log.slice(-18)},null,2);
  try{await navigator.clipboard.writeText(detail);$('loading-diagnostics').textContent='已复制诊断';}catch{window.prompt('复制以下诊断信息',detail);}
 });
 function syncStyle() {
@@ -312,7 +312,7 @@ let dragStart = null;
 stage.addEventListener('pointerdown', e => { if (mode !== 'preview' || e.target.closest('button,input,aside,.hud')) return; pointerDown = true; dragStart = e.pointerId; stage.setPointerCapture(e.pointerId); move(e); });
 function move(e) { if (!pointerDown || mode !== 'preview') return; previewX = clamp(e.clientX / width, .18, .82); previewY = clamp(e.clientY / height, .2, .58); }
 stage.addEventListener('pointermove', move); stage.addEventListener('pointerup', () => pointerDown = false); stage.addEventListener('pointercancel', () => pointerDown = false);
-$('export-session').addEventListener('click', () => { const data = { version: 80, exportedAt: new Date().toISOString(), metrics: mode === 'idle' ? lastMetric : metrics(), note: 'Aggregate performance and interaction events only; no images or face geometry.', events: log }; const url = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })); const a = document.createElement('a'); a.href = url; a.download = 'expression-session.json'; a.click(); setTimeout(() => URL.revokeObjectURL(url), 1000); });
+$('export-session').addEventListener('click', () => { const data = { version: 81, exportedAt: new Date().toISOString(), metrics: mode === 'idle' ? lastMetric : metrics(), note: 'Aggregate performance and interaction events only; no images or face geometry.', events: log }; const url = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })); const a = document.createElement('a'); a.href = url; a.download = 'expression-session.json'; a.click(); setTimeout(() => URL.revokeObjectURL(url), 1000); });
 document.addEventListener('visibilitychange', () => document.hidden ? pause() : resume());
 window.addEventListener('pagehide', e => { pause(); if (!e.persisted) { releaseTracks(); vision.dispose();geometry.dispose(); } });
 window.addEventListener('pageshow', e => { if (e.persisted) resume(); });

@@ -1,7 +1,7 @@
-import {REFINED_CINEMA_PATTERN} from './cinema-refined-particles.mjs?v=718cb088c5cf';
-import {ORIGINAL_CINEMA_PATTERN} from './cinema-original-particles.mjs?v=718cb088c5cf';
-import {GIFT_RANDOM_MATERIALS,giftMaterialTint} from './gift-materials.mjs?v=718cb088c5cf';
-import {clamp} from './core.mjs?v=718cb088c5cf';
+import {REFINED_CINEMA_PATTERN} from './cinema-refined-particles.mjs?v=af1483e5221b';
+import {ORIGINAL_CINEMA_PATTERN} from './cinema-original-particles.mjs?v=af1483e5221b';
+import {GIFT_RANDOM_MATERIALS,giftMaterialTint} from './gift-materials.mjs?v=af1483e5221b';
+import {clamp} from './core.mjs?v=af1483e5221b';
 export const GIFT_PATTERNS=Object.freeze(['gift-twinkle']);
 export const CINEMA_PATTERNS=Object.freeze(['cinema-shell','cinema-rings']);
 export const ACTIVE_CINEMA_PATTERNS=Object.freeze(['cinema-rings']);
