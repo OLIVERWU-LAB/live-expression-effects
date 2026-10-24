@@ -3,7 +3,7 @@ import{readFileSync,readdirSync,statSync}from'node:fs';import{resolve,dirname,re
 import{GIFT_ASSETS}from'../dist/reference-bursts.mjs';import{giftAssetPath}from'../dist/gift-shapes.mjs';import{GIFT_RANDOM_MATERIALS}from'../dist/gift-materials.mjs';
 const root=fileURLToPath(new URL('../dist/',import.meta.url));
 export function liveFiles(){
- const files=new Set(['index.html','style.css','assets/favicon.svg','vision.worker.js','vision-config.js']);
+ const files=new Set(['index.html','style.css','assets/favicon.svg','vision.worker.js','vision-config.js','vision-pack.js','vision-download.js']);
  function visit(rel){if(files.has(rel))return;files.add(rel);const source=readFileSync(resolve(root,rel),'utf8');for(const m of source.matchAll(/(?:from\s*|import\s*)['"](\.[^'"]+)['"]/g))visit(relative(root,resolve(root,dirname(rel),m[1])));}
  visit('app.mjs');
  function walk(rel){for(const entry of readdirSync(resolve(root,rel),{withFileTypes:true})){const path=rel+'/'+entry.name;if(entry.isDirectory())walk(path);else files.add(path);}}

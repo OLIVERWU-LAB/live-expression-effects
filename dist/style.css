@@ -38,3 +38,5 @@
 .stage:not([data-mode])>.topbar,.stage[data-mode=idle]>.topbar{display:none}
 
 .loading{position:absolute;z-index:30;left:50%;top:46%;transform:translate(-50%,-50%);display:flex;align-items:center;gap:12px;max-width:calc(100% - 40px);width:max-content;padding:18px 22px;border:1px solid #ffffff20;border-radius:18px;background:#111e;color:#fff;font-size:14px;pointer-events:none}.loading[hidden]{display:none}.loading-spinner{width:18px;height:18px;flex:none;border:2px solid #ffffff30;border-top-color:#fff;border-radius:50%;animation:loading-turn .85s linear infinite}.loading button{pointer-events:auto;border:0;border-radius:8px;padding:8px;color:#111;background:#fff}@keyframes loading-turn{to{transform:rotate(360deg)}}
+
+.loading{flex-wrap:wrap;justify-content:center;max-width:min(440px,calc(100% - 40px))}.loading small{flex-basis:100%;font-size:12px;line-height:1.6;color:#ffcfaf;overflow-wrap:anywhere}.loading button{font-size:12px;padding:8px 12px}
