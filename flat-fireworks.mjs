@@ -1,6 +1,6 @@
-import {particleVisibility} from './particle-visibility.mjs?v=0581627ae3b8';
-import {clamp} from './core.mjs?v=0581627ae3b8';
-import {handShell,handRing} from './handglow-particles.mjs?v=0581627ae3b8';
+import {particleVisibility} from './particle-visibility.mjs?v=2adad563e72b';
+import {clamp} from './core.mjs?v=2adad563e72b';
+import {handShell,handRing} from './handglow-particles.mjs?v=2adad563e72b';
 const TAU=Math.PI*2;
 export const FLAT_LAUNCH_BLUE='#59C9F2';
 export const FLAT_PATTERN='flat-petals';
@@ -93,7 +93,12 @@ function radialShell(parent,phase,random){
  let band=0;const emit=(role,count,speed,size,palette,offset=0,extra={})=>{
   const flatBand=band++;
   for(let i=0;i<count;i++){
-   const a=phase+(i+offset)/count*TAU,medallionRay=key==='flat-medallion'&&role==='comet',velocity=(speed+(i%2?8:-8))*s*(medallionRay?.92:1);
+   // Stable, slight spacing and reach variations loosen the perfect circular
+   // rows. Every ray keeps its own radial direction; no common sideways push.
+   const organic=ACTIVE_FLAT_PATTERNS.includes(key),seed=parent.seed+flatBand*1.73,
+    spacing=organic?.10*Math.sin(seed+i*2.39996)+.045*Math.sin(seed*.3+i*.81):0,
+    reach=organic?1+.065*Math.sin(seed*.7+i*2.39996)+.035*Math.sin(seed*.2+i*.73):1,
+    a=phase+(i+offset+spacing)/count*TAU,medallionRay=key==='flat-medallion'&&role==='comet',velocity=(speed+(i%2?8:-8))*s*(medallionRay?.92:1)*reach;
    p.push(make(parent,role,Math.cos(a)*velocity,Math.sin(a)*velocity-22*r,size*(i%2?.9:1)*r,2.05+random()*.24,palette[i%palette.length],random,{angle:a,flatBand,tempo:1,gravity:(medallionRay?145:115)*r,drag:1.0,tailLength:['comet','ribbon','leaf','spoke'].includes(role)?24:0,trailAge:.28,cap:'#FFF2D6',...extra}));
   }
  };
