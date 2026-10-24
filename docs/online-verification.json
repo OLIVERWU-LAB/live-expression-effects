@@ -1,5 +1,7 @@
 {
   "version": "v67",
+  "pagesCommit": "ab513e243c5732ddf4978adb18f2cb857239b37e",
+  "pagesBuild": "built",
   "url": "https://oliverwu-lab.github.io/live-expression-effects/",
   "entryFilesVerified": 9,
   "entryChecks": [
@@ -7,9 +9,9 @@
       "path": "app.mjs",
       "status": 200,
       "type": "text/javascript; charset=utf-8",
-      "localBytes": 30591,
+      "localBytes": 31527,
       "verification": "full SHA256",
-      "sha256": "36bdaa48cc383045055b4e8679b714625269fc45482de1b32c6816b1dbbece6b"
+      "sha256": "10a76bc64d8f0b1351dd230561c94d92efabcfc5e863da28e517c84f1fbaa012"
     },
     {
       "path": "camera-frame.mjs",
@@ -25,7 +27,7 @@
       "type": "text/html; charset=utf-8",
       "localBytes": 6711,
       "verification": "full SHA256",
-      "sha256": "ec870e8712702c32828a667122e01e0082ee49a6f356e995ff0d2e9c7cd70a2e"
+      "sha256": "0d9309ca85eec187a4ea1bfe5adb4fb9198d4a8d5cb0596a94213603f503b6f5"
     },
     {
       "path": "style.css",
@@ -63,20 +65,20 @@
       "path": "vision-session.mjs",
       "status": 200,
       "type": "text/javascript; charset=utf-8",
-      "localBytes": 5160,
+      "localBytes": 5474,
       "verification": "full SHA256",
-      "sha256": "023f5eef077d42c66a22d454141031284cd22a9cf83852701458ab38e495910e"
+      "sha256": "eb5f111a8212f0660a31c914e2483f23b50e75e0a8d662b76b9403ac2b30c34d"
     },
     {
       "path": "vision.worker.js",
       "status": 200,
       "type": "application/javascript; charset=utf-8",
-      "localBytes": 8471,
+      "localBytes": 8512,
       "verification": "full SHA256",
-      "sha256": "880bda90ccab2b43916fdccfe835d274f73a94e8cc4d6e25ad9c2c7cea1fe83a"
+      "sha256": "7046ba26ad92e1303ea08b59b509c4be1d782730ac7710706e7a2ba62707814b"
     }
   ],
-  "criticalCompressedAssets": [
+  "coreCompressedAssetsVerified": [
     {
       "name": "vision_bundle.cjs",
       "packedBytes": 39717,
@@ -110,6 +112,5 @@
       "elapsedMs": 117399
     }
   ],
-  "cameraOnUserChromeTested": false,
-  "note": "Live asset bytes were streamed through the same decompression/integrity loader via an HTTP test adapter. This is not a real browser or camera inference test."
+  "cameraOnDeviceTested": false
 }
