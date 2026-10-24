@@ -58,7 +58,10 @@ export function flatChildren(parent,random=Math.random){
    const a=parent.turn+i*2.39996323,speed=(70+random()*230)*local.scale;
    children.push(make(local,'dust',Math.cos(a)*speed,Math.sin(a)*speed,Math.min(parent.pattern==='flat-festival'?1.8:parent.pattern==='flat-star-crown'?2.2:3.5,(i%8===0?3.5:i%2===0?1.5+random()*.8:.50+random()*.70))*Math.sqrt(local.scale*.62/.78),1.65+random()*.24,i%2===0?'#FFFFFF':colors[i%3],random,{delay:.06+random()*.08,gravity:90*Math.sqrt(local.scale),luminosity:.20,flatFine:true,whiteFlash:i%2===0}));
   }
-  for(const child of children){child.vx+=parent.vx;child.vy+=parent.vy;child.clusterIndex=parent.clusterIndex;child.cascadeChild=true;const longTrail=parent.pattern==='flat-medallion'&&child.flatRole==='comet';child.life=child.maxLife=(longTrail?2.05:child.flatRing?1.90:child.flatFine?(parent.pattern==='flat-medallion'?1.70:1.90):1.62)+random()*(longTrail?.18:.22);child.drag=longTrail?.95:1.35;child.collisionDelay=.38;if(longTrail){child.longTrail=true;child.trailAge=1.10;child.tailLength=84;child.trailTint=colors[child.flatBand===0?1:0];}if(parent.pattern==='flat-star-crown'&&child.tailLength){child.trailAge=.56;child.tailLength=40;child.trailDistance=170;}}
+  // The carrier chooses the flower's real birth position, but its remaining
+  // flight velocity must not sweep the whole radial explosion to one side.
+  const carry=Math.min(.12,22*local.scale/(Math.hypot(parent.vx,parent.vy)||1));
+  for(const child of children){child.vx+=parent.vx*carry;child.vy+=parent.vy*carry;child.clusterIndex=parent.clusterIndex;child.cascadeChild=true;const longTrail=parent.pattern==='flat-medallion'&&child.flatRole==='comet';child.life=child.maxLife=(longTrail?2.05:child.flatRing?1.90:child.flatFine?(parent.pattern==='flat-medallion'?1.70:1.90):1.62)+random()*(longTrail?.18:.22);child.drag=longTrail?.95:1.35;child.collisionDelay=.38;if(longTrail){child.longTrail=true;child.trailAge=1.10;child.tailLength=84;child.trailTint=colors[child.flatBand===0?1:0];}if(parent.pattern==='flat-star-crown'&&child.tailLength){child.trailAge=.56;child.tailLength=40;child.trailDistance=170;}}
   return children;
  }
  const out=[],root=Math.sqrt(parent.scale),T=parent.tempo,color=parent.color,accent=parent.accent;
