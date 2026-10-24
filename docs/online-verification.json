@@ -1,15 +1,63 @@
 {
   "url": "https://oliverwu-lab.github.io/live-expression-effects/",
-  "filesVerified": 9,
+  "filesVerified": 17,
   "https": true,
   "checks": [
     {
       "path": "app.mjs",
       "status": 200,
       "type": "text/javascript; charset=utf-8",
-      "localBytes": 31527,
+      "localBytes": 31859,
       "verification": "full SHA256",
-      "sha256": "4edb153d619b9ac3d6d60afbb4c5b00198a16ffa1dfb7c08dbbcb90cf4c6e073"
+      "sha256": "93fda0fb01d1fa02a08d0dc8e9ec4901b879c60c7c8786df00b636e4c835d37b"
+    },
+    {
+      "path": "assets/audio/explode-895ac3e0cede.mp3",
+      "status": 200,
+      "type": "audio/mp3",
+      "localBytes": 22330,
+      "verification": "full SHA256",
+      "sha256": "895ac3e0cede06e57dba3388b4e296558bea70b2ce9b921e8564737bc678f683"
+    },
+    {
+      "path": "assets/audio/fireworks2-c49ff933cd99.mp3",
+      "status": 200,
+      "type": "audio/mp3",
+      "localBytes": 3514,
+      "verification": "full SHA256",
+      "sha256": "c49ff933cd99f5518227e88b0480cf70ab5c5df42a783a973aeda06c1e1c9f5d"
+    },
+    {
+      "path": "assets/audio/paper-fbf05bd9ba67.mp3",
+      "status": 200,
+      "type": "audio/mp3",
+      "localBytes": 32145,
+      "verification": "full SHA256",
+      "sha256": "fbf05bd9ba67a9df8eff656e813881c7f1a754d7473388785b228b0ed62dc564"
+    },
+    {
+      "path": "assets/audio/shining-8f6574bd823f.mp3",
+      "status": 200,
+      "type": "audio/mp3",
+      "localBytes": 53434,
+      "verification": "full SHA256",
+      "sha256": "8f6574bd823f61932889f99a5d15a30d52fa1f286247d56eadf1a098d4ebac01"
+    },
+    {
+      "path": "assets/audio/shoot-364ca1ba5960.mp3",
+      "status": 200,
+      "type": "audio/mp3",
+      "localBytes": 28858,
+      "verification": "full SHA256",
+      "sha256": "364ca1ba5960f273ee544bb12a12ff33adf0ccc9a1e93356352dbb6e8bfb0197"
+    },
+    {
+      "path": "assets/audio/sparks-3d9bc3421cc0.mp3",
+      "status": 200,
+      "type": "audio/mp3",
+      "localBytes": 71098,
+      "verification": "full SHA256",
+      "sha256": "3d9bc3421cc04c21b47e2ca5bd39e0a42ad27696bc2224f201664903825c2b6b"
     },
     {
       "path": "camera-frame.mjs",
@@ -23,17 +71,33 @@
       "path": "index.html",
       "status": 200,
       "type": "text/html; charset=utf-8",
-      "localBytes": 6711,
+      "localBytes": 7427,
       "verification": "full SHA256",
-      "sha256": "c3574af9a72d11cf1f954ff4112c0ee5f2bc35c141a23d3c39d6a7f54550ee02"
+      "sha256": "21b4a6b6417233c475f235464e4dff3d9b9199fad98adb98d54a170423e185ec"
+    },
+    {
+      "path": "sound-assets.mjs",
+      "status": 200,
+      "type": "text/javascript; charset=utf-8",
+      "localBytes": 588,
+      "verification": "full SHA256",
+      "sha256": "3f4a46dc09869da75bb05db3b93bf3e4b77792c161f926680b069be019db9e57"
+    },
+    {
+      "path": "sound.mjs",
+      "status": 200,
+      "type": "text/javascript; charset=utf-8",
+      "localBytes": 8922,
+      "verification": "full SHA256",
+      "sha256": "29593b9fe98b6c9f3ac6fe177ca3a6ef8f48ba42d5bf8d73e8cba9e39daeb273"
     },
     {
       "path": "style.css",
       "status": 200,
       "type": "text/css; charset=utf-8",
-      "localBytes": 13156,
+      "localBytes": 13506,
       "verification": "full SHA256",
-      "sha256": "92ee344193480a5a93c95242a89c2cb212f2328d83878ca4167504eb7ad55688"
+      "sha256": "0f709ed740d3ec0665e7764604ab2716761f8c1c0d09f87262087c995a39e190"
     },
     {
       "path": "vision-config.js",
@@ -73,15 +137,14 @@
       "type": "application/javascript; charset=utf-8",
       "localBytes": 8512,
       "verification": "full SHA256",
-      "sha256": "95470bb7679ead9397fcb597f61807a56823cf2ec655262593a3104c96e8eb57"
+      "sha256": "7c34660c753ee6fc4b315c5e361e360f4b13008f40c7370dc9d87fb8e611c5de"
     }
   ],
   "cameraOnDeviceTested": false,
-  "version": "v68",
-  "pagesCommit": "d2c3e999604d87f2c7bdabce56420fc06e25d43f",
+  "version": "v69",
+  "pagesCommit": "2fcdefe7779642d9cf5f08da8d6c6be4c79f5691",
   "pagesBuild": "built",
-  "automatedTestsPassed": 256,
-  "cameraOnUserChromeReportedWorking": true,
-  "userFeedback": "好了",
-  "automatedCameraOnDeviceTested": false
+  "testsPassed": 265,
+  "userAuditionFeedbackApplied": true,
+  "assistantAudioAuditionCompleted": false
 }
