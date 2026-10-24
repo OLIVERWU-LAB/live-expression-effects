@@ -4,20 +4,18 @@ import {fitFlatViewport} from './flat-budget.mjs';
 import {VisionSession} from './vision-session.mjs';
 import{ParticleQuality}from'./particle-quality.mjs';
 import {applyLiveStyle,lockedState,flatLaunchBusy,flatLaunchGap,simulationSlices} from './live-playback.mjs';
-import {REFERENCE_NAMES} from './reference-bursts.mjs';
 import { ExpressionController, clamp, headPolygon, previewHead } from './core.mjs';
 import { StickerWorld, SilhouetteCollider } from './effects.mjs';
 import {HandCollider,withHands} from './hands.mjs';
 import { Renderer } from './renderer.mjs';
-import { SHELLS, planBurst } from './pyro.mjs';
-import {BOUQUET_NAME} from './bouquet.mjs';
+import { planBurst } from './pyro.mjs';
 import { SoundDesigner } from './sound.mjs';
 const $ = id => document.getElementById(id), stage = $('stage'), video = $('camera');
 const renderer = new Renderer($('scene')), world = new StickerWorld(), expression = new ExpressionController();
 renderer.gift.tileSize=matchMedia('(max-width: 600px)').matches?96:0;
 const sound = new SoundDesigner({context:window.__cameraEntry?.audioContext});
 try { sound.setEnabled(localStorage.getItem('expression-sound') !== 'off'); } catch {}
-function syncSound() { const on = sound.enabled && sound.ready; $('sound-toggle').setAttribute('aria-pressed', String(on)); $('sound-toggle').setAttribute('aria-label', on ? '关闭声音' : '开启声音'); $('sound-toggle').title = on ? '关闭声音' : '开启声音'; $('sound-status').textContent = !sound.enabled ? '静音' : !sound.ready ? '点击右上角开启' : '雨声 · 升空 · 爆裂'; }
+function syncSound() { const on = sound.enabled && sound.ready; $('sound-toggle').setAttribute('aria-pressed', String(on)); $('sound-toggle').setAttribute('aria-label', on ? '关闭声音' : '开启声音'); $('sound-toggle').title = on ? '关闭声音' : '开启声音'; }
 sound.onstate = ()=>{syncSound();syncLoading();}; syncSound();
 function activateAudio() { sound.unlock().then(syncSound); }
 const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -35,7 +33,7 @@ let lastMetric = null, segmentationReady = false, handsReady = false, handLandma
 applyLiveStyle(world,'cinema');
 world.giftMaterialStyle='random';
 renderer.gift.material=world.giftMaterialStyle;
-stage.dataset.build='v86';
+stage.dataset.build='release';
 const readFaceFrame=cameraFrameReader(480),readGeometryFrame=cameraFrameReader(320);
 let lastGeometryCapture=0,lastGeometryVideoTime=-1;
 const vision=new VisionSession({
@@ -64,7 +62,6 @@ function syncLoading(){
  const failure=recognition?(cameraStartupError||vision.lastError):audio?sound.error:gift?String(renderer.gift.error||''):null;
  $('loading-detail').textContent=failure?'上次未成功：'+failure.slice(0,180):'';
  $('loading-detail').hidden=!failure;$('loading-retry').hidden=!failure;
- $('loading-diagnostics').hidden=!recognition||(!vision.lastError&&performance.now()-vision.startedAt<10000);
  stage.setAttribute('aria-busy',String(!!text));
 }
 $('loading-retry').addEventListener('click',()=>{
@@ -72,16 +69,13 @@ $('loading-retry').addEventListener('click',()=>{
  else if(!sound.assetsReady)sound.unlock().then(syncLoading);
  else renderer.gift.load(world.giftMaterialStyle).then(syncLoading);syncLoading();
 });
-$('loading-diagnostics').addEventListener('click',async()=>{
- const detail=JSON.stringify({version:86,browser:navigator.userAgent,source:mode,startup:cameraStartup,startupError:cameraStartupError,wanted,suspended,workerCreated:!!vision.worker,phase:vision.phase,error:vision.lastError,ready:vision.ready,resultReceived:vision.hasResult,pending:vision.pending,attempts:vision.attempt,audio:{ready:sound.assetsReady,loaded:sound.loaded,error:sound.error,enabled:sound.enabled},video:{width:video.videoWidth,height:video.videoHeight,time:video.currentTime,readyState:video.readyState,paused:video.paused},events:log.slice(-18)},null,2);
- try{await navigator.clipboard.writeText(detail);$('loading-diagnostics').textContent='已复制诊断';}catch{window.prompt('复制以下诊断信息',detail);}
-});
+export function runtimeStatus(){return {browser:navigator.userAgent,source:mode,startup:cameraStartup,startupError:cameraStartupError,wanted,suspended,workerCreated:!!vision.worker,phase:vision.phase,error:vision.lastError,ready:vision.ready,resultReceived:vision.hasResult,pending:vision.pending,attempts:vision.attempt,audio:{ready:sound.assetsReady,loaded:sound.loaded,error:sound.error,enabled:sound.enabled},video:{width:video.videoWidth,height:video.videoHeight,time:video.currentTime,readyState:video.readyState,paused:video.paused},events:log.slice(-18)};}
 function syncStyle() {
   stage.dataset.style=world.style;
   if(world.style==='gift')renderer.gift.load(world.giftMaterialStyle).then(syncLoading);
   syncLoading();
   stage.dataset.giftMaterial=world.giftMaterialStyle;
-  for(const b of document.querySelectorAll('.version-switch [data-style]'))b.setAttribute('aria-pressed',String(b.dataset.style===world.style));
+  for(const b of document.querySelectorAll('.style-switch [data-style]'))b.setAttribute('aria-pressed',String(b.dataset.style===world.style));
   syncPlayback();
 }
 function syncPlayback(){
@@ -95,7 +89,6 @@ function choosePlayback(effect){
   syncPlayback();setState(expression.state);record('locked-playback',{effect:lockedEffect||'auto'});
 }
 syncStyle();
-$('optics-status').textContent = renderer.optics ? '粒子合成 · 人物受光' : '基础绘制（光学降级）';
 const names = { neutral: '待机', smile: '雨滴', laugh: '烟花' };
 const storage = { get() { try { return localStorage.getItem('expression-camera-intent'); } catch { return null; } }, set(value) { try { localStorage.setItem('expression-camera-intent', value ? 'yes' : 'no'); } catch {} } };
 function record(type, detail = {}) { log.push({ elapsedMs: Math.round(performance.now() - sessionStart), type, ...detail }); if (log.length > 200) log.shift(); }
@@ -126,7 +119,6 @@ function usePreview() {
 function ensureEngine(){return vision.start();}
 function handleVisionEvent(data){
     if (data.type === 'ready') {
-      $('cache-status').textContent = data.cacheAvailable === false ? '浏览器未开放持久缓存' : data.cached ? '已从本机缓存读取' : '已保存，后续优先复用';
       record('engine-ready', { cached: !!data.cached, cacheHits: data.cacheHits, cacheWrites: data.cacheWrites });
     } else if (data.type === 'segmentation-ready') { segmentationReady = true; record('silhouette-ready', { labels: data.labels }); }
     else if (data.type === 'segmentation-error') { segmentationReady = false; record('silhouette-error', { message: data.message }); if (mode === 'camera') notify('人物轮廓暂未就绪，目前使用头部轮廓。表情识别会继续运行。'); }
@@ -252,11 +244,7 @@ function updateUI(now) {
   $('face-hint').hidden = !!lockedEffect || mode !== 'camera' || !engineReady || suspended || now - faceTime < 900;
   if (mode === 'camera' && engineReady && !suspended) $('status-copy').textContent = now - faceTime < 1800 ? '本地识别中' : '等待笑脸进入画面';
   document.querySelectorAll('[data-strength]').forEach(b => b.classList.toggle('active', +b.dataset.strength === Math.round(previewStrength * 100)));
-  $('diag-fps').textContent = fps ? `${Math.round(fps)} fps` : '—'; $('diag-inference').textContent = inferenceMs ? `${Math.round(inferenceMs)} ms` : '—';
-  $('diag-particles').textContent = `${world.particles.length} / ${world.limit}`; $('diag-collisions').textContent = String(world.collisions); $('diag-water').textContent = `${Math.round(world.water.level)} px`; $('diag-render').textContent = `${renderer.drawMs.toFixed(1)} ms`; $('optics-status').textContent = renderer.optics && !renderer.optics.lost ? '粒子合成 · 人物受光' : '基础绘制（光学降级）';
-  $('hand-status').textContent=!handsReady?'轮廓碰撞':hands?.count?`${hands.count} 只手 · 已跟踪`:'已就绪';
-  $('diag-rockets').textContent = String(world.rockets.length); $('diag-pattern').textContent = (REFERENCE_NAMES[world.lastPattern]||(world.lastPattern==='bouquet'?BOUQUET_NAME:SHELLS[world.lastPattern]?.name)) || '—'; $('diag-audio').textContent = String(sound.voices.size+(sound.rain?.voices.size||0)); syncSound();
-  $('diag-source').textContent = mode === 'camera' ? '真实摄像头' : mode === 'preview' ? '模拟预览' : '未启动';
+  syncSound();
 }
 function frame(now) {
   const gap=lastFrame?now-lastFrame:16,slices=simulationSlices(gap,world.style),dt=slices.reduce((a,b)=>a+b,0);lastFrame=now;let sampledFPS=false;
@@ -281,7 +269,7 @@ function frame(now) {
   }
   for(const slice of slices)world.update(slice, width, height, active ? collider : null);
   const events=world.consumeEvents();stage.dataset.headCollisions=String(world.headCollisions);stage.dataset.burstCount=String(+(stage.dataset.burstCount||0)+events.filter(e=>e.type==='burst').length);if(events.some(e=>e.type==='flight-blocked')){nextLaunchAt=Math.min(nextLaunchAt,now+100);record('firework-blocked');}sound.setScene(world.effect, world.style); sound.handle(events); sound.update(dt,world);
-  renderer.draw(world, { time: now, camera: mode === 'camera' && !!stream, video, preview: mode === 'preview', strength: expression.smile, previewX, previewY, tracking: $('show-tracking').checked, polygon, silhouette, hands });
+  renderer.draw(world, { time: now, camera: mode === 'camera' && !!stream, video, preview: mode === 'preview', strength: expression.smile, previewX, previewY, tracking:false, polygon, silhouette, hands });
   capture(now); updateUI(now); requestAnimationFrame(frame);
 }
 async function resume() {
@@ -305,14 +293,12 @@ $('sound-toggle').addEventListener('click', async () => { if(sound.enabled && so
 $('pattern-picker').addEventListener('click',e=>{const b=e.target.closest('button[data-playback]');if(!b)return;activateAudio();choosePlayback(b.dataset.playback);});
 $('preview-strength').addEventListener('input', e => previewStrength = +e.target.value / 100);
 for (const b of document.querySelectorAll('[data-strength]')) b.addEventListener('click', () => { previewStrength = +b.dataset.strength / 100; $('preview-strength').value = b.dataset.strength; });
-$('settings-button').addEventListener('click', () => $('settings').hidden = !$('settings').hidden); $('close-settings').addEventListener('click', () => $('settings').hidden = true);
 $('fullscreen').addEventListener('click', async () => { try { if (document.fullscreenElement) await document.exitFullscreen(); else if (stage.requestFullscreen) await stage.requestFullscreen(); else notify('画面已铺满窗口；当前浏览器不支持进一步隐藏系统栏。'); } catch { notify('当前浏览器限制了系统全屏，画面仍会铺满可用窗口。'); } });
-for (const b of document.querySelectorAll('.version-switch [data-style]')) b.addEventListener('click', () => { sound.stopAll(); applyLiveStyle(world,b.dataset.style);world.clear();state='neutral';syncStyle();setState(expression.state);syncSound();nextLaunchAt=0; record('visual-style', {style: world.style}); });
+for (const b of document.querySelectorAll('.style-switch [data-style]')) b.addEventListener('click', () => { sound.stopAll(); applyLiveStyle(world,b.dataset.style);world.clear();state='neutral';syncStyle();setState(expression.state);syncSound();nextLaunchAt=0; record('visual-style', {style: world.style}); });
 let dragStart = null;
 stage.addEventListener('pointerdown', e => { if (mode !== 'preview' || e.target.closest('button,input,aside,.hud')) return; pointerDown = true; dragStart = e.pointerId; stage.setPointerCapture(e.pointerId); move(e); });
 function move(e) { if (!pointerDown || mode !== 'preview') return; previewX = clamp(e.clientX / width, .18, .82); previewY = clamp(e.clientY / height, .2, .58); }
 stage.addEventListener('pointermove', move); stage.addEventListener('pointerup', () => pointerDown = false); stage.addEventListener('pointercancel', () => pointerDown = false);
-$('export-session').addEventListener('click', () => { const data = { version: 86, exportedAt: new Date().toISOString(), metrics: mode === 'idle' ? lastMetric : metrics(), note: 'Aggregate performance and interaction events only; no images or face geometry.', events: log }; const url = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })); const a = document.createElement('a'); a.href = url; a.download = 'expression-session.json'; a.click(); setTimeout(() => URL.revokeObjectURL(url), 1000); });
 document.addEventListener('visibilitychange', () => document.hidden ? pause() : resume());
 window.addEventListener('pagehide', e => { pause(); if (!e.persisted) { releaseTracks(); vision.dispose();geometry.dispose(); } });
 window.addEventListener('pageshow', e => { if (e.persisted) resume(); });

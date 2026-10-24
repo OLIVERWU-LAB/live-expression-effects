@@ -28,6 +28,6 @@ test('initial glints stay compact, vary spatially and blink independently; openi
 test('live delivery includes both random gift banks and inference dependencies without historical QA pages',async()=>{
  const {liveFiles}=await import('../tools/live-files.mjs'),files=liveFiles();
  for(const p of ['app.mjs','live-playback.mjs','vision.worker.js','vision-config.js','vendor/compressed/face_landmarker.task.gz','vendor/compressed/hand_landmarker.task.gz','assets/favicon.svg'])assert.ok(files.includes(p),p);
- assert.ok(files.some(p=>p==='assets/gift-v70/candy-bank.webp'));assert.ok(files.some(p=>p==='assets/gift-v70/soft-candy-bank.webp'));
+ assert.ok(files.some(p=>p==='assets/gift/candy.webp'));assert.ok(files.some(p=>p==='assets/gift/soft-candy.webp'));
  assert.ok(!files.some(p=>p.startsWith('qa/')||p.includes('gift-v20/')||p.includes('gift-v21/')||p.includes('gift-v35/')));
 });

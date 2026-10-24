@@ -7,7 +7,6 @@ export function liveFiles(){
  const files=new Set(['index.html','style.css','assets/favicon.svg','vision.worker.js','vision-config.js','vision-pack.js','vision-download.js']);
  function visit(rel){if(files.has(rel))return;files.add(rel);const source=readFileSync(resolve(root,rel),'utf8');for(const m of source.matchAll(/(?:from\s*|import\s*)['"](\.[^'"]+)['"]/g))visit(relative(root,resolve(root,dirname(rel),m[1])));}
  visit('app.mjs');
- files.add('flat-preview.html');files.add('flat-preview.css');visit('flat-preview.mjs');
  function walk(rel){for(const entry of readdirSync(resolve(root,rel),{withFileTypes:true})){const path=rel+'/'+entry.name;if(entry.isDirectory())walk(path);else files.add(path);}}
  walk('vendor/compressed');files.add('vendor/LICENSE-APACHE-2.0.txt');files.add('vendor/THIRD_PARTY_NOTICES.txt');
  for(const path of Object.values(AUDIO_FILES))files.add(path);

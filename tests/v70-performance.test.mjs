@@ -21,7 +21,7 @@ test('mobile and low-core desktops have bounded initial pixels, particles and te
 });
 test('delivery retains exact original face, body and hand models in compressed form',()=>{
  const files=liveFiles();assert.ok(files.includes('vision.worker.js'));assert.ok(!files.some(p=>p.includes('compact')));assert.ok(!files.some(p=>/\.wasm$|\.task$/.test(p)));let total=0;
- for(const name of['face_landmarker.task','hand_landmarker.task','selfie_segmenter.tflite']){const path='vendor/compressed/'+name+'.gz';assert.ok(files.includes(path));const packed=readFileSync(file(path));assert.deepEqual(gunzipSync(packed),readFileSync(file('vendor/'+name)));total+=packed.length;}
+ for(const name of['face_landmarker.task','hand_landmarker.task','selfie_segmenter.tflite']){const path='vendor/compressed/'+name+'.gz';assert.ok(files.includes(path));const packed=readFileSync(file(path)),hashes={'face_landmarker.task':'64184e229b263107bc2b804c6625db1341ff2bb731874b0bcc2fe6544e0bc9ff','hand_landmarker.task':'fbc2a30080c3c557093b5ddfc334698132eb341044ccee322ccf8bcf3607cde1','selfie_segmenter.tflite':'191ac9529ae506ee0beefa6b2c945a172dab9d07d1e802a290a4e4038226658b'};assert.equal(createHash('sha256').update(gunzipSync(packed)).digest('hex'),hashes[name]);total+=packed.length;}
  assert.ok(total<9400000);assert.ok(files.reduce((n,p)=>n+statSync(file(p)).size,0)<16500000);for(const p of['vendor/LICENSE-APACHE-2.0.txt','vendor/THIRD_PARTY_NOTICES.txt'])assert.ok(files.includes(p));
 });
 test('two shared gift atlases bound network and decoded memory and contain all live layout components',()=>{

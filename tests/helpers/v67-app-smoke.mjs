@@ -13,7 +13,7 @@ class Sound{constructor(){this.enabled=false;this.assetsReady=!audioPending;this
 const context=createContext({console,URL,URLSearchParams,Blob,Math,Promise,performance:{now:()=>time},setTimeout:checkedSetTimeout,clearTimeout:checkedClearTimeout,matchMedia:()=>({matches:false}),localStorage:{getItem(key){return key==='expression-visual-style'?'gift':null;},setItem(){}},document:{hidden:false,getElementById:el,querySelectorAll:s=>s.includes('data-style')?styles:[],addEventListener(){},createElement:()=>new Element()},window:{Worker:true,createImageBitmap:true,OffscreenCanvas:true,addEventListener(){}},navigator:{clipboard:{writeText:async text=>diagnostic=JSON.parse(text)},permissions:{query:async()=>({state:'prompt'})},mediaDevices:{getUserMedia:async()=>{sequence.push('camera');return{getTracks:()=>[],getVideoTracks:()=>[{readyState:'live',addEventListener(){}}]};}}},isSecureContext:true,location:{search:'?start'},requestAnimationFrame:f=>callbacks.push(f),ResizeObserver:class{observe(){}},Worker:class{constructor(){this.posts=[];workers.push(this);}postMessage(data){this.posts.push(data);}terminate(){}},createImageBitmap:async()=>({close(){}})});
 timerGlobal=new SourceTextModule('export const value=globalThis',{context});await timerGlobal.link(()=>{});await timerGlobal.evaluate();timerGlobal=timerGlobal.namespace.value;
 const exportsModule=obj=>{const m=new SyntheticModule(Object.keys(obj),function(){for(const[k,v]of Object.entries(obj))this.setExport(k,v);},{context});return m;};
-if(earlyTap){runInContext(readFileSync(new URL('camera-entry.js',root),'utf8'),context);el('start-camera').click();assert.deepEqual(sequence,['camera']);assert.equal(el('start-camera').disabled,true);}
+if(earlyTap){runInContext(readFileSync(new URL('../fixtures/camera-entry.js',import.meta.url),'utf8'),context);el('start-camera').click();assert.deepEqual(sequence,['camera']);assert.equal(el('start-camera').disabled,true);}
 const app=new SourceTextModule(readFileSync(new URL('app.mjs',root),'utf8'),{context,initializeImportMeta:meta=>meta.url=new URL('app.mjs',root).href});
 await app.link(async specifier=>specifier==='./vision-session.mjs'?new SourceTextModule(readFileSync(new URL(specifier,root),'utf8'),{context}):specifier==='./camera-frame.mjs'?exportsModule({cameraFrameReader:()=>async()=>({close(){}})}):specifier==='./renderer.mjs'?exportsModule({Renderer}):specifier==='./sound.mjs'?exportsModule({SoundDesigner:Sound}):exportsModule(await import(new URL(specifier,root))));await app.evaluate();assert.equal(el('stage').dataset.style,'cinema','a stored gift preference must not override the default');
 // Exercise a direct first click, without entering preview or resuming a previous engine.
@@ -21,7 +21,7 @@ if(fault)el('live-dot').classList.add=()=>{throw Error('Injected session UI fail
 if(!earlyTap)el('start-camera').click();for(let i=0;i<20;i++)await Promise.resolve();
 assert.equal(workers.length,1,'first camera click must request recognition');assert.equal(sequence.filter(v=>v==='camera').length,1);assert.equal(sequence[0],'camera');if(earlyTap)console.log('First tap before app download is consumed once; permission precedes audio.');
 assert.equal(workers[0].posts[0].type,'init');
-await el('loading-diagnostics').click();
+diagnostic=app.namespace.runtimeStatus();
 assert.equal(diagnostic.source,'camera');assert.notEqual(diagnostic.phase,'idle');
 assert.ok(diagnostic.events.some(e=>e.type==='recognition-requested'));
 if(fault){

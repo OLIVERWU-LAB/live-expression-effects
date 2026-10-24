@@ -1,27 +1,25 @@
 import {drawWaterSurface} from './water-renderer.mjs';
 import {GIFT_BANKS} from './gift-banks.mjs';
 import {loadGiftImage} from './gift-loader.mjs';
-import {loadGiftBank} from './gift-loader.mjs';
 import {mixHex} from './emission.mjs';
 import {particleVisibility} from './particle-visibility.mjs';
 import {GIFT_MATERIALS,GIFT_RANDOM_MATERIALS} from './gift-materials.mjs';
-import {activeGiftAssets,giftAssetPath} from './gift-shapes.mjs';
-import {GIFT_ASSETS,giftBeadEnvelope} from './reference-bursts.mjs';
+import {giftBeadEnvelope} from './reference-bursts.mjs';
 import {clamp} from './core.mjs';
 import {GIFT_KINDS,GIFT_COLORS,giftMaterial,giftSplashEnvelope,giftFlashEnvelope,drawGiftConfetti} from './gift-style.mjs';
 const TAU=Math.PI*2;
 export function giftFrameIndex(phase,frames){return Math.round(((phase%TAU)+TAU)%TAU/TAU*frames)%frames;}
 export class GiftRenderer{
- constructor(){this.images=new Map();this.banks=new Map();this.materialImages=new Map();this.material='soft';this.rainTiles=new Map();this.ready=false;this.promise=null;this.error=null;this.tileSize=0;}
+ constructor(){this.images=new Map();this.banks=new Map();this.materialImages=new Map();this.material='random';this.rainTiles=new Map();this.ready=false;this.promise=null;this.error=null;this.tileSize=0;}
  bank(material){
   if(!this.banks.has(material)){
    const images=new Map(),compact=GIFT_BANKS[material];
-   const promise=compact?loadGiftImage(new URL(compact.url,import.meta.url).href).then(image=>{for(const[key,view]of Object.entries(compact.items))images.set(key,{...view,image});this.materialImages.set(material,images);return images;}):loadGiftBank(Object.entries(activeGiftAssets(GIFT_ASSETS)).flatMap(([kind,colors])=>colors.map(color=>({key:kind+color,url:new URL(giftAssetPath(material,kind,color),import.meta.url).href}))),this.tileSize).then(loaded=>{for(const[key,image]of loaded)images.set(key,image);this.materialImages.set(material,images);return images;});
+   const promise=loadGiftImage(new URL(compact.url,import.meta.url).href).then(image=>{for(const[key,view]of Object.entries(compact.items))images.set(key,{...view,image});this.materialImages.set(material,images);return images;});
    this.banks.set(material,promise);while(this.banks.size>2){const oldest=this.banks.keys().next().value;this.banks.delete(oldest);for(const image of this.materialImages.get(oldest)?.values()||[])image.close?.();this.materialImages.delete(oldest);}
   }return this.banks.get(material);
  }
  load(material=this.material){
-  if(material!=='random'&&!GIFT_MATERIALS.includes(material))material='soft';
+  if(material!=='random'&&!GIFT_MATERIALS.includes(material))material='candy';
   if(material===this.material&&this.ready)return Promise.resolve(true);
   if(material===this.material&&this.promise&&!this.error)return this.promise;
   this.material=material;this.ready=false;this.error=null;
