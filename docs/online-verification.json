@@ -1,6 +1,6 @@
 {
   "url": "https://oliverwu-lab.github.io/live-expression-effects/",
-  "filesVerified": 116,
+  "filesVerified": 119,
   "https": true,
   "checks": [
     {
@@ -15,9 +15,9 @@
       "path": "app.mjs",
       "status": 200,
       "type": "text/javascript; charset=utf-8",
-      "localBytes": 27483,
+      "localBytes": 27522,
       "verification": "full SHA256",
-      "sha256": "6a5fd487b5210c2a02ae320428bc895eabb2f260e5a866dc234ccc4ac263ec44"
+      "sha256": "5ffa037000727ecb84e79ec9f9b64e3330edf0750b850e075ca4aa5abc79826f"
     },
     {
       "path": "assets/favicon.svg",
@@ -591,49 +591,49 @@
       "path": "bouquet.mjs",
       "status": 200,
       "type": "text/javascript; charset=utf-8",
-      "localBytes": 4040,
+      "localBytes": 4055,
       "verification": "full SHA256",
-      "sha256": "e4768e0e04e049b4e0364a10a7523069dddeee9db02c004b1417c2247d710843"
+      "sha256": "9265a045c972f5f136a57f07da4fa19c21aeb55a0f3314b4665a56244baf9eee"
     },
     {
       "path": "cinema-original-particles.mjs",
       "status": 200,
       "type": "text/javascript; charset=utf-8",
-      "localBytes": 5010,
+      "localBytes": 5025,
       "verification": "full SHA256",
-      "sha256": "05c05718831816fc2ee1f02345bd1721172a057c381ea8858f71754db8005fa2"
+      "sha256": "f1fe26c707eef9f39052857ec231b79698e2cb1b4bbf7bddeb7bd2d046acfa6c"
     },
     {
       "path": "cinema-original-renderer.mjs",
       "status": 200,
       "type": "text/javascript; charset=utf-8",
-      "localBytes": 7109,
+      "localBytes": 7184,
       "verification": "full SHA256",
-      "sha256": "1b0a4651d029b7ebe747047e43b917a91c3d9eed3a778c9035ec792ebda48a0f"
+      "sha256": "680e0258c719a3c723b07f72632d22470821e90109925c404f1c39df96b54d4b"
     },
     {
       "path": "cinema-refined-particles.mjs",
       "status": 200,
       "type": "text/javascript; charset=utf-8",
-      "localBytes": 1576,
+      "localBytes": 1591,
       "verification": "full SHA256",
-      "sha256": "d5e540cee2a1ca8754d73a88c29ce2d65e022ba89611c4f652385a838e7d285c"
+      "sha256": "c26be86afc9698595cc8dba64f96791026f2e950951576cd28d30ee3ef56d1e2"
     },
     {
       "path": "cinema-refined-renderer.mjs",
       "status": 200,
       "type": "text/javascript; charset=utf-8",
-      "localBytes": 6940,
+      "localBytes": 7015,
       "verification": "full SHA256",
-      "sha256": "f714ddbd4efde9584d08a2af1e01b73141f34458f4dee6a544120fc9ddad922c"
+      "sha256": "f152e4d83fd1346831597761b6636b831043f6a27f44d37913bd20a192b177ed"
     },
     {
       "path": "cinema-renderer.mjs",
       "status": 200,
       "type": "text/javascript; charset=utf-8",
-      "localBytes": 11808,
+      "localBytes": 11898,
       "verification": "full SHA256",
-      "sha256": "106fb114769751042619b925dcbf5a9207d0fc8e802145143a1682170ae6141d"
+      "sha256": "ff961bb5ad4212bfb23cbcf06ccf3c81a3e9dc01d3bfa7fca96219329d247ebf"
     },
     {
       "path": "core.mjs",
@@ -655,25 +655,41 @@
       "path": "effects.mjs",
       "status": 200,
       "type": "text/javascript; charset=utf-8",
-      "localBytes": 33371,
+      "localBytes": 33771,
       "verification": "full SHA256",
-      "sha256": "10d9b1b441fb2c28a3254a6167518638ac68a45e1df79675b0aeb983a909b87c"
+      "sha256": "39c6743e793cde9ba74461a5e766cab24b3f7b1a0031dc5cd39dd2a5b077ebf5"
     },
     {
       "path": "emission.mjs",
       "status": 200,
       "type": "text/javascript; charset=utf-8",
-      "localBytes": 1013,
+      "localBytes": 1043,
       "verification": "full SHA256",
-      "sha256": "cea2e172dc8301bafdf8d8aaef2163fdd53ead6559325fe348ee2600f1c27ba3"
+      "sha256": "dc5cc7dc539e439a8d0259a100e5a0b123351c01a650d33b0900eba1c4336ed2"
+    },
+    {
+      "path": "flat-budget.mjs",
+      "status": 200,
+      "type": "text/javascript; charset=utf-8",
+      "localBytes": 1699,
+      "verification": "full SHA256",
+      "sha256": "0c2ad4ca8e24bd02f3ee035122774af1e74c493f4c2337db5a2d1468ffae5bd9"
     },
     {
       "path": "flat-fireworks.mjs",
       "status": 200,
       "type": "text/javascript; charset=utf-8",
-      "localBytes": 22847,
+      "localBytes": 22923,
       "verification": "full SHA256",
-      "sha256": "685fe8eebf9e1a307aa9f6f00db0e3281f0c1219c609a56d6a72166b36051526"
+      "sha256": "a87843ccd13d00aa744f37c784fb13366f72429abf5368e9d93bc0632ea1ee02"
+    },
+    {
+      "path": "gift-loader.mjs",
+      "status": 200,
+      "type": "text/javascript; charset=utf-8",
+      "localBytes": 1739,
+      "verification": "full SHA256",
+      "sha256": "d2267ea0604d86a4f6c4d426390c9e5d99702bf15b3bd8eb8e57e688ef2e2d5c"
     },
     {
       "path": "gift-materials.mjs",
@@ -687,9 +703,9 @@
       "path": "gift-renderer.mjs",
       "status": 200,
       "type": "text/javascript; charset=utf-8",
-      "localBytes": 9189,
+      "localBytes": 9540,
       "verification": "full SHA256",
-      "sha256": "5e9f332b84b124f214aa8dd1366ca1016d3371f6a226d883bce79dd7d6fa27ee"
+      "sha256": "0c6da9ff0c526cf885262cd01e894f7375079ea9ec50816cea04c57184bbc1d3"
     },
     {
       "path": "gift-shapes.mjs",
@@ -703,9 +719,9 @@
       "path": "gift-style.mjs",
       "status": 200,
       "type": "text/javascript; charset=utf-8",
-      "localBytes": 3232,
+      "localBytes": 3277,
       "verification": "full SHA256",
-      "sha256": "a7df5b10dbd734cd28a3c8eefe662e2ae12a7fb6fab5969e56d1b3b5a9f5dd3d"
+      "sha256": "d45be780182eb6dc57c5ba7a8ff3caee9c9833dd188aa414851e8892dda66ebe"
     },
     {
       "path": "handglow-particles.mjs",
@@ -719,41 +735,41 @@
       "path": "handglow.mjs",
       "status": 200,
       "type": "text/javascript; charset=utf-8",
-      "localBytes": 3707,
+      "localBytes": 3752,
       "verification": "full SHA256",
-      "sha256": "3ee59fe2452fadeb8ffaf93a970093f89f1b6de2ac6302e484c6c7880cbd588e"
+      "sha256": "b9fa2c4654541a95771139432258f195143bc87ad8b4add1c246a68704e18649"
     },
     {
       "path": "hands.mjs",
       "status": 200,
       "type": "text/javascript; charset=utf-8",
-      "localBytes": 3582,
+      "localBytes": 3597,
       "verification": "full SHA256",
-      "sha256": "5dac28be4e82f044cb2a08a7938e585478cba0e95d95e4ac4e0db45ab9cc9793"
+      "sha256": "693b337b2d9fec4e4b151134a5a3243e881062510a98b282de1e593c892e80ba"
     },
     {
       "path": "head-collision.mjs",
       "status": 200,
       "type": "text/javascript; charset=utf-8",
-      "localBytes": 2341,
+      "localBytes": 2371,
       "verification": "full SHA256",
-      "sha256": "4653fc9eaf6c68c914bb563d02cf9e7e053458c4742e2e96114c53abca561cf2"
+      "sha256": "f35a403912460098bf4da3db3db63ee11975b72b9bdcd8b2db7ed620755f5ae2"
     },
     {
       "path": "index.html",
       "status": 200,
       "type": "text/html; charset=utf-8",
-      "localBytes": 6376,
+      "localBytes": 6609,
       "verification": "full SHA256",
-      "sha256": "918a6853112fa18d16ab2c332d22b7bebf27a7d3d18bab900057d7b96b56a462"
+      "sha256": "136322ec15f6c6a5e9774c2e6ad148ee6115b8c140e63bb29b31db2e17b73081"
     },
     {
       "path": "lighting.mjs",
       "status": 200,
       "type": "text/javascript; charset=utf-8",
-      "localBytes": 2935,
+      "localBytes": 2995,
       "verification": "full SHA256",
-      "sha256": "3e3181cb7f3566d9224632fdcc3eaf5cc3272bf384894a89fb5c3ff2d2a6bae1"
+      "sha256": "26936154f92bd2395b270f44679c69be5e286a978be42b899374874302873fb7"
     },
     {
       "path": "live-playback.mjs",
@@ -767,9 +783,9 @@
       "path": "optics.mjs",
       "status": 200,
       "type": "text/javascript; charset=utf-8",
-      "localBytes": 6644,
+      "localBytes": 6736,
       "verification": "full SHA256",
-      "sha256": "591b9d63f0068848bf109208e97e54dc03f261dda2e4e5b84d852f12900a5abd"
+      "sha256": "5ebb64d05fb7ade6fba4af8bfa8c0a8f16b8d7473a4e5c19f26d3fd4dece51c3"
     },
     {
       "path": "particle-quality.mjs",
@@ -783,57 +799,57 @@
       "path": "particle-visibility.mjs",
       "status": 200,
       "type": "text/javascript; charset=utf-8",
-      "localBytes": 201,
+      "localBytes": 216,
       "verification": "full SHA256",
-      "sha256": "9833b863291bc51994ab589766c78bcce2ad5985d6a3e49e81138e566ba13199"
+      "sha256": "2164e6d2250e38855080067fc5cc0bab2b4419caacd7ef1511b67005cf83683c"
     },
     {
       "path": "pyro.mjs",
       "status": 200,
       "type": "text/javascript; charset=utf-8",
-      "localBytes": 7321,
+      "localBytes": 7351,
       "verification": "full SHA256",
-      "sha256": "063815c1405ec312e30911e8487642974bf7b07cc2077d969a32c8f8514b44d6"
+      "sha256": "75aaa1ce379868acef49d772fb3f1e858ff1d7988c9bb2315c828ac7e71a2695"
     },
     {
       "path": "rain-style.mjs",
       "status": 200,
       "type": "text/javascript; charset=utf-8",
-      "localBytes": 4074,
+      "localBytes": 4550,
       "verification": "full SHA256",
-      "sha256": "270f005a43448b641f5ab58d3ed47520942ecc4705d082f66c4aa65b85f5a4ef"
+      "sha256": "27c7f301559f10b792a7d4cb6ce6e30275cf5d6b6a848a4881baa53ba7e3c459"
     },
     {
       "path": "reference-bursts.mjs",
       "status": 200,
       "type": "text/javascript; charset=utf-8",
-      "localBytes": 12078,
+      "localBytes": 12138,
       "verification": "full SHA256",
-      "sha256": "aca72bdd0989d0f69bcb3038e9cd60e12ede0a000697598bb67b5e9ec67b9deb"
+      "sha256": "35d8866189154a541a033fb03d1959337ed78e87a293b4269322128eb7f068f6"
     },
     {
       "path": "renderer.mjs",
       "status": 200,
       "type": "text/javascript; charset=utf-8",
-      "localBytes": 22299,
+      "localBytes": 22479,
       "verification": "full SHA256",
-      "sha256": "8b8dd24a35ef04a181402ba88d2dbcc831cc2677f4455db2f325c6760b94bc41"
+      "sha256": "8da6246e10c8686f25c9cfff7071efe79f69f089bed1350512c02b5ca3e7fab7"
     },
     {
       "path": "sound.mjs",
       "status": 200,
       "type": "text/javascript; charset=utf-8",
-      "localBytes": 9453,
+      "localBytes": 9468,
       "verification": "full SHA256",
-      "sha256": "464d5462afb34b82264558bb2a682caaa184852208632fa96954d6a36a321724"
+      "sha256": "bc36bcc1be9c66c9f9ab3b08a7f3e0e30062235f7e9faa13c83fdda5b4ef68c2"
     },
     {
       "path": "style.css",
       "status": 200,
       "type": "text/css; charset=utf-8",
-      "localBytes": 12311,
+      "localBytes": 12959,
       "verification": "full SHA256",
-      "sha256": "ff6a1ef19ff8bac93e0fbd1e04adedb2f30d039edd072f593b1118f077ee2384"
+      "sha256": "74542d2adc0bb3799a341faf40aef5ffcf6f135144f3618e7d47da5156c11875"
     },
     {
       "path": "vendor/LICENSE-APACHE-2.0.txt",
@@ -924,12 +940,20 @@
       "sha256": "cbd386e5e3193a78f4619c4a053936c3d236bfd7f04c9680da71154e26568996"
     },
     {
+      "path": "vision-session.mjs",
+      "status": 200,
+      "type": "text/javascript; charset=utf-8",
+      "localBytes": 4262,
+      "verification": "full SHA256",
+      "sha256": "b7882818938e1a33422e09c3ae6a239c02ab1b45a25f60383335356c22e9c030"
+    },
+    {
       "path": "vision.worker.js",
       "status": 200,
       "type": "application/javascript; charset=utf-8",
-      "localBytes": 6785,
+      "localBytes": 7168,
       "verification": "full SHA256",
-      "sha256": "50618b96693544da23c2fd42d3758f5b3553662ca643c5c92f8789683e932ebd"
+      "sha256": "0f07a5b6736681d3d9731b88a0980769f67bf6bc8cc19caf570a1c2b90d8217f"
     }
   ],
   "cameraOnDeviceTested": false
