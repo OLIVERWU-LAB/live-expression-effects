@@ -1,6 +1,6 @@
-import{SoundDesigner as SampledSoundDesigner}from'./sound-bank.mjs?v=055eb6cdc316';
-import{RainAudio}from'./rain-audio.mjs?v=055eb6cdc316';
-import{clamp}from'./core.mjs?v=055eb6cdc316';import{particleVisibility}from'./particle-visibility.mjs?v=055eb6cdc316';import{refinedDissolveStart}from'./cinema-refined-particles.mjs?v=055eb6cdc316';
+import{SoundDesigner as SampledSoundDesigner}from'./sound-bank.mjs?v=0581627ae3b8';
+import{RainAudio}from'./rain-audio.mjs?v=0581627ae3b8';
+import{clamp}from'./core.mjs?v=0581627ae3b8';import{particleVisibility}from'./particle-visibility.mjs?v=0581627ae3b8';import{refinedDissolveStart}from'./cinema-refined-particles.mjs?v=0581627ae3b8';
 export const MIX=Object.freeze({master:.38,maxVoices:24,echoDelay:.065});
 // Recorded launch, water, paper, booms and glitter are decoded before playback.
 // Envelopes follow actual events; glitter never loops or repeats cut fragments.

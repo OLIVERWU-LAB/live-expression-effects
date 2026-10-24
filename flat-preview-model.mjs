@@ -1,5 +1,5 @@
-import{StickerWorld}from'./effects.mjs?v=055eb6cdc316';
-import{ACTIVE_FLAT_PATTERNS,drawFlatFireworks,drawFlatLaunch}from'./flat-fireworks.mjs?v=055eb6cdc316';
+import{StickerWorld}from'./effects.mjs?v=0581627ae3b8';
+import{ACTIVE_FLAT_PATTERNS,drawFlatFireworks,drawFlatLaunch}from'./flat-fireworks.mjs?v=0581627ae3b8';
 
 const names={'flat-petals':'花瓣涟漪','flat-medallion':'同心礼花','flat-star-crown':'星冠绽放','flat-festival':'锦簇花火'};
 const numbers={'flat-medallion':'02','flat-star-crown':'03','flat-festival':'04'};

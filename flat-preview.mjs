@@ -1,4 +1,4 @@
-import{FlatPreview,PREVIEW_STYLES,PREVIEW_DURATION,paintFlatPreview}from'./flat-preview-model.mjs?v=055eb6cdc316';
+import{FlatPreview,PREVIEW_STYLES,PREVIEW_DURATION,paintFlatPreview}from'./flat-preview-model.mjs?v=0581627ae3b8';
 const $=id=>document.getElementById(id),grid=$('styles'),dialog=$('detail'),storageKey='flat-style-choices-v83';
 let choices={};try{choices=JSON.parse(localStorage.getItem(storageKey)||'{}')||{};}catch{}
 const cards=PREVIEW_STYLES.map(style=>{

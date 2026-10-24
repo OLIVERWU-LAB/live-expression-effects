@@ -1,4 +1,4 @@
-import{placeFlatBouquet}from'./flat-placement.mjs?v=055eb6cdc316';
+import{placeFlatBouquet}from'./flat-placement.mjs?v=0581627ae3b8';
 // Sample around each circle, separately for every flower and radial band.
 // Never remove a carrier: that would remove an entire future blossom.
 const sample=(a,n)=>n>=a.length?a:n?Array.from({length:n},(_,i)=>a[Math.floor(i*a.length/n)]):[];
