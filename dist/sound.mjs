@@ -1,4 +1,5 @@
 import{SoundDesigner as SampledSoundDesigner}from'./sound-bank.mjs';
+import{RainAudio}from'./rain-audio.mjs';
 import{clamp}from'./core.mjs';import{particleVisibility}from'./particle-visibility.mjs';import{refinedDissolveStart}from'./cinema-refined-particles.mjs';
 export const MIX=Object.freeze({master:.38,maxVoices:24,echoDelay:.065});
 // Preserve the real recordings' timbre. Program the envelopes, dynamics and
@@ -28,7 +29,7 @@ export class SoundDesigner extends SampledSoundDesigner{
  glitter(e){this.shimmer(e,true);}
  confetti(e){if(!this.allow('paper',.10))return;this.play('paper',{gain:.12+this.random()*.035,rate:.97+this.random()*.13,duration:.33+this.random()*.06,fade:.16,pan:(e.x-.5)*1.2,highpass:320,lowpass:7500,priority:2});}
  handle(events){if(!this.ready||!this.enabled)return;for(const e of events){if(e.type==='launch')this.launch(e);else if(e.type==='burst'){if(e.style==='flat')this.small(e);else this.big(e);}else if(e.type==='crackle'){if(e.style==='gift'&&e.collision)this.confetti(e);else if(e.style==='flat'&&e.stage===2)this.big(e);else if(e.stage>=3)this.glitter(e);else this.small(e);}else if(e.type==='glitter')this.glitter(e);else if(e.type==='flight-blocked')for(const[source,v]of this.voiceInfo)if(v.name==='shoot')this.fade(source,.18);}}
- update(dt,world){this.prune();if(!world||!this.ready||!this.enabled)return;const now=this.context.currentTime;if(now-this.lastAnalysis<.05)return;this.lastAnalysis=now;let lit=0,spreadX=0;
+ update(dt,world){this.prune();if(!world||!this.ready||!this.enabled){this.rain?.stop();return;}this.rain??=new RainAudio(this.context,this.master,this.random);this.rain.update(world,true);const now=this.context.currentTime;if(now-this.lastAnalysis<.05)return;this.lastAnalysis=now;let lit=0,spreadX=0;
   if(this.style!=='gift')for(const p of world.particles){if(p.life<=0||p.delay>0||(world.viewport&&(p.x<0||p.x>world.viewport.width||p.y<0||p.y>world.viewport.height)))continue;let weight=0;const age=p.maxLife-p.life;
    if(p.cinemaDust)weight=clamp(age/.1)*clamp(p.life/.55)*(.45+.55*Math.sin(age*29+p.seed)**2);
    else if(p.ringBlob&&p.refinedCinema)weight=clamp(((world.simulationTime||0)-(p.shellStartedAt||0)-refinedDissolveStart(p))/.3)*clamp(p.life/.4)*(.2+.8*Math.sin(age*11+p.seed)**2);
@@ -37,7 +38,7 @@ export class SoundDesigner extends SampledSoundDesigner{
   }
   for(const source of this.shimmers.values()){const v=this.voiceInfo.get(source);if(!v||v.fading)continue;if(lit<.7){if(now-v.lastLit>.18)this.fade(source,.38);continue;}v.lastLit=now;const density=clamp(lit/40),life=clamp((v.when+v.duration-now)/.45),target=v.level*(.35+.65*density)*life;v.currentLevel+=(target-v.currentLevel)*.32;v.gain.setTargetAtTime(v.currentLevel,now,.045);v.filter?.setTargetAtTime(4200+density*4300,now,.10);if(v.panner&&world.viewport)v.panner.setTargetAtTime(clamp((spreadX/lit/world.viewport.width-.5)*1.1,-.7,.7),now,.10);}
  }
- setScene(effect,style){if(effect!==this.effect||style!==this.style){for(const[source,v]of this.voiceInfo)if(v.priority<3)this.fade(source,.30);this.effect=effect;this.style=style;}}
+ setScene(effect,style){if(effect!==this.effect||style!==this.style){this.rain?.stop();for(const[source,v]of this.voiceInfo)if(v.priority<3)this.fade(source,.30);this.effect=effect;this.style=style;}}
  ambientStop(){for(const[source,v]of this.voiceInfo)if(v.priority<3)this.fade(source,.30);}
- stopAll(){for(const source of [...this.voiceInfo.keys()])this.fade(source,.18);this.last.clear();}
+ stopAll(){this.rain?.stop(.18);for(const source of [...this.voiceInfo.keys()])this.fade(source,.18);this.last.clear();}
 }
