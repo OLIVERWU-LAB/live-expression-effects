@@ -1,3 +1,4 @@
+import{refinedDissolveStart}from'./cinema-refined-particles.mjs';
 import{OriginalCinemaRenderer}from'./cinema-original-renderer.mjs';import{ringEnvelope}from'./cinema-original-particles.mjs';import{particleVisibility}from'./particle-visibility.mjs';import{clamp}from'./core.mjs';import{mixHex}from'./emission.mjs';
 const TAU=Math.PI*2;
 const canvas=(w,h)=>typeof OffscreenCanvas!=='undefined'?new OffscreenCanvas(w,h):Object.assign(document.createElement('canvas'),{width:w,height:h});
@@ -10,7 +11,7 @@ function rayTint(color){
  if(rayTints.size>=32)rayTints.delete(rayTints.keys().next().value);rayTints.set(color,tint);return tint;
 }
 export function refinedRayLook(p,color,width){return{color:rayTint(color),width:width*(p.innerRay?1.06:p.filament?1.10:1.14),hotMix:p.innerRay?.35:.46};}
-export function refinedDissolve(p,shellAge){const age=p.maxLife-p.life,start=2.05+.24*phase(p.ringGroup??p.seed,1.2)+.12*phase(p.seed,4.7),duration=.28+.14*phase(p.seed,7.1),u=clamp((shellAge-start)/duration),split=u*u*(3-2*u);return{age,start,split,elapsed:Math.max(0,shellAge-start),alpha:particleVisibility(p)*ringEnvelope(p).alpha};}
+export function refinedDissolve(p,shellAge){const age=p.maxLife-p.life,start=refinedDissolveStart(p),duration=.28+.14*phase(p.seed,7.1),u=clamp((shellAge-start)/duration),split=u*u*(3-2*u);return{age,start,split,elapsed:Math.max(0,shellAge-start),alpha:particleVisibility(p)*ringEnvelope(p).alpha};}
 export function refinedStrobeWhite(p){const age=p.maxLife-p.life,start=.68+.24*phase(p.seed,1.7),u=clamp((age-start)/.82);return u*u*(3-2*u);}
 export function refinedGlintAlpha(p,e,k){const lead=.02+.12*phase(p.seed,3.8)+.05*phase(p.seed+k*2.3,6.1),fade=.32+.30*phase(p.ringGroup??p.seed,2.5),blink=.19+.81*(.5+.5*Math.sin(e.age*(8+(p.seed%5))+p.seed*2.17+k*2.1))**2;return clamp(particleVisibility(p)*clamp((p.life-lead)/fade)*e.split*blink*1.35);}
 // Late burning wake only: keep the head and early geometry fixed. No physics/RNG changes.

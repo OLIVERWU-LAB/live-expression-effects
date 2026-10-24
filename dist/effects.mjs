@@ -291,6 +291,7 @@ export class StickerWorld {
       if(p.delay>0){p.delay=Math.max(0,p.delay-step);continue;}
       if(p.retireRemaining!=null){p.retireRemaining-=step;if(p.retireRemaining<=0){p.life=0;continue;}}
       const old = { x: p.x, y: p.y }; p.life -= step;p.wallAge=(p.wallAge||0)+step/particleRate;
+      if(p.audioDissolveAt!=null&&this.simulationTime-(p.shellStartedAt??0)>=p.audioDissolveAt){p.audioDissolveAt=null;this.event('glitter',{x:clamp(p.x/width),stage:3});}
       if(p.flatEmitAt!=null&&(p.maxLife-p.life>=p.flatEmitAt||(p.flatStopSpeed&&p.maxLife-p.life>.12&&Math.hypot(p.vx,p.vy)<=p.flatStopSpeed))){
         // Children inherit the emitter's actual position, including any collision.
         secondary.push(...flatChildren(p,this.random));this.event('crackle',{x:clamp(p.x/width),pattern:p.pattern,stage:p.flatRole==='seed'||p.flatReprise?2:3});
@@ -339,7 +340,7 @@ export class StickerWorld {
         if(p.trailClock>=.016){p.trailClock%=.016;p.trail.unshift({x:p.x,y:p.y,age:p.maxLife-p.life});}
         const age=p.maxLife-p.life;p.trail=p.trail.filter(q=>age-q.age<=(p.trailAge??.28)).slice(0,p.tailLength);
       }
-      if(p.outerGlints&&p.pattern!=='flat-medallion'&&!p.outerSpent&&p.life<=.32){p.outerSpent=true;if(p.retireRemaining==null)secondary.push(...flatAfterglints(p,this.random));}
+      if(p.outerGlints&&p.pattern!=='flat-medallion'&&!p.outerSpent&&p.life<=.32){p.outerSpent=true;if(p.retireRemaining==null){secondary.push(...flatAfterglints(p,this.random));this.event('glitter',{x:clamp(p.x/width),stage:3});}}
       if (p.type === 'drop' && !p.giftSplash && !p.rainRipple && p.life > 0 && p.y >= this.water.surface(p.x, width, height) - 2) { if(['cinema','glow'].includes(this.style)&&!p.generation)additions.push({...p,hitNormal:{x:0,y:-1}});this.water.impact(p.x, width, ['cinema','glow'].includes(this.style) ? Math.cbrt(p.volume ?? p.size ** 3) * 3.2 : p.size); p.life = 0; }
     }
     for (const p of additions) this.split(p);

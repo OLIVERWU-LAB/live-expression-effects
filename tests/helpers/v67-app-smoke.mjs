@@ -6,9 +6,9 @@ const el=id=>{if(!ids.has(id))return null;if(!elements.has(id))elements.set(id,n
 const styles=['cinema','gift','flat'].map(style=>{const e=new Element();e.dataset.style=style;return e;});let time=0,giftResolve,diagnostic,timerGlobal;
 function checkedSetTimeout(...args){assert.ok(this==null||this===timerGlobal,'Native timer receiver must be global');return setTimeout(...args);}
 function checkedClearTimeout(...args){assert.ok(this==null||this===timerGlobal,'Native timer receiver must be global');return clearTimeout(...args);}
-const fault=process.argv.includes('--ui-fault');
+const fault=process.argv.includes('--ui-fault'),audioPending=process.argv.includes('--audio-pending');let finishAudio;
 class Renderer{constructor(){this.drawMs=2;this.gift={ready:false,error:null,load(){if(this.ready)return Promise.resolve(true);return new Promise(r=>giftResolve=()=>{this.ready=true;r(true);});}};}resize(){}draw(){}}
-class Sound{constructor(){this.enabled=false;this.voices=new Set();}setEnabled(){}setScene(){}stopAll(){}handle(){}update(){}async resume(){}pause(){}}
+class Sound{constructor(){this.enabled=false;this.assetsReady=!audioPending;this.total=6;this.loaded=this.assetsReady?6:0;this.voices=new Set();}setEnabled(){}setScene(){}stopAll(){}handle(){}update(){}async load(){if(this.assetsReady)return true;return new Promise(resolve=>finishAudio=()=>{this.assetsReady=true;this.loaded=6;this.onstate?.();resolve(true);});}async unlock(){return true;}async resume(){}pause(){}}
 const context=createContext({console,URL,URLSearchParams,Blob,Math,Promise,performance:{now:()=>time},setTimeout:checkedSetTimeout,clearTimeout:checkedClearTimeout,matchMedia:()=>({matches:false}),localStorage:{getItem(key){return key==='expression-visual-style'?'gift':null;},setItem(){}},document:{hidden:false,getElementById:el,querySelectorAll:s=>s.includes('data-style')?styles:[],addEventListener(){},createElement:()=>new Element()},window:{Worker:true,createImageBitmap:true,OffscreenCanvas:true,addEventListener(){}},navigator:{clipboard:{writeText:async text=>diagnostic=JSON.parse(text)},permissions:{query:async()=>({state:'prompt'})},mediaDevices:{getUserMedia:async()=>({getTracks:()=>[],getVideoTracks:()=>[{readyState:'live',addEventListener(){}}]})}},isSecureContext:true,location:{search:'?start'},requestAnimationFrame:f=>callbacks.push(f),ResizeObserver:class{observe(){}},Worker:class{constructor(){this.posts=[];workers.push(this);}postMessage(data){this.posts.push(data);}terminate(){}},createImageBitmap:async()=>({close(){}})});
 timerGlobal=new SourceTextModule('export const value=globalThis',{context});await timerGlobal.link(()=>{});await timerGlobal.evaluate();timerGlobal=timerGlobal.namespace.value;
 const exportsModule=obj=>{const m=new SyntheticModule(Object.keys(obj),function(){for(const[k,v]of Object.entries(obj))this.setExport(k,v);},{context});return m;};
@@ -33,6 +33,7 @@ if(fault){
  time=200;callbacks.shift()(time);for(let i=0;i<20;i++)await Promise.resolve();
  const coldFrame=workers[0].posts.find(p=>p.type==='frame');assert.ok(coldFrame,'cold camera boot begins inference');
  workers[0].onmessage({data:{type:'result',frameId:coldFrame.frameId,inferenceMs:35,smile:.4,face:Array.from({length:478},()=>({x:.5,y:.4,z:0}))}});
+ if(audioPending){assert.equal(el('loading').hidden,false);assert.match(el('loading-copy').textContent,/正在加载音效/);finishAudio();await Promise.resolve();console.log('Audio asset readiness gates the experience after face recognition is ready.');}
  assert.equal(el('loading').hidden,true);assert.equal(workers.length,2);el('stop-camera').click();
  console.log('Direct cold camera boot requests recognition and accepts a first face result.');
 }
