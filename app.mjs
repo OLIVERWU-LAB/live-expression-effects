@@ -1,17 +1,17 @@
-import {performanceProfile} from './performance-profile.mjs?v=a9c88dfd0e4a';
-import {cameraFrameReader} from './camera-frame.mjs?v=a9c88dfd0e4a';
-import {fitFlatViewport} from './flat-budget.mjs?v=a9c88dfd0e4a';
-import {VisionSession} from './vision-session.mjs?v=a9c88dfd0e4a';
-import{ParticleQuality}from'./particle-quality.mjs?v=a9c88dfd0e4a';
-import {applyLiveStyle,lockedState,flatLaunchBusy,simulationSlices} from './live-playback.mjs?v=a9c88dfd0e4a';
-import {REFERENCE_NAMES} from './reference-bursts.mjs?v=a9c88dfd0e4a';
-import { ExpressionController, clamp, headPolygon, previewHead } from './core.mjs?v=a9c88dfd0e4a';
-import { StickerWorld, SilhouetteCollider } from './effects.mjs?v=a9c88dfd0e4a';
-import {HandCollider,withHands} from './hands.mjs?v=a9c88dfd0e4a';
-import { Renderer } from './renderer.mjs?v=a9c88dfd0e4a';
-import { SHELLS, planBurst } from './pyro.mjs?v=a9c88dfd0e4a';
-import {BOUQUET_NAME} from './bouquet.mjs?v=a9c88dfd0e4a';
-import { SoundDesigner } from './sound.mjs?v=a9c88dfd0e4a';
+import {performanceProfile} from './performance-profile.mjs?v=2b0ba957a1a8';
+import {cameraFrameReader} from './camera-frame.mjs?v=2b0ba957a1a8';
+import {fitFlatViewport} from './flat-budget.mjs?v=2b0ba957a1a8';
+import {VisionSession} from './vision-session.mjs?v=2b0ba957a1a8';
+import{ParticleQuality}from'./particle-quality.mjs?v=2b0ba957a1a8';
+import {applyLiveStyle,lockedState,flatLaunchBusy,simulationSlices} from './live-playback.mjs?v=2b0ba957a1a8';
+import {REFERENCE_NAMES} from './reference-bursts.mjs?v=2b0ba957a1a8';
+import { ExpressionController, clamp, headPolygon, previewHead } from './core.mjs?v=2b0ba957a1a8';
+import { StickerWorld, SilhouetteCollider } from './effects.mjs?v=2b0ba957a1a8';
+import {HandCollider,withHands} from './hands.mjs?v=2b0ba957a1a8';
+import { Renderer } from './renderer.mjs?v=2b0ba957a1a8';
+import { SHELLS, planBurst } from './pyro.mjs?v=2b0ba957a1a8';
+import {BOUQUET_NAME} from './bouquet.mjs?v=2b0ba957a1a8';
+import { SoundDesigner } from './sound.mjs?v=2b0ba957a1a8';
 const $ = id => document.getElementById(id), stage = $('stage'), video = $('camera');
 const renderer = new Renderer($('scene')), world = new StickerWorld(), expression = new ExpressionController();
 renderer.gift.tileSize=matchMedia('(max-width: 600px)').matches?96:0;
@@ -35,11 +35,11 @@ let lastMetric = null, segmentationReady = false, handsReady = false, handLandma
 applyLiveStyle(world,'cinema');
 world.giftMaterialStyle='random';
 renderer.gift.material=world.giftMaterialStyle;
-stage.dataset.build='v76';
+stage.dataset.build='v77';
 const readFaceFrame=cameraFrameReader(480),readGeometryFrame=cameraFrameReader(320);
 let lastGeometryCapture=0,lastGeometryVideoTime=-1;
 const vision=new VisionSession({
- createWorker:()=>new Worker(new URL('./vision.worker.js?v=a9c88dfd0e4a',import.meta.url)),
+ createWorker:()=>new Worker(new URL('./vision.worker.js?v=2b0ba957a1a8',import.meta.url)),
  createBitmap:()=>readFaceFrame(video),
  initOptions:{role:'face'},
  active:()=>wanted&&mode==='camera'&&!suspended,
@@ -48,7 +48,7 @@ const vision=new VisionSession({
  onEvent:handleVisionEvent
 });
 const geometry=new VisionSession({
- createWorker:()=>new Worker(new URL('./vision.worker.js?v=a9c88dfd0e4a',import.meta.url)),
+ createWorker:()=>new Worker(new URL('./vision.worker.js?v=2b0ba957a1a8',import.meta.url)),
  createBitmap:()=>readGeometryFrame(video),initOptions:{role:'geometry'},
  onState:()=>syncLoading(),
  active:()=>wanted&&mode==='camera'&&!suspended&&engineReady,
@@ -73,7 +73,7 @@ $('loading-retry').addEventListener('click',()=>{
  else renderer.gift.load(world.giftMaterialStyle).then(syncLoading);syncLoading();
 });
 $('loading-diagnostics').addEventListener('click',async()=>{
- const detail=JSON.stringify({version:76,browser:navigator.userAgent,source:mode,startup:cameraStartup,startupError:cameraStartupError,wanted,suspended,workerCreated:!!vision.worker,phase:vision.phase,error:vision.lastError,ready:vision.ready,resultReceived:vision.hasResult,pending:vision.pending,attempts:vision.attempt,audio:{ready:sound.assetsReady,loaded:sound.loaded,error:sound.error,enabled:sound.enabled},video:{width:video.videoWidth,height:video.videoHeight,time:video.currentTime,readyState:video.readyState,paused:video.paused},events:log.slice(-18)},null,2);
+ const detail=JSON.stringify({version:77,browser:navigator.userAgent,source:mode,startup:cameraStartup,startupError:cameraStartupError,wanted,suspended,workerCreated:!!vision.worker,phase:vision.phase,error:vision.lastError,ready:vision.ready,resultReceived:vision.hasResult,pending:vision.pending,attempts:vision.attempt,audio:{ready:sound.assetsReady,loaded:sound.loaded,error:sound.error,enabled:sound.enabled},video:{width:video.videoWidth,height:video.videoHeight,time:video.currentTime,readyState:video.readyState,paused:video.paused},events:log.slice(-18)},null,2);
  try{await navigator.clipboard.writeText(detail);$('loading-diagnostics').textContent='已复制诊断';}catch{window.prompt('复制以下诊断信息',detail);}
 });
 function syncStyle() {
@@ -275,7 +275,7 @@ function frame(now) {
     const plan=planBurst(width,height,world.head,burstSide++),layout=world.style==='flat'?fitFlatViewport(plan,width,height,world.head):plan;
     if(layout&&world.launch(layout.x,layout.y,width,height,layout.scale,layout)){
       stage.dataset.launchCount=String(++fireworkLaunches);
-      launchGap=world.style==='cinema'?1500+Math.random()*160:world.style==='flat'?1250:lockedEffect?450:world.style==='gift'?1750+Math.random()*200:1100+Math.random()*250;
+      launchGap=world.style==='cinema'?1500+Math.random()*160:world.style==='flat'?950+Math.random()*160:lockedEffect?450:world.style==='gift'?1750+Math.random()*200:1100+Math.random()*250;
       nextLaunchAt=now+(reduced?2800:launchGap);record('firework-launch',{zone:layout.zone,radius:Math.round(layout.radius)});
     }else nextLaunchAt=now+160;
   }
@@ -312,7 +312,7 @@ let dragStart = null;
 stage.addEventListener('pointerdown', e => { if (mode !== 'preview' || e.target.closest('button,input,aside,.hud')) return; pointerDown = true; dragStart = e.pointerId; stage.setPointerCapture(e.pointerId); move(e); });
 function move(e) { if (!pointerDown || mode !== 'preview') return; previewX = clamp(e.clientX / width, .18, .82); previewY = clamp(e.clientY / height, .2, .58); }
 stage.addEventListener('pointermove', move); stage.addEventListener('pointerup', () => pointerDown = false); stage.addEventListener('pointercancel', () => pointerDown = false);
-$('export-session').addEventListener('click', () => { const data = { version: 76, exportedAt: new Date().toISOString(), metrics: mode === 'idle' ? lastMetric : metrics(), note: 'Aggregate performance and interaction events only; no images or face geometry.', events: log }; const url = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })); const a = document.createElement('a'); a.href = url; a.download = 'expression-session.json'; a.click(); setTimeout(() => URL.revokeObjectURL(url), 1000); });
+$('export-session').addEventListener('click', () => { const data = { version: 77, exportedAt: new Date().toISOString(), metrics: mode === 'idle' ? lastMetric : metrics(), note: 'Aggregate performance and interaction events only; no images or face geometry.', events: log }; const url = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })); const a = document.createElement('a'); a.href = url; a.download = 'expression-session.json'; a.click(); setTimeout(() => URL.revokeObjectURL(url), 1000); });
 document.addEventListener('visibilitychange', () => document.hidden ? pause() : resume());
 window.addEventListener('pagehide', e => { pause(); if (!e.persisted) { releaseTracks(); vision.dispose();geometry.dispose(); } });
 window.addEventListener('pageshow', e => { if (e.persisted) resume(); });

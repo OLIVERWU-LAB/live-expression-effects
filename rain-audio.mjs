@@ -1,9 +1,9 @@
-import{clamp}from'./core.mjs?v=a9c88dfd0e4a';
-import{proceduralTexture}from'./sound-textures.mjs?v=a9c88dfd0e4a';
+import{clamp}from'./core.mjs?v=2b0ba957a1a8';
+import{proceduralTexture}from'./sound-textures.mjs?v=2b0ba957a1a8';
 // A shared, small noise buffer; filters run on the audio thread. No downloaded
 // rain asset, main-thread audio callback, playback timer or per-drop voice.
 export class RainAudio{
- constructor(context,output,random=Math.random){this.context=context;this.output=output;this.random=random;this.voices=new Set();this.beds=[];this.seen=new WeakSet();this.lastAnalysis=-Infinity;this.lastHit=-Infinity;this.lastPersonHit=-Infinity;this.lastWaterHit=-Infinity;}
+ constructor(context,output,random=Math.random,waterAsset=null,waterNormalization=1){this.waterAsset=waterAsset;this.waterNormalization=waterNormalization;this.context=context;this.output=output;this.random=random;this.voices=new Set();this.beds=[];this.seen=new WeakSet();this.lastAnalysis=-Infinity;this.lastHit=-Infinity;this.lastPersonHit=-Infinity;this.lastWaterHit=-Infinity;}
  prepare(){
   if(this.buffer)return;const c=this.context,rate=Math.min(c.sampleRate||44100,48000),length=Math.round(rate*1.6),buffer=c.createBuffer(1,length,rate),data=buffer.getChannelData(0);
   for(let i=0;i<length;i++)data[i]=this.random()*2-1;
@@ -14,10 +14,10 @@ export class RainAudio{
  }
  voice({gain=0,pan=0,high=600,low=4500,loop=false,duration=.13,kind='noise'}={}){
   const c=this.context,source=c.createBufferSource(),g=c.createGain(),hp=c.createBiquadFilter(),lp=c.createBiquadFilter(),p=c.createStereoPanner?.();
-  if(kind==='water')this.waterBuffer??=proceduralTexture(c,'water',this.random);source.buffer=kind==='water'?this.waterBuffer:this.buffer;source.loop=loop;source.loopStart=this.loopStart;source.loopEnd=source.buffer.duration;hp.type='highpass';hp.frequency.value=high;hp.Q.value=.5;lp.type='lowpass';lp.frequency.value=low;lp.Q.value=.5;g.gain.setValueAtTime(0,c.currentTime);
+  if(kind==='water')this.waterBuffer??=this.waterAsset?.buffer||proceduralTexture(c,'water',this.random);source.buffer=kind==='water'?this.waterBuffer:this.buffer;if(kind==='water'){gain*=this.waterNormalization;source.playbackRate.value=.97+this.random()*.06;}source.loop=loop;source.loopStart=this.loopStart;source.loopEnd=source.buffer.duration;hp.type='highpass';hp.frequency.value=high;hp.Q.value=.5;lp.type='lowpass';lp.frequency.value=low;lp.Q.value=.5;g.gain.setValueAtTime(0,c.currentTime);
   source.connect(hp);hp.connect(lp);lp.connect(g);if(p){p.pan.value=pan;g.connect(p);p.connect(this.output);}else g.connect(this.output);
   const v={source,gain:g.gain,nodes:[source,hp,lp,g,...(p?[p]:[])],loop,kind,level:0,when:c.currentTime,peak:gain,duration};this.voices.add(v);source.onended=()=>this.release(v);
-  source.start(c.currentTime,kind==='water'?0:this.loopStart+this.random()*(this.buffer.duration-this.loopStart-duration));
+  source.start(c.currentTime,kind==='water'?(this.waterAsset?.offset||0):this.loopStart+this.random()*(this.buffer.duration-this.loopStart-duration));
   if(!loop){g.gain.linearRampToValueAtTime(gain,c.currentTime+.006);g.gain.setValueAtTime(gain,c.currentTime+duration*.45);g.gain.linearRampToValueAtTime(0,c.currentTime+duration);v.end=c.currentTime+duration+.02;source.stop(v.end);}
   return v;
  }
@@ -36,6 +36,6 @@ export class RainAudio{
   this.beds.forEach((v,i)=>{v.level=(i?.035:.15)*density*swell;v.gain.setTargetAtTime(v.level,now,.14);});
   // Aggregate beads; reserve the audible contact for the person, not the pool.
   const person=hit?.hitRegion&&hit.hitRegion!=='water';
-  if(hit&&now-(person?this.lastPersonHit:this.lastWaterHit)>(person?.17:.26)&&this.voices.size<6){this.lastHit=now;if(person)this.lastPersonHit=now;else this.lastWaterHit=now;this.voice({kind:'water',gain:person?.20+Math.min(hit.size,8)*.009:.075+Math.min(hit.size,8)*.004,pan:clamp((hit.x/width-.5)*1.4,-.7,.7),high:550,low:6500,duration:.10+this.random()*.035});}
+  if(hit&&now-(person?this.lastPersonHit:this.lastWaterHit)>(person?.17:.26)&&this.voices.size<6){this.lastHit=now;if(person)this.lastPersonHit=now;else this.lastWaterHit=now;this.voice({kind:'water',gain:person?.22+Math.min(hit.size,8)*.008:.075+Math.min(hit.size,8)*.004,pan:clamp((hit.x/width-.5)*1.4,-.7,.7),high:180,low:9000,duration:this.waterAsset?.buffer ? .24+this.random()*.025 : .10+this.random()*.035});}
  }
 }

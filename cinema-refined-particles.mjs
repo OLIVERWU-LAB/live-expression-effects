@@ -1,4 +1,4 @@
-import{originalCinemaShell,originalCinemaChildren,CINEMA_PAIRS,RING_HUES}from'./cinema-original-particles.mjs?v=a9c88dfd0e4a';
+import{originalCinemaShell,originalCinemaChildren,CINEMA_PAIRS,RING_HUES}from'./cinema-original-particles.mjs?v=2b0ba957a1a8';
 export const REFINED_CINEMA_PATTERN='cinema-refined';
 // Restore the original colour family and its independent, whole-shell reprise colour.
 // Reuse the original factory's choices so colour changes never alter motion randomness.

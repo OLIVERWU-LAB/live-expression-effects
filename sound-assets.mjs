@@ -1,5 +1,6 @@
 // Five user clips plus one CC0 paper rustle. Content-addressed URLs prevent stale cached revisions.
 export const AUDIO_FILES={
+
   "shoot": "assets/audio/shoot-364ca1ba5960.mp3",
   "explode": "assets/audio/explode-895ac3e0cede.mp3",
   "fireworks2": "assets/audio/fireworks2-c49ff933cd99.mp3",
@@ -8,7 +9,12 @@ export const AUDIO_FILES={
   "paper": "assets/audio/paper-fbf05bd9ba67.mp3"
 };
 export const AUDIO_URLS=Object.fromEntries(Object.entries(AUDIO_FILES).map(([key,path])=>[key,new URL("./"+path,import.meta.url).href]));
-// Live playback uses only the main explosion and Sparks. Other clips remain
+// Live playback uses Explode, Sparks and three edited CC0 recordings. Other clips remain
 // archived source references; they are neither shipped nor fetched.
-export const LIVE_AUDIO_FILES=Object.fromEntries(Object.entries(AUDIO_FILES).filter(([key])=>['explode','sparks'].includes(key)));
+export const RECORDING_FILES={
+  "launch": "assets/audio/launch-a8ce255f9028.m4a",
+  "water": "assets/audio/water-3da727f0f04e.m4a",
+  "paperLight": "assets/audio/paperLight-e1feffbe0b24.m4a"
+};
+export const LIVE_AUDIO_FILES={explode:AUDIO_FILES.explode,sparks:AUDIO_FILES.sparks,...RECORDING_FILES};
 export const LIVE_AUDIO_URLS=Object.fromEntries(Object.entries(LIVE_AUDIO_FILES).map(([key,path])=>[key,new URL('./'+path,import.meta.url).href]));
