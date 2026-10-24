@@ -1,4 +1,5 @@
-import {fireworkLights} from './lighting.mjs';
+export const personRimGain=style=>style==='flat'?0:style==='cinema'?1.6:style==='gift'?1.7:1;
+import {fireworkLights} from './lighting.mjs?v=c01b0346bbdd';
 // Independent WebGL composition: base camera, transparent VFX and a low-resolution
 // person matte. No camera readback; no images leave this browser.
 const vertex = `attribute vec2 aPosition;varying vec2 vUV;void main(){vUV=vec2(aPosition.x*.5+.5,.5-aPosition.y*.5);gl_Position=vec4(aPosition,0.,1.);}`;
@@ -76,7 +77,7 @@ export class Optics {
   [base,fx,mask].forEach((source,i)=>{gl.activeTexture(gl.TEXTURE0+i);gl.bindTexture(gl.TEXTURE_2D,this.textures[i]);gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL,i===1);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,source);});
   this.lights.fill(0);this.colors.fill(0);
   lights.slice(0,5).forEach((light,i)=>{this.lights.set([light.x/width,light.y/height,0,light.energy],i*4);this.colors.set(light.color||colors[light.variant],i*3);});
-  gl.uniform2f(this.uniforms.uResolution,width,height);gl.uniform1f(this.uniforms.uNight,night);gl.uniform1f(this.uniforms.uTime,time);gl.uniform1f(this.uniforms.uDigital,['cinema','glow'].includes(world.style)?1:0);gl.uniform1f(this.uniforms.uWater,world.water.level);gl.uniform1f(this.uniforms.uRimGain,['gift','flat'].includes(world.style)?1.7:1);
+  gl.uniform2f(this.uniforms.uResolution,width,height);gl.uniform1f(this.uniforms.uNight,night);gl.uniform1f(this.uniforms.uTime,time);gl.uniform1f(this.uniforms.uDigital,['cinema','glow'].includes(world.style)?1:0);gl.uniform1f(this.uniforms.uWater,world.water.level);gl.uniform1f(this.uniforms.uRimGain,personRimGain(world.style));
   gl.uniform4fv(this.uniforms['uLights[0]'],this.lights);gl.uniform3fv(this.uniforms['uColors[0]'],this.colors);
   gl.drawArrays(gl.TRIANGLE_STRIP,0,4);return true;
  }

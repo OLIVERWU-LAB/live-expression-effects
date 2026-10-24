@@ -1,15 +1,15 @@
-import {particleVisibility} from './particle-visibility.mjs';
-import {drawLineRain,drawFlatRain} from './rain-style.mjs';
-import {drawFlatFireworks,drawFlatLaunch} from './flat-fireworks.mjs';
-import {CinemaRenderer} from './cinema-renderer.mjs';
-import {GiftRenderer} from './gift-renderer.mjs';
-import {stickerBurstEnvelope} from './dandelion.mjs';
-import { clamp, SMILE_ZONES } from './core.mjs';
-import { fireworkEnvelope } from './effects.mjs';
-import { Optics } from './optics.mjs';
-import {fireworkLights} from './lighting.mjs';
-import {EMBER_COLORS,emberPhase,mixHex} from './emission.mjs';
-import { PAPER_COLORS, FIRE_COLORS, FIRE_LIGHTS } from './pyro.mjs';
+import {particleVisibility} from './particle-visibility.mjs?v=c01b0346bbdd';
+import {drawLineRain,drawFlatRain} from './rain-style.mjs?v=c01b0346bbdd';
+import {drawFlatFireworks,drawFlatLaunch} from './flat-fireworks.mjs?v=c01b0346bbdd';
+import {CinemaRenderer} from './cinema-renderer.mjs?v=c01b0346bbdd';
+import {GiftRenderer} from './gift-renderer.mjs?v=c01b0346bbdd';
+import {stickerBurstEnvelope} from './dandelion.mjs?v=c01b0346bbdd';
+import { clamp, SMILE_ZONES } from './core.mjs?v=c01b0346bbdd';
+import { fireworkEnvelope } from './effects.mjs?v=c01b0346bbdd';
+import { Optics } from './optics.mjs?v=c01b0346bbdd';
+import {fireworkLights} from './lighting.mjs?v=c01b0346bbdd';
+import {EMBER_COLORS,emberPhase,mixHex} from './emission.mjs?v=c01b0346bbdd';
+import { PAPER_COLORS, FIRE_COLORS, FIRE_LIGHTS } from './pyro.mjs?v=c01b0346bbdd';
 export const lightColors=FIRE_LIGHTS;
 const lightCSS=FIRE_COLORS,palette=PAPER_COLORS;
 function makeCanvas(w, h) { const c = typeof OffscreenCanvas !== 'undefined' ? new OffscreenCanvas(w, h) : document.createElement('canvas'); c.width = w; c.height = h; return c; }

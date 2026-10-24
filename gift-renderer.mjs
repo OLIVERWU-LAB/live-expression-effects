@@ -1,18 +1,19 @@
-import {mixHex} from './emission.mjs';
-import {particleVisibility} from './particle-visibility.mjs';
-import {GIFT_MATERIALS,GIFT_RANDOM_MATERIALS} from './gift-materials.mjs';
-import {activeGiftAssets,giftAssetPath} from './gift-shapes.mjs';
-import {GIFT_ASSETS,giftBeadEnvelope} from './reference-bursts.mjs';
-import {clamp} from './core.mjs';
-import {GIFT_KINDS,GIFT_COLORS,giftMaterial,giftSplashEnvelope,giftFlashEnvelope,drawGiftConfetti} from './gift-style.mjs';
+import {loadGiftBank} from './gift-loader.mjs?v=c01b0346bbdd';
+import {mixHex} from './emission.mjs?v=c01b0346bbdd';
+import {particleVisibility} from './particle-visibility.mjs?v=c01b0346bbdd';
+import {GIFT_MATERIALS,GIFT_RANDOM_MATERIALS} from './gift-materials.mjs?v=c01b0346bbdd';
+import {activeGiftAssets,giftAssetPath} from './gift-shapes.mjs?v=c01b0346bbdd';
+import {GIFT_ASSETS,giftBeadEnvelope} from './reference-bursts.mjs?v=c01b0346bbdd';
+import {clamp} from './core.mjs?v=c01b0346bbdd';
+import {GIFT_KINDS,GIFT_COLORS,giftMaterial,giftSplashEnvelope,giftFlashEnvelope,drawGiftConfetti} from './gift-style.mjs?v=c01b0346bbdd';
 const TAU=Math.PI*2;
 export function giftFrameIndex(phase,frames){return Math.round(((phase%TAU)+TAU)%TAU/TAU*frames)%frames;}
 export class GiftRenderer{
- constructor(){this.images=new Map();this.banks=new Map();this.materialImages=new Map();this.material='soft';this.rainTiles=new Map();this.ready=false;this.promise=null;this.error=null;}
+ constructor(){this.images=new Map();this.banks=new Map();this.materialImages=new Map();this.material='soft';this.rainTiles=new Map();this.ready=false;this.promise=null;this.error=null;this.tileSize=0;}
  bank(material){
   if(!this.banks.has(material)){
-   const images=new Map(),promise=Promise.all(Object.entries(activeGiftAssets(GIFT_ASSETS)).flatMap(([kind,colors])=>colors.map(color=>new Promise((resolve,reject)=>{const im=new Image();im.onload=()=>{images.set(kind+color,im);resolve();};im.onerror=()=>reject(new Error('Gift material unavailable: '+material+' '+kind+color));im.src=new URL(giftAssetPath(material,kind,color),import.meta.url).href;})))).then(()=>{if(this.banks.has(material))this.materialImages.set(material,images);return images;});
-   this.banks.set(material,promise);while(this.banks.size>2){const oldest=this.banks.keys().next().value;this.banks.delete(oldest);this.materialImages.delete(oldest);}
+   const images=new Map(),entries=Object.entries(activeGiftAssets(GIFT_ASSETS)).flatMap(([kind,colors])=>colors.map(color=>({key:kind+color,url:new URL(giftAssetPath(material,kind,color),import.meta.url).href}))),promise=loadGiftBank(entries,this.tileSize).then(loaded=>{for(const [key,image]of loaded)images.set(key,image);if(this.banks.has(material))this.materialImages.set(material,images);else for(const image of images.values())image.close?.();return images;});
+   this.banks.set(material,promise);while(this.banks.size>2){const oldest=this.banks.keys().next().value;this.banks.delete(oldest);for(const image of this.materialImages.get(oldest)?.values()||[])image.close?.();this.materialImages.delete(oldest);}
   }return this.banks.get(material);
  }
  load(material=this.material){
@@ -21,11 +22,11 @@ export class GiftRenderer{
   if(material===this.material&&this.promise&&!this.error)return this.promise;
   this.material=material;this.ready=false;this.error=null;
   const profiles=material==='random'?GIFT_RANDOM_MATERIALS:[material];
-  this.promise=Promise.all(profiles.map(profile=>this.bank(profile))).then(images=>{if(this.material===material){this.images=images[0];this.ready=true;}return true;}).catch(e=>{for(const profile of profiles){this.banks.delete(profile);this.materialImages.delete(profile);}if(this.material===material){this.error=e;console.warn(e.message);}return false;});return this.promise;
+  this.promise=Promise.all(profiles.map(profile=>this.bank(profile))).then(images=>{if(this.material===material){this.images=images[0];this.ready=true;}return true;}).catch(e=>{for(const profile of profiles){this.banks.delete(profile);for(const image of this.materialImages.get(profile)?.values()||[])image.close?.();this.materialImages.delete(profile);}if(this.material===material){this.error=e;console.warn(e.message);}return false;});return this.promise;
  }
  sprite(g,kind,color,x,y,w,h,phase=0,alpha=1,finish=null){
   const bank=this.material==='random'&&finish?this.materialImages.get(finish):this.images,im=bank?.get(kind+color);if(!im)return;
-  const tile=im.naturalHeight,frames=Math.round(im.naturalWidth/tile);
+  const tile=im.naturalHeight||im.height,frames=Math.round((im.naturalWidth||im.width)/tile);
   // Each sprite is exactly one opaque pose. Crossfading rotated silhouettes
   // creates a second edge/side-on shaft inside rings, tubes and ribbons.
   const index=giftFrameIndex(phase,frames);
@@ -48,7 +49,7 @@ export class GiftRenderer{
   g.save();g.globalCompositeOperation='screen';g.globalAlpha=alpha*(p.secondary?.74:.32);g.lineWidth=p.secondary?1.25:.85;g.lineCap='round';g.lineJoin='round';g.strokeStyle=gradient;g.beginPath();g.moveTo(p.x,p.y);for(const q of points)g.lineTo(q.x,q.y);g.stroke();g.restore();
  }
  draw(g,world){
-  if(!this.ready){this.load();return;}
+  if(!this.ready){if(!this.promise)this.load();return;}
   for(const p of world.particles){if(p.delay>0)continue;if(p.giftConfetti){drawGiftConfetti(g,p);continue;}const drop=p.type==='drop',age=p.maxLife-p.life,fade=drop?Math.min(1,p.life/.22):clamp(p.life/.6),m=giftMaterial(p),splash=p.giftSplash?giftSplashEnvelope(p):p.secondary&&p.referenceGift?giftBeadEnvelope(p):null;
    if(!drop)this.trail(g,p,fade*particleVisibility(p));const size=p.size*(p.contactSpray?(.65+.35*clamp(p.life/p.maxLife)):(splash?splash.scale:1)),alpha=particleVisibility(p)*(splash?splash.alpha:fade*(!drop&&!p.secondary?clamp(age/.10):1));
    g.save();g.translate(p.x,p.y);g.rotate(drop?p.angle:p.angle*.42);

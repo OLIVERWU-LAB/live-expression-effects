@@ -1,6 +1,6 @@
-import {particleVisibility} from './particle-visibility.mjs';
-import {clamp} from './core.mjs';
-import {handShell,handRing} from './handglow-particles.mjs';
+import {particleVisibility} from './particle-visibility.mjs?v=c01b0346bbdd';
+import {clamp} from './core.mjs?v=c01b0346bbdd';
+import {handShell,handRing} from './handglow-particles.mjs?v=c01b0346bbdd';
 const TAU=Math.PI*2;
 export const FLAT_LAUNCH_BLUE='#59C9F2';
 export const FLAT_PATTERN='flat-petals';
@@ -20,7 +20,7 @@ export const FLAT_COLORWAYS=Object.freeze([
 export const flatTempo=pattern=>pattern==='flat-petals-slow'?1.65:.95;
 function make(parent,role,vx,vy,size,life,tint,random,extra={}){
  const tempo=parent.tempo||1,scale=parent.scale||1;
- return{type:'spark',flatFx:true,flatRole:role,pattern:parent.pattern,x:parent.x,y:parent.y,vx,vy,size,life:life*tempo,maxLife:life*tempo,tempo,scale,variant:parent.variant||0,tint,seed:random()*100,angle:Math.atan2(vy,vx),spin:0,gravity:130*Math.sqrt(scale)/(tempo*tempo),drag:.85/tempo,delay:0,trail:[],tailLength:0,trailClock:0,touched:0,collisionDelay:.55,luminosity:.48,birthX:parent.x,birthY:parent.y,emitterId:parent.seed,noRecollision:role==='ring',backgroundOnly:role==='ring',...extra};
+ return{type:'spark',flatFx:true,flatRole:role,pattern:parent.pattern,x:parent.x,y:parent.y,vx,vy,size,life:life*tempo,maxLife:life*tempo,tempo,scale,variant:parent.variant||0,tint,seed:random()*100,angle:Math.atan2(vy,vx),spin:0,gravity:130*Math.sqrt(scale)/(tempo*tempo),drag:.85/tempo,delay:0,trail:[],tailLength:0,trailClock:0,touched:0,collisionDelay:.55,luminosity:.48,birthX:parent.x,birthY:parent.y,emitterId:parent.seed,flatDensity:parent.flatDensity,noRecollision:role==='ring',backgroundOnly:role==='ring',...extra};
 }
 // Old flower choreography retained, but only five live carriers are created here.
 // Their actual, integrated positions now own every later explosion centre.

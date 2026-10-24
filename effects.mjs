@@ -1,16 +1,17 @@
-import{thinCinema,interleaveCinema}from'./particle-quality.mjs';
-import {REFINED_CINEMA_PATTERN,refinedCinemaShell,refinedCinemaChildren} from './cinema-refined-particles.mjs';
-import {ORIGINAL_CINEMA_PATTERN,originalCinemaShell,originalCinemaChildren} from './cinema-original-particles.mjs';
-import {contactRain,lineRainEntry,lineRainCoverage} from './rain-style.mjs';
-import {handShell,handRing} from './handglow-particles.mjs';
-import {FLAT_PATTERN,FLAT_PATTERNS,ACTIVE_FLAT_PATTERNS,FLAT_PALETTE,flatShell,flatChildren,flatOpening,flatAfterglints} from './flat-fireworks.mjs';
-import {withHeadCollider,resolveBurstPoint} from './head-collision.mjs';
-import {GIFT_PATTERNS,CINEMA_PATTERNS,GIFT_PALETTE,GIFT_BEAD_COLORS,giftShell,giftBeadChildren,cinemaShell,cinemaRingChildren,referencePattern} from './reference-bursts.mjs';
-import {GIFT_COLORS,giftMaterial,giftSplash,giftLaunchOrigin,giftConfetti} from './gift-style.mjs';
-import { clamp, collide, coverPoint } from './core.mjs';
-import {chooseColors,roundColor} from './dandelion.mjs';
-import {bouquetShell,poppingFlower,innerCrownParticles} from './bouquet.mjs';
-import { SHELLS, PATTERNS, ACTIVE_PATTERNS, STAGED_PATTERNS, STICKER_PATTERN_BAG, rocketPoint, shellParticles, crossetteChildren, burstIsSafe, boundsDistance } from './pyro.mjs';
+import {thinFlat,prioritizeFlat} from './flat-budget.mjs?v=c01b0346bbdd';
+import{thinCinema,interleaveCinema}from'./particle-quality.mjs?v=c01b0346bbdd';
+import {REFINED_CINEMA_PATTERN,refinedCinemaShell,refinedCinemaChildren} from './cinema-refined-particles.mjs?v=c01b0346bbdd';
+import {ORIGINAL_CINEMA_PATTERN,originalCinemaShell,originalCinemaChildren} from './cinema-original-particles.mjs?v=c01b0346bbdd';
+import {contactRain,lineRainEntry,rainRate} from './rain-style.mjs?v=c01b0346bbdd';
+import {handShell,handRing} from './handglow-particles.mjs?v=c01b0346bbdd';
+import {FLAT_PATTERN,FLAT_PATTERNS,ACTIVE_FLAT_PATTERNS,FLAT_PALETTE,flatShell,flatChildren,flatOpening,flatAfterglints} from './flat-fireworks.mjs?v=c01b0346bbdd';
+import {withHeadCollider,resolveBurstPoint} from './head-collision.mjs?v=c01b0346bbdd';
+import {GIFT_PATTERNS,CINEMA_PATTERNS,GIFT_PALETTE,GIFT_BEAD_COLORS,giftShell,giftBeadChildren,cinemaShell,cinemaRingChildren,referencePattern} from './reference-bursts.mjs?v=c01b0346bbdd';
+import {GIFT_COLORS,giftMaterial,giftSplash,giftLaunchOrigin,giftConfetti} from './gift-style.mjs?v=c01b0346bbdd';
+import { clamp, collide, coverPoint } from './core.mjs?v=c01b0346bbdd';
+import {chooseColors,roundColor} from './dandelion.mjs?v=c01b0346bbdd';
+import {bouquetShell,poppingFlower,innerCrownParticles} from './bouquet.mjs?v=c01b0346bbdd';
+import { SHELLS, PATTERNS, ACTIVE_PATTERNS, STAGED_PATTERNS, STICKER_PATTERN_BAG, rocketPoint, shellParticles, crossetteChildren, burstIsSafe, boundsDistance } from './pyro.mjs?v=c01b0346bbdd';
 
 export class WaterSurface {
   constructor() { this.level = 0; this.y = new Float32Array(64); this.v = new Float32Array(64); }
@@ -150,15 +151,16 @@ export class StickerWorld {
     if(needed<=retiring)return;
     // Reclaim slots only after a visible fade. Live emitters keep their children.
     const score=p=>(p.snowAnchor?4:p.cinemaDust?0:p.secondary?1:3)+p.life/Math.max(.01,p.maxLife);
-    const candidates=alive.filter(p=>p.flatEmitAt==null&&p.ringSplitAt==null&&p.handSplitAt==null&&!p.ringAnchor&&p.retireRemaining==null&&!(p.delay>0)&&p.maxLife-p.life>.12).sort((a,b)=>score(a)-score(b));
+    const candidates=alive.filter(p=>(!p.flatFx||p.flatRole==='dust'||p.flatFine)&&p.flatEmitAt==null&&p.ringSplitAt==null&&p.handSplitAt==null&&!p.ringAnchor&&p.retireRemaining==null&&!(p.delay>0)&&p.maxLife-p.life>.12).sort((a,b)=>score(a)-score(b));
     const layers=this.style==='cinema'?['innerRay','cinemaDust']:[],remaining=Object.fromEntries(layers.map(key=>[key,alive.filter(p=>p[key]&&p.retireRemaining==null).length])),floor=Math.max(4,Math.ceil(this.limit*.05));
     let marked=0;for(const p of candidates){if(marked>=needed-retiring)break;const layer=layers.find(key=>p[key]);if(layer&&remaining[layer]<=floor)continue;p.retireRemaining=.24;marked++;if(layer)remaining[layer]--; }
   }
   fitBatch(particles,share=.80){
     // Remove expired slots, never opaque particles, before admitting a new cohort.
     this.particles=this.particles.filter(p=>{if(p.life>0)return true;this.keepTrail(p);return false;});
+    if(this.style==='flat')particles=thinFlat(particles);
     const budget=Math.min(particles.length,Math.max(1,Math.floor(this.limit*share))),major=particles.filter(p=>!p.cinemaDust),dust=particles.filter(p=>p.cinemaDust),sample=(arr,n)=>Array.from({length:n},(_,i)=>arr[Math.floor(i*arr.length/n)]);
-    let picked=(this.style==='cinema'?thinCinema(particles,budget):null)||(major.length>budget?sample(major,budget):[...major,...sample(dust,Math.min(dust.length,budget-major.length))]);
+    let picked=(this.style==='flat'?prioritizeFlat(particles,budget):this.style==='cinema'?thinCinema(particles,budget):null)||(major.length>budget?sample(major,budget):[...major,...sample(dust,Math.min(dust.length,budget-major.length))]);
     const room=Math.max(0,this.limit-this.particles.length);if(this.style==='cinema'&&room<picked.length)picked=interleaveCinema(picked);const immediate=picked.slice(0,room),waiting=picked.slice(room);
     // Bound deferred births too. Excess new detail is thinned before it becomes visible.
     this.pendingParticles.push(...waiting.slice(0,Math.max(0,this.limit-this.pendingParticles.length)));
@@ -172,7 +174,7 @@ export class StickerWorld {
   rain(dt, width, height, strength) {
     if (this.effect !== 'smile') return;
     const digital = ['cinema','glow'].includes(this.style);
-    this.rainCredit = Math.min(10, this.rainCredit + dt * (this.style==='gift'?1.4:digital?lineRainCoverage(width,height):1) * clamp(width / (digital ? 28 : this.style==='gift'?24:34), 10, digital ? 100 : this.style==='gift'?75:45) * (.75 + strength * .6));
+    this.rainCredit = Math.min(10, this.rainCredit + dt * rainRate(this.style,width,height,strength));
     while (this.rainCredit >= 1) {
       this.rainCredit--;
       const depth = .35 + this.random() * .65;
@@ -225,7 +227,7 @@ export class StickerWorld {
       bloom.tint=pair[0];for(const p of shell.particles){p.roundColors=pair;p.tint=pair[0];p.fireworkStage=1;}
     }
     if(this.style==='glow')this.blooms.at(-1).tint=shell.tint;
-    if(flat)shell.particles.push(...flatOpening(x,y,scale,shell.variant,this.random,pattern));
+    if(flat){shell.particles.push(...flatOpening(x,y,scale,shell.variant,this.random,pattern));const density=this.limit>=700?1:Math.max(.12,(this.limit-20)/700);for(const p of shell.particles)p.flatDensity=density;}
     if(this.style==='gift'){this.blooms.at(-1).tint=GIFT_COLORS[0];this.blooms.at(-1).giftFinish=shell.finish;}
     for(const p of (this.style==='gift'||referenceCinema||flat?this.fitBatch(shell.particles):shell.particles))this.add(p);
     if(pattern==='chrysanthemum-inner'){
@@ -342,7 +344,7 @@ export class StickerWorld {
     }
     for (const p of additions) this.split(p);
     for(const p of (secondary.some(p=>p.referenceGift||p.cinematic||p.flatFx)?this.fitBatch(secondary,.70):secondary))this.add(p);
-    let n = 0; for (const p of this.particles) { if (p.life > 0 && p.y < height + 100 && p.x > -150 && p.x < width + 150) this.particles[n++] = p; else if(p.life<=0)this.keepTrail(p,p.pattern==='willow'?.9:.55); }
+    let n = 0; for (const p of this.particles) { if (p.life > 0 && (p.flatFx || (p.y < height + 100 && p.x > -150 && p.x < width + 150))) this.particles[n++] = p; else if(p.life<=0)this.keepTrail(p,p.pattern==='willow'?.9:.55); }
     this.particles.length = n;this.admitPending();
     for (const b of this.blooms){b.age+=particleDT;if(this.style==='gift')b.tint=GIFT_COLORS[0];}
     this.blooms = this.blooms.filter(b => b.age < b.life);

@@ -1,5 +1,5 @@
-import {clamp} from './core.mjs';
-import {mixHex} from './emission.mjs';
+import {clamp} from './core.mjs?v=c01b0346bbdd';
+import {mixHex} from './emission.mjs?v=c01b0346bbdd';
 // Flux through the top and upstream edge keeps a slanted rain field filled.
 export function lineRainEntry(width,height,depth,roll){
  const vx=145+depth*90,vy=440+depth*280,leftShare=vx*height/(vy*Math.max(1,width)+vx*height);
@@ -16,7 +16,7 @@ export function contactRain(parent,random=Math.random,style='gift'){
  return result;
 }
 export function drawLineRain(g,p,style='cinema'){
- const age=p.maxLife-p.life,fade=clamp(p.life/(p.contactSpray?.20:.15));g.save();g.globalCompositeOperation='source-over';g.lineCap='round';g.strokeStyle='#E8F7FF';g.globalAlpha=fade*(p.rainRipple?.32:.55+(p.depth||.5)*.35);g.lineWidth=p.contactSpray?.85:(.55+(p.depth||.5)*.85)*(style==='cinema'&&!p.rainRipple?1.22:1);
+ const age=p.maxLife-p.life,fade=clamp(p.life/(p.contactSpray?.20:.15));g.save();g.globalCompositeOperation='source-over';g.lineCap='round';g.strokeStyle='#E8F7FF';g.globalAlpha=fade*(p.rainRipple?.32:.55+(p.depth||.5)*.35);g.lineWidth=p.contactSpray?.85:(.55+(p.depth||.5)*.85)*(style==='cinema'&&!p.rainRipple?1.7:1);
  g.beginPath();
  if(p.rainRipple){g.ellipse(p.x,p.y,p.size*(.18+age*2),p.size*(.04+age*.22),0,0,Math.PI*2);g.stroke();}
  else if(p.contactSpray){
@@ -36,4 +36,11 @@ export function drawFlatRain(g,p){
   g.strokeStyle='#FFFFFFB8';g.lineWidth=Math.max(.65,r*.09);g.lineCap='round';g.beginPath();if(round)g.arc(-r*.07,-r*.04,r*.43,Math.PI*1.02,Math.PI*1.55);else{g.moveTo(-r*.15*width,-r*.22);g.quadraticCurveTo(-r*.38*width,r*.06,-r*.30*width,r*.28);}g.stroke();
  }
  g.restore();
+}
+
+// Portrait needs a floor independent of its narrow width; retain desktop rates.
+export function rainRate(style,width,height,strength){
+ const digital=['cinema','glow'].includes(style),gift=style==='gift',portrait=height>width&&width<650;
+ const base=clamp(width/(digital?28:gift?24:34),10,digital?100:gift?75:45);
+ return Math.max(base,portrait?(digital?52:gift?38:48):0)*(gift?1.4:digital?lineRainCoverage(width,height):1)*(.75+strength*.6);
 }
