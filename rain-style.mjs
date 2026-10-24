@@ -1,12 +1,12 @@
-import {clamp} from './core.mjs?v=2b0ba957a1a8';
-import {mixHex} from './emission.mjs?v=2b0ba957a1a8';
+import {clamp} from './core.mjs?v=064c3c3a6f0f';
+import {mixHex} from './emission.mjs?v=064c3c3a6f0f';
 // Flux through the top and upstream edge keeps a slanted rain field filled.
 export function lineRainEntry(width,height,depth,roll){
  const vx=145+depth*90,vy=440+depth*280,leftShare=vx*height/(vy*Math.max(1,width)+vx*height);
  return roll<leftShare?{x:-24,y:-45+roll/leftShare*(height+45),vx,vy}:{x:(roll-leftShare)/(1-leftShare)*width,y:-45,vx,vy};
 }
 export const lineRainCoverage=(width,height)=>1+(145+.675*90)*height/((440+.675*280)*Math.max(1,width));
-export const FLAT_RAIN_COLORS=Object.freeze(['#439DCA','#58AED6','#378BB9','#69B9DE','#4A9FD0']);
+export const FLAT_RAIN_COLORS=Object.freeze(['#42C9DE','#50D0E1','#38BED8','#69D9E6','#49C7DD']);
 export const portraitRainScale=(style,width,height)=>width<650&&height>width?(style==='flat'?.60:style==='gift'?.75:1):1;
 // Two visible contact droplets, born outside the resolved surface; never recurse.
 export function contactRain(parent,random=Math.random,style='gift'){
@@ -33,7 +33,7 @@ export function drawFlatRain(g,p){
  g.beginPath();if(round)g.ellipse(0,0,r*(.76+squash),r*(.76-squash*.65),0,0,Math.PI*2);else{g.moveTo(0,-r);g.bezierCurveTo(-r*.25*width,-r*.2,-r*.65*width,r*.2,-r*.48*width,r*.6);g.bezierCurveTo(-r*.28*width,r*1.08,r*.60*width,r*.86,r*.48*width,r*.28);g.bezierCurveTo(r*.37*width,-r*.16,r*.12*width,-r*.65,0,-r);}g.closePath();
  if(p.rainVariant==='hollow'){g.strokeStyle=mixHex(base,'#FFFFFF',.32);g.lineWidth=Math.max(.85,r*.065);g.stroke();}
  else{
-  const body=g.createLinearGradient(-r*.4,-r*.4,r*.55,r*.8);body.addColorStop(0,mixHex(base,'#FFFFFF',.22));body.addColorStop(.48,base);body.addColorStop(1,mixHex(base,'#64A9DC',.22));g.fillStyle=body;g.fill();g.strokeStyle='#F6FCFFCF';g.lineWidth=Math.max(.6,r*.045);g.stroke();
+  const body=g.createLinearGradient(-r*.4,-r*.4,r*.55,r*.8);body.addColorStop(0,mixHex(base,'#FFFFFF',.22));body.addColorStop(.48,base);body.addColorStop(1,mixHex(base,'#28AECA',.22));g.fillStyle=body;g.fill();g.strokeStyle='#F6FCFFCF';g.lineWidth=Math.max(.6,r*.045);g.stroke();
   g.strokeStyle='#FFFFFFB8';g.lineWidth=Math.max(.65,r*.09);g.lineCap='round';g.beginPath();if(round)g.arc(-r*.07,-r*.04,r*.43,Math.PI*1.02,Math.PI*1.55);else{g.moveTo(-r*.15*width,-r*.22);g.quadraticCurveTo(-r*.38*width,r*.06,-r*.30*width,r*.28);}g.stroke();
  }
  g.restore();
