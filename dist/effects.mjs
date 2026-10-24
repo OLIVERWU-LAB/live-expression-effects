@@ -1,4 +1,4 @@
-import {thinFlat,prioritizeFlat} from './flat-budget.mjs';
+import {thinFlat,prioritizeFlat,fitPortraitFlowers} from './flat-budget.mjs';
 import{thinCinema,interleaveCinema}from'./particle-quality.mjs';
 import {REFINED_CINEMA_PATTERN,refinedCinemaShell,refinedCinemaChildren} from './cinema-refined-particles.mjs';
 import {ORIGINAL_CINEMA_PATTERN,originalCinemaShell,originalCinemaChildren} from './cinema-original-particles.mjs';
@@ -33,7 +33,12 @@ export class WaterSurface {
       for (let i = 0; i < 64; i++) this.y[i] = clamp(this.y[i] + this.v[i] * step, -13, 13);
     }
   }
-  surface(x, width, height) { return height - this.level + this.y[Math.round(clamp(x / width) * 63)]; }
+  surface(x,width,height){
+    const q=clamp(x/Math.max(1,width))*63,i=Math.floor(q),t=q-i;
+    const sample=j=>{j=clamp(j,0,63);return(this.y[Math.max(0,j-1)]+2*this.y[j]+this.y[Math.min(63,j+1)])*.25;};
+    const a=sample(i-1),b=sample(i),c=sample(i+1),d=sample(i+2);
+    return height-this.level+.4*(b+.5*t*(c-a+t*(2*a-5*b+4*c-d+t*(3*(b-c)+d-a))));
+  }
 }
 
 // Downsampled person mask mapped through the exact mirrored video cover transform.
@@ -142,7 +147,7 @@ export class StickerWorld {
   setEffect(next) {
     this.pendingEffect=null;this.finishRemaining=0;
     if (next === this.effect) return;
-    this.effect = next; this.particles.length = 0;this.pendingParticles.length=0; this.blooms.length = 0; this.rockets.length = 0;this.launchers.length=0;this.innerBursts.length=0; this.afterglows.length = 0; this.events.length = 0; this.rainCredit = next==='smile'?1:0;
+    this.effect = next; this.particles.length = 0;this.pendingParticles.length=0; this.blooms.length = 0; this.rockets.length = 0;this.launchers.length=0;this.innerBursts.length=0; this.afterglows.length = 0; this.events.length = 0; this.rainCredit = next==='smile'?1:0;this.rainPriming=next==='smile'?24:0;
     if (next === 'laugh') { this.water.clear(); this.lens.clear(); }
   }
   add(p) { if(this.style==='gift'&&p.type!=='drop'){p.giftMaterial=giftMaterial(p);p.tint ||= p.giftMaterial.kind==='twinkle'?GIFT_BEAD_COLORS[p.giftMaterial.color]:GIFT_PALETTE[p.giftMaterial.color];}if (this.particles.length < this.limit) this.particles.push(p); }
@@ -161,7 +166,8 @@ export class StickerWorld {
     if(this.style==='flat')particles=thinFlat(particles);
     const budget=Math.min(particles.length,Math.max(1,Math.floor(this.limit*share))),major=particles.filter(p=>!p.cinemaDust),dust=particles.filter(p=>p.cinemaDust),sample=(arr,n)=>Array.from({length:n},(_,i)=>arr[Math.floor(i*arr.length/n)]);
     let picked=(this.style==='flat'?prioritizeFlat(particles,budget):this.style==='cinema'?thinCinema(particles,budget):null)||(major.length>budget?sample(major,budget):[...major,...sample(dust,Math.min(dust.length,budget-major.length))]);
-    const room=Math.max(0,this.limit-this.particles.length);if(this.style==='cinema'&&room<picked.length)picked=interleaveCinema(picked);const immediate=picked.slice(0,room),waiting=picked.slice(room);
+    const room=Math.max(0,this.limit-this.particles.length);if(this.style==='cinema'&&room<picked.length)picked=interleaveCinema(picked);const flatEmitters=this.style==='flat'?picked.filter(p=>p.flatEmitAt!=null):[];
+    const immediate=this.style==='flat'&&room<picked.length?(flatEmitters.length>room?flatEmitters.slice(0,room):prioritizeFlat(picked,room)):picked.slice(0,room),waiting=this.style==='flat'?flatEmitters.filter(p=>!immediate.includes(p)):picked.slice(room);
     // Bound deferred births too. Excess new detail is thinned before it becomes visible.
     this.pendingParticles.push(...waiting.slice(0,Math.max(0,this.limit-this.pendingParticles.length)));
     this.makeRoom(this.pendingParticles.length+immediate.length);return immediate;
@@ -175,16 +181,25 @@ export class StickerWorld {
     if (this.effect !== 'smile') return;
     const digital = ['cinema','glow'].includes(this.style);
     this.rainCredit = Math.min(10, this.rainCredit + dt * rainRate(this.style,width,height,strength));
+    const priming=Math.min(this.rainPriming||0,Math.max(0,this.limit-this.particles.length));this.rainPriming=0;this.rainCredit+=priming;let prefill=priming;
     while (this.rainCredit >= 1) {
       this.rainCredit--;
       const depth = .35 + this.random() * .65;
       const size = digital ? (7.2 + Math.pow(this.random(), 1.25) * 6.8) * (.78+depth*.22) : this.style==='gift'?(18+this.random()*13)*2/3*.78:this.style==='flat'?5+this.random()**1.5*17:18+this.random()*13;
       const life = height / 210 + 4;
       const spawnRandom=this.random(),rainX=this.style==='gift'?(((this.rainSequence=(this.rainSequence||0)+1)*.61803398875+spawnRandom*.12)%1)*width:spawnRandom*width,entry=digital?lineRainEntry(width,height,depth,spawnRandom):null;
-      this.add({ type: 'drop', x: entry?.x??rainX, y: entry?.y??-45, vx: digital?entry.vx:this.style==='flat'?52+depth*45:-10+this.random()*20, vy: digital ? entry.vy : 360 + this.random() * 180, gravity:digital?620:this.style==='gift'?500:this.style==='flat'?470:65, size, life, maxLife: life, variant: Math.floor(this.random() * 5), angle: this.style==='flat'?-.23:0, spin: 0, touched: 0, generation: 0, depth, rainTone:Math.floor(this.random()*5),rainVariant:this.random()<.10?'hollow':this.random()<.16?'soft':'solid',dropShape:Math.floor(this.random()*3),rainLength:digital?26+depth*44:0, volume: size ** 3 });
+      this.add({ type: 'drop', x: entry?.x??rainX, y: prefill-->0?this.random()*height*.88:(entry?.y??-45), vx: digital?entry.vx:this.style==='flat'?52+depth*45:-10+this.random()*20, vy: digital ? entry.vy : 360 + this.random() * 180, gravity:digital?620:this.style==='gift'?500:this.style==='flat'?470:65, size, life, maxLife: life, variant: Math.floor(this.random() * 5), angle: this.style==='flat'?-.23:0, spin: 0, touched: 0, generation: 0, depth, rainTone:Math.floor(this.random()*5),rainVariant:this.random()<.10?'hollow':this.random()<.16?'soft':'solid',dropShape:Math.floor(this.random()*3),rainLength:digital?26+depth*44:0, volume: size ** 3 });
     }
   }
-  split(parent) { const parts=['gift','cinema','glow'].includes(this.style)?contactRain(parent,this.random,this.style):fragmentDrops(parent,this.random),flatScale=this.style==='flat'?Math.min(.78,8.5/Math.max(...parts.map(p=>p.size))):1;for(const child of parts){if(this.style==='flat'){child.size*=flatScale;child.volume=child.size**3;child.flatRound=true;child.rainVariant='solid';child.noRecollision=true;child.gravity=620;child.life=child.maxLife=.52+this.random()*.12;}this.add(child);} }
+  split(parent) {
+    const water=parent.hitRegion==='water';
+    // Water contacts are brief accents, not a permanent band of beads at the bottom.
+    if(water&&this.particles.filter(p=>p.life>0&&p.generation>0&&p.hitRegion==='water').length>=16)return;
+    const parts=(['gift','cinema','glow'].includes(this.style)?contactRain(parent,this.random,this.style):fragmentDrops(parent,this.random)).filter(p=>!water||!p.rainRipple);
+    const flatScale=this.style==='flat'?Math.min(.78,(water?6.5:8.5)/Math.max(...parts.map(p=>p.size))):1;
+    for(const child of parts){if(this.style==='flat'){child.size*=flatScale;child.volume=child.size**3;child.flatRound=true;child.rainVariant='solid';child.noRecollision=true;child.gravity=620;child.life=child.maxLife=(water?.30:.52)+this.random()*.12;}this.add(child);}
+  }
+
   setPattern(pattern) { if(this.style==='cinema'&&[ORIGINAL_CINEMA_PATTERN,REFINED_CINEMA_PATTERN].includes(pattern)){this.pattern=pattern;return;} if(this.style==='flat'&&pattern==='flat-reprise')pattern='flat-petals';if(this.style==='gift'&&pattern!=='auto')pattern='gift-twinkle';if(pattern==='cinema-inner')pattern='cinema-shell';if(this.style==='cinema'&&pattern==='cinema-shell')pattern='cinema-rings'; if(this.style==='flat'&&FLAT_PATTERNS.includes(pattern)){this.pattern=pattern;return;}if((this.style==='gift'&&GIFT_PATTERNS.includes(pattern))||(['cinema','glow'].includes(this.style)&&CINEMA_PATTERNS.includes(pattern))){this.pattern=pattern;return;}if(!['cinema','glow'].includes(this.style)&&pattern==='orbit')return;if (pattern === 'auto' || (this.style!=='flat'&&SHELLS[pattern]) || (pattern==='bouquet'&&!['cinema','glow'].includes(this.style))) this.pattern = pattern; }
   nextPattern() {
     if(this.style==='flat'&&this.pattern==='flat-reprise')return 'flat-petals';
@@ -216,6 +231,7 @@ export class StickerWorld {
     if(!['cinema','glow'].includes(this.style)&&pattern==='orbit')pattern='crossette';
     this.lastPattern=pattern;
     const flat=this.style==='flat'&&FLAT_PATTERNS.includes(pattern),digital=['cinema','glow'].includes(this.style),referenceCinema=digital&&referencePattern(this.style,pattern),shell=flat?flatShell(x,y,scale,this.random,pattern):this.style==='gift'?giftShell(pattern,x,y,scale,this.random,this.giftMaterialStyle):referenceCinema?(pattern===REFINED_CINEMA_PATTERN?refinedCinemaShell(x,y,scale,this.random,this.simulationTime):pattern===ORIGINAL_CINEMA_PATTERN?originalCinemaShell(x,y,scale,this.random):(this.style==='glow'?handShell:cinemaShell)(pattern,x,y,scale,this.random)):pattern==='bouquet'?bouquetShell(x,y,scale,this.random):shellParticles(pattern,x,y,scale,digital,this.random);
+    if(flat)fitPortraitFlowers(shell,this.viewport,this.head);
     this.blooms.push({x,y,age:0,flatFx:flat,life:digital?1.8:.9,size:Math.min(digital?46:62,Math.max(digital?24:38,(digital?38:52)*scale)),rotation:this.random()*1.2,variant:shell.variant,pattern,power:digital?.5:.55,seed:this.random()*100,referenceCinema,tint:referenceCinema?'#FFD54A':undefined});
     if([ORIGINAL_CINEMA_PATTERN,REFINED_CINEMA_PATTERN].includes(pattern))this.blooms.at(-1).classicCinema=true;
     if(pattern===REFINED_CINEMA_PATTERN)this.blooms.at(-1).refinedCinema=true;
@@ -227,7 +243,7 @@ export class StickerWorld {
       bloom.tint=pair[0];for(const p of shell.particles){p.roundColors=pair;p.tint=pair[0];p.fireworkStage=1;}
     }
     if(this.style==='glow')this.blooms.at(-1).tint=shell.tint;
-    if(flat){shell.particles.push(...flatOpening(x,y,scale,shell.variant,this.random,pattern));const density=this.limit>=700?1:Math.max(.12,(this.limit-20)/700);for(const p of shell.particles)p.flatDensity=density;}
+    if(flat){shell.particles.push(...flatOpening(x,y,this.viewport?.width<650?Math.max(scale,.28):scale,shell.variant,this.random,pattern));const density=this.limit>=700?1:Math.max(.12,(this.limit-20)/700);for(const p of shell.particles)p.flatDensity=density;}
     if(this.style==='gift'){this.blooms.at(-1).tint=GIFT_COLORS[0];this.blooms.at(-1).giftFinish=shell.finish;}
     for(const p of (this.style==='gift'||referenceCinema||flat?this.fitBatch(shell.particles):shell.particles))this.add(p);
     if(pattern==='chrysanthemum-inner'){
@@ -337,11 +353,11 @@ export class StickerWorld {
       }
       if(p.flatFx&&p.trail&&p.tailLength){
         p.trailClock=(p.trailClock||0)+step;
-        if(p.trailClock>=.016){p.trailClock%=.016;p.trail.unshift({x:p.x,y:p.y,age:p.maxLife-p.life});}
+        if(p.trailClock>=(this.trailStep||.016)){p.trailClock%=(this.trailStep||.016);p.trail.unshift({x:p.x,y:p.y,age:p.maxLife-p.life});}
         const age=p.maxLife-p.life;p.trail=p.trail.filter(q=>age-q.age<=(p.trailAge??.28)).slice(0,p.tailLength);
       }
       if(p.outerGlints&&p.pattern!=='flat-medallion'&&!p.outerSpent&&p.life<=.32){p.outerSpent=true;if(p.retireRemaining==null){secondary.push(...flatAfterglints(p,this.random));this.event('glitter',{x:clamp(p.x/width),stage:3});}}
-      if (p.type === 'drop' && !p.giftSplash && !p.rainRipple && p.life > 0 && p.y >= this.water.surface(p.x, width, height) - 2) { if(['cinema','glow'].includes(this.style)&&!p.generation)additions.push({...p,hitNormal:{x:0,y:-1}});this.water.impact(p.x, width, ['cinema','glow'].includes(this.style) ? Math.cbrt(p.volume ?? p.size ** 3) * 3.2 : p.size); p.life = 0; }
+      if (p.type === 'drop' && !p.giftSplash && !p.rainRipple && p.life > 0 && p.y >= this.water.surface(p.x, width, height) - 2) { if(!p.generation&&['cinema','glow','flat','gift'].includes(this.style))additions.push({...p,y:this.water.surface(p.x,width,height)-3,hitNormal:{x:0,y:-1},hitRegion:'water'});this.water.impact(p.x, width, ['cinema','glow'].includes(this.style) ? Math.cbrt(p.volume ?? p.size ** 3) * 3.2 : p.size); p.life = 0; }
     }
     for (const p of additions) this.split(p);
     for(const p of (secondary.some(p=>p.referenceGift||p.cinematic||p.flatFx)?this.fitBatch(secondary,.70):secondary))this.add(p);

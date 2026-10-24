@@ -4,7 +4,7 @@ let seed=536;const random=()=>{seed=(Math.imul(seed,1664525)+1013904223)>>>0;ret
 test('opening regions clear the entire head while large falling clouds can still reach the person',()=>{
  for(const [w,h]of[[390,844],[526,984],[1280,720],[320,640]])for(let i=0;i<100;i++){
   const r=Math.min(w*.13,h*.14),x=w*(.28+random()*.44),y=h*(.3+random()*.15),head={left:x-r*1.1,right:x+r*1.1,top:y-r*1.4,bottom:y+r*1.4};const p=planBurst(w,h,head,i,random);
-  assert.ok(p,'normal portrait needs an available sky region');assert.ok(burstIsSafe(p,head,23));assert.ok(p.x>=24&&p.x<=w-24);assert.ok(p.y>=(w<650?104:78)-1);assert.ok(p.radius>=w*.2||p.radius>=h*.3);const distance=Math.hypot(Math.max(head.left-p.x,0,p.x-head.right),Math.max(head.top-p.y,0,p.y-head.bottom));assert.ok(distance<p.radius*.92,'the falling cloud must still reach the person');
+  assert.ok(p,'normal portrait needs an available sky region');assert.ok(burstIsSafe(p,head,23));assert.ok(p.x>=24&&p.x<=w-24);assert.ok(p.y>=(w<650&&h>w?28:w<650?104:78)-1);assert.ok(p.radius>=w*.2||p.radius>=h*.3);const distance=Math.hypot(Math.max(head.left-p.x,0,p.x-head.right),Math.max(head.top-p.y,0,p.y-head.bottom));assert.ok(distance<p.radius*.92,'the falling cloud must still reach the person');
  }
 });
 test('a head occupying all sky causes cancellation instead of a forehead burst',()=>{assert.equal(planBurst(320,640,{left:0,right:320,top:0,bottom:640},0,random),null);});

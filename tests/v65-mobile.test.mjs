@@ -32,7 +32,7 @@ test('every flat flower keeps all five carriers and inner layers on portrait at 
 test('flat emitters outside the narrow viewport are retained until they emit instead of dropping a whole flower',()=>{
  const w=new StickerWorld(rng(31));w.setStyle('flat');w.setEffect('laugh');w.burst(-170,160,.74,'flat-petals');for(let i=0;i<300;i++)w.update(.02,390,844,null);assert.equal(w.events.filter(e=>e.stage===2).length,5);
 });
-test('person reflection is disabled for flat and enhanced for realistic fireworks',()=>{assert.equal(personRimGain('flat'),0);assert.equal(personRimGain('cinema'),1.6);assert.equal(personRimGain('gift'),1.7);});
+test('person reflection is disabled for flat and enhanced for realistic fireworks',()=>{assert.equal(personRimGain('flat'),0);assert.equal(personRimGain('cinema'),1.6);assert.equal(personRimGain('gift'),0);});
 test('gift loading caps concurrent decodes, releases partial images on failure and allows a clean retry',async()=>{
  const entries=Array.from({length:25},(_,i)=>({key:String(i),url:String(i)}));let active=0,peak=0,closed=0;
  const load=async url=>{active++;peak=Math.max(peak,active);await flush();active--;if(url==='5')throw Error('network');return{close(){closed++;}};};await assert.rejects(loadGiftBank(entries,96,load));assert.ok(peak<=4);assert.ok(closed>=5);assert.equal(active,0);assert.equal((await loadGiftBank(entries,96,async()=>({}))).size,25);

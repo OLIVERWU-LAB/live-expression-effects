@@ -1,3 +1,4 @@
+import {GIFT_BANKS} from '../dist/gift-banks.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
@@ -9,7 +10,7 @@ import {GiftRenderer} from '../dist/gift-renderer.mjs';
 test('soft candy loads every selected shape and uses the current saturated soft lighting palette',async()=>{
  const original=globalThis.Image;
  globalThis.Image=class{set src(url){const b=readFileSync(new URL(url));this.naturalWidth=b.readUInt32BE(16);this.naturalHeight=b.readUInt32BE(20);queueMicrotask(()=>this.onload());}};
- try{const r=new GiftRenderer();assert.equal(await r.load('soft-candy'),true);assert.equal(r.material,'soft-candy');assert.equal(r.images.size,Object.values(GIFT_ASSETS).flat().length);for(let i=0;i<6;i++)assert.match(giftMaterialTint({variant:i},'soft-candy'),/^#[0-9a-f]{6}$/i);assert.deepEqual(GIFT_MATERIALS,['light','soft','candy','soft-candy']);}finally{globalThis.Image=original;}
+ try{const r=new GiftRenderer();assert.equal(await r.load('soft-candy'),true);assert.equal(r.material,'soft-candy');assert.equal(r.images.size,Object.keys(GIFT_BANKS['soft-candy'].items).length);for(let i=0;i<6;i++)assert.match(giftMaterialTint({variant:i},'soft-candy'),/^#[0-9a-f]{6}$/i);assert.deepEqual(GIFT_MATERIALS,['light','soft','candy','soft-candy']);}finally{globalThis.Image=original;}
 });
 test('soft candy atlases retain single-pose frames within a bounded new texture bank',()=>{
  const base=new URL('../dist/assets/gift-v37/soft-candy/',import.meta.url),m=JSON.parse(readFileSync(new URL('manifest.json',base)));let decoded=0,bytes=0;

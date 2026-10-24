@@ -24,9 +24,9 @@ export function boundsDistance(x,y,b){return Math.hypot(Math.max(b.left-x,0,x-b.
 // Reserve an opening region around the whole head, not just a few pixels at the core.
 export function burstIsSafe(plan,head,gap=84){return !head||boundsDistance(plan.x,plan.y,head)>=(plan.clearance??gap);}
 export function planBurst(w,h,head,side=0,random=Math.random){
- const edge=24,top=w<650?104:78;
+ const portrait=w<650&&h>w,edge=24,top=portrait?28:w<650?104:78;
  const b=head||{left:w*.37,right:w*.63,top:h*.28,bottom:h*.55},cx=(b.left+b.right)/2,headHeight=b.bottom-b.top,headWidth=b.right-b.left;
- const clearance=clamp(headHeight*.48,84,150),radius=Math.min(260,w*.39,h*.36),candidates=[];const reserve=clamp(headHeight*.10,16,28);
+ const clearance=portrait?clamp(headHeight*.22,32,68):clamp(headHeight*.48,84,150),radius=Math.min(260,w*.39,h*.36),candidates=[];const reserve=clamp(headHeight*.10,16,28);
  const push=(x,y,zone)=>{const p={x,y,radius,scale:radius/205,zone,clearance};if(x>=edge&&x<=w-edge&&y>=top&&y<=h*.54&&burstIsSafe(p,b))candidates.push(p);};
  for(const margin of [reserve,0]){
  const plannedGap=clearance+margin;

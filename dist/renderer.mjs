@@ -1,3 +1,5 @@
+import {drawWaterSurface,drawWaterRefraction} from './water-renderer.mjs';
+import {performanceProfile} from './performance-profile.mjs';
 import {particleVisibility} from './particle-visibility.mjs';
 import {drawLineRain,drawFlatRain} from './rain-style.mjs';
 import {drawFlatFireworks,drawFlatLaunch} from './flat-fireworks.mjs';
@@ -46,10 +48,12 @@ export class Renderer {
     this.sprites = Object.fromEntries(['drop', 'star', 'confetti'].map(type => [type, Array.from({ length: 5 }, (_, i) => sprite(type, i))]));
   }
   resize(w, h) {
-    this.width=w;this.height=h;const d=Math.min(devicePixelRatio||1,1.35,Math.sqrt(1600000/(w*h)));
+    const profile=this.profile||performanceProfile({width:w,height:h});
+    const d=Math.min(devicePixelRatio||1,profile.dpr,Math.sqrt(profile.pixels/(w*h)));if(this.width===w&&this.height===h&&this.dpr===d)return;
+    this.width=w;this.height=h;
     this.dpr=d;this.canvas.width=this.base.width=Math.round(w*d);this.canvas.height=this.base.height=Math.round(h*d);
     this.ctx.setTransform(d,0,0,d,0,0);this.baseCtx.setTransform(d,0,0,d,0,0);
-    this.matte.width=512;this.matte.height=Math.max(1,Math.round(512*h/w));this.occlusion.width=this.matte.width;this.occlusion.height=this.matte.height;this.maskSignature=null;this.optics?.resize(w,h,d);
+    this.matte.width=profile.matte;this.matte.height=Math.max(1,Math.round(profile.matte*h/w));this.occlusion.width=this.matte.width;this.occlusion.height=this.matte.height;this.maskSignature=null;this.optics?.resize(w,h,d);
   }
   matteFrame(silhouette,polygon) {
     const g=this.matteCtx,w=this.matte.width,h=this.matte.height,og=this.occlusion.getContext('2d');
@@ -67,17 +71,22 @@ export class Renderer {
     const started=performance.now(),g=this.ctx,w=this.width,h=this.height,bg=this.baseCtx;
     const dt=this.lastTime?Math.min(.05,(time-this.lastTime)/1000):.016;this.lastTime=time;
     this.night+=((world.effect==='laugh'?((['cinema','glow'].includes(world.style))?1:.58):0)-this.night)*(1-Math.exp(-dt/(world.effect==='laugh'?.5:.7)));
+    const flat=world.style==='flat',simple=flat||world.style==='gift',nativeCamera=simple&&camera&&video?.readyState>=2;
+    if(video?.style)video.style.filter=nativeCamera?`brightness(${1-this.night*.32})`:'';
+    if(!nativeCamera){
     bg.clearRect(0,0,w,h);
-    if(camera&&video?.readyState>=2) {
+    if(!nativeCamera&&camera&&video?.readyState>=2) {
       const scale=Math.max(w/video.videoWidth,h/video.videoHeight),vw=video.videoWidth*scale,vh=video.videoHeight*scale;
       bg.save();bg.translate(w,0);bg.scale(-1,1);bg.drawImage(video,(w-vw)/2,(h-vh)/2,vw,vh);bg.restore();
     } else {
       bg.fillStyle='#000';bg.fillRect(0,0,w,h);
       if(preview){this.ctx=bg;this.person(previewX*w,previewY*h,Math.min(w*.13,h*.14),strength);this.ctx=g;}
     }
+    }
     g.clearRect(0,0,w,h);
+    if(simple)drawWaterRefraction(g,camera?video:this.base,world.water,w,h,time,!!camera);
 
-    const digital=['cinema','glow'].includes(world.style),lights=fireworkLights(world);
+    const digital=['cinema','glow'].includes(world.style),lights=simple?[]:fireworkLights(world);
     this.matteFrame(silhouette,polygon);if(world.style!=='gift')this.rockets(world);this.atmosphere(lights,digital);this.lingering(world);
     if(world.style==='gift')this.gift.draw(g,world);else if(digital)this.digital(world,time);else this.stickers(world);
     if(world.effect==='laugh')this.occludeFireworks(world.head);
@@ -89,8 +98,10 @@ export class Renderer {
       g.save();g.globalCompositeOperation='destination-in';g.globalAlpha=clamp(world.finishRemaining/.24);g.fillStyle='#fff';g.fillRect(0,0,w,h);g.restore();
     }
     if(tracking){g.save();if(hands){g.strokeStyle='#dfff7caa';g.lineWidth=1.1;for(const shape of hands.shapes){g.beginPath();shape.points.forEach((p,i)=>i?g.lineTo(p.x,p.y):g.moveTo(p.x,p.y));g.closePath();g.stroke();}}g.fillStyle='#dfff7c';g.strokeStyle='#dfff7caa';g.lineWidth=1.3;if(silhouette)for(const p of silhouette.boundaryPoints())g.fillRect(p.x-1,p.y-1,2,2);else if(polygon){g.setLineDash([4,5]);g.beginPath();polygon.forEach((p,i)=>i?g.lineTo(p.x,p.y):g.moveTo(p.x,p.y));g.closePath();g.stroke();}g.restore();}
-    if(this.optics&&!this.optics.lost)this.optics.render(this.base,this.canvas,this.matte,world,{night:this.night,time,width:w,height:h,lights,colors:['cinema','glow'].includes(world.style)?lightColors:PAPER_COLORS.map(c=>[parseInt(c.slice(1,3),16)/255,parseInt(c.slice(3,5),16)/255,parseInt(c.slice(5,7),16)/255])});
-    else {this.canvas.style.visibility='visible';g.save();g.globalCompositeOperation='destination-over';g.filter=`brightness(${1-this.night*.32})`;g.drawImage(this.base,0,0,w,h);g.restore();}
+    if(this.optics?.canvas)this.optics.canvas.hidden=simple;
+    this.canvas.style.visibility=simple||!this.optics||this.optics.lost?'visible':'hidden';
+    if(this.optics&&!this.optics.lost&&!simple)this.optics.render(this.base,this.canvas,this.matte,world,{night:this.night,time,width:w,height:h,lights,colors:['cinema','glow'].includes(world.style)?lightColors:PAPER_COLORS.map(c=>[parseInt(c.slice(1,3),16)/255,parseInt(c.slice(3,5),16)/255,parseInt(c.slice(5,7),16)/255])});
+    else if(!nativeCamera){this.canvas.style.visibility='visible';g.save();g.globalCompositeOperation='destination-over';g.filter=`brightness(${1-this.night*.32})`;g.drawImage(this.base,0,0,w,h);g.restore();}
     this.drawMs=this.drawMs*.9+(performance.now()-started)*.1;
   }
   atmosphere(lights,digital){const g=this.ctx;g.save();g.globalCompositeOperation='lighter';for(const light of lights){const radius=Math.min(96,this.height*.14);g.globalAlpha=light.energy*(digital?.055:.025);const color='#'+light.color.map(v=>Math.round(v*15)*17).map(v=>v.toString(16).padStart(2,'0')).join('');if(!this.atmosphereCache.has(color)){if(this.atmosphereCache.size>=64)this.atmosphereCache.delete(this.atmosphereCache.keys().next().value);this.atmosphereCache.set(color,glow(color));}g.drawImage(this.atmosphereCache.get(color),light.x-radius,light.y-radius,radius*2,radius*2);}g.restore();}
@@ -172,16 +183,7 @@ export class Renderer {
     g.globalCompositeOperation='destination-out';g.drawImage(this.occlusion,0,0,this.width,this.height);g.restore();
   }
   lingering(world){for(const t of world.afterglows||[]){if(['cinema','glow'].includes(world.style))this.trail(t.points,t.x,t.y,t.variant,Math.max(.3,t.size*.4),t.light*Math.pow(t.life/t.maxLife,1.7)*.5,true,t.tint||'#D39357');else if(world.style==='gift')this.gift.trail(this.ctx,{...t,trail:t.points},Math.pow(t.life/t.maxLife,1.5)*.65);else this.paperTrail({...t,trail:t.points},Math.pow(t.life/t.maxLife,1.5)*.65);}}
-  water(water, time, digital = false) {
-    if (water.level < .3) return;
-    const g = this.ctx, w = this.width, h = this.height, points = water.y;
-    const trace = (offset = 0) => { g.beginPath(); for (let i = 0; i < points.length; i++) { const x = i / (points.length - 1) * w, y = h - water.level + points[i] + Math.sin(i * .31 + time * .0014) * 1.7 + offset; i ? g.lineTo(x, y) : g.moveTo(x, y); } };
-    trace(); g.lineTo(w, h + 10); g.lineTo(0, h + 10); g.closePath(); const fill = g.createLinearGradient(0, h - water.level, 0, h); fill.addColorStop(0, digital ? '#9dd9ed36' : '#6feaf0e8'); fill.addColorStop(1, digital ? '#163a627a' : '#37a7dbe8'); g.fillStyle = fill; g.fill();
-    trace(); g.strokeStyle = digital ? '#cef8ff9a' : '#fff8e8'; g.lineWidth = digital ? 1.5 : 4; g.lineJoin = 'round'; g.stroke(); trace(4); g.strokeStyle = '#145a7180'; g.lineWidth = 1.7; g.stroke();
-    g.save(); g.beginPath(); g.rect(0, h - water.level + 10, w, water.level); g.clip(); g.strokeStyle = '#d8ffff80'; g.lineWidth = 2; g.lineCap = 'round';
-    for (let i = 0; i < 7; i++) { const x = (i * w / 6 + Math.sin(time * .0005 + i) * 17), y = h - water.level + 18 + ((i * 39) % Math.max(15, water.level)); g.beginPath(); g.moveTo(x, y); g.quadraticCurveTo(x + 12, y - 4, x + 26, y); g.stroke(); }
-    g.restore();
-  }
+  water(water,time,digital=false){drawWaterSurface(this.ctx,water,this.width,this.height,digital);}
   person(x, y, r, strength) {
     const g = this.ctx; g.save(); g.translate(x, y); g.rotate(Math.sin(strength * .9) * .035); g.lineJoin = 'round'; g.lineCap = 'round';
     g.fillStyle = '#b5c8c5'; g.strokeStyle = '#fff9ea'; g.lineWidth = 6;

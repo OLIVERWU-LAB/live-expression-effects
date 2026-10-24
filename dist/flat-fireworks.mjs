@@ -20,7 +20,7 @@ export const FLAT_COLORWAYS=Object.freeze([
 export const flatTempo=pattern=>pattern==='flat-petals-slow'?1.65:.95;
 function make(parent,role,vx,vy,size,life,tint,random,extra={}){
  const tempo=parent.tempo||1,scale=parent.scale||1;
- return{type:'spark',flatFx:true,flatRole:role,pattern:parent.pattern,x:parent.x,y:parent.y,vx,vy,size,life:life*tempo,maxLife:life*tempo,tempo,scale,variant:parent.variant||0,tint,seed:random()*100,angle:Math.atan2(vy,vx),spin:0,gravity:130*Math.sqrt(scale)/(tempo*tempo),drag:.85/tempo,delay:0,trail:[],tailLength:0,trailClock:0,touched:0,collisionDelay:.55,luminosity:.48,birthX:parent.x,birthY:parent.y,emitterId:parent.seed,flatDensity:parent.flatDensity,noRecollision:role==='ring',backgroundOnly:role==='ring',...extra};
+ return{type:'spark',flatFx:true,flatRole:role,pattern:parent.pattern,x:parent.x,y:parent.y,vx,vy,size,life:life*tempo,maxLife:life*tempo,tempo,scale,variant:parent.variant||0,tint,seed:random()*100,angle:Math.atan2(vy,vx),spin:0,gravity:130*Math.sqrt(scale)/(tempo*tempo),drag:.85/tempo,delay:0,trail:[],tailLength:0,trailClock:0,touched:0,collisionDelay:.55,luminosity:.48,birthX:parent.x,birthY:parent.y,emitterId:parent.seed,clusterIndex:parent.clusterIndex,flatBand:parent.flatBand,flatDensity:parent.flatDensity,noRecollision:role==='ring',backgroundOnly:role==='ring',...extra};
 }
 // Old flower choreography retained, but only five live carriers are created here.
 // Their actual, integrated positions now own every later explosion centre.
@@ -42,7 +42,7 @@ export function flatShell(x,y,scale=1,random=Math.random,pattern=FLAT_PATTERN){
  const particles=[];
  for(let j=0;j<5;j++){
   const a=phase+j*2.39996323,speed=(j===0?45:185+random()*65)*scale,open=.20+j*.11+random()*.01;
-  particles.push(make(parent,'seed',Math.cos(a)*speed/tempo,(Math.sin(a)*speed-45*root)/tempo,3.2*root,open+.06,FLAT_PALETTE[3],random,{delay:.08,flatEmitAt:open*tempo,tailLength:10,color:FLAT_COLORWAYS[(hue+j)%FLAT_COLORWAYS.length][0],accent:FLAT_COLORWAYS[(hue+j)%FLAT_COLORWAYS.length][1],variant:(hue+j)%FLAT_COLORWAYS.length,turn:a*.2,petalCount:17+j%3}));
+  particles.push(make(parent,'seed',Math.cos(a)*speed/tempo,(Math.sin(a)*speed-45*root)/tempo,3.2*root,open+.06,FLAT_PALETTE[3],random,{delay:.08,flatEmitAt:open*tempo,clusterIndex:j,tailLength:10,color:FLAT_COLORWAYS[(hue+j)%FLAT_COLORWAYS.length][0],accent:FLAT_COLORWAYS[(hue+j)%FLAT_COLORWAYS.length][1],variant:(hue+j)%FLAT_COLORWAYS.length,turn:a*.2,petalCount:17+j%3}));
  }
  return{particles,variant:hue};
 }
@@ -86,10 +86,11 @@ export function flatChildren(parent,random=Math.random){
 }
 function radialShell(parent,phase,random){
  const p=[],colors=FLAT_COLORWAYS[parent.variant],r=Math.sqrt(parent.scale),s=parent.scale,key=parent.pattern;
- const emit=(role,count,speed,size,palette,offset=0,extra={})=>{
+ let band=0;const emit=(role,count,speed,size,palette,offset=0,extra={})=>{
+  const flatBand=band++;
   for(let i=0;i<count;i++){
    const a=phase+(i+offset)/count*TAU,velocity=(speed+(i%2?8:-8))*s;
-   p.push(make(parent,role,Math.cos(a)*velocity,Math.sin(a)*velocity-22*r,size*(i%2?.9:1)*r,2.05+random()*.24,palette[i%palette.length],random,{angle:a,tempo:1,gravity:115*r,drag:1.0,tailLength:['comet','ribbon','leaf','spoke'].includes(role)?24:0,trailAge:.28,cap:'#FFF2D6',...extra}));
+   p.push(make(parent,role,Math.cos(a)*velocity,Math.sin(a)*velocity-22*r,size*(i%2?.9:1)*r,2.05+random()*.24,palette[i%palette.length],random,{angle:a,flatBand,tempo:1,gravity:115*r,drag:1.0,tailLength:['comet','ribbon','leaf','spoke'].includes(role)?24:0,trailAge:.28,cap:'#FFF2D6',...extra}));
   }
  };
  if(key==='flat-medallion'){
@@ -185,7 +186,7 @@ export function drawFlatFireworks(g,world){
   }else if(p.flatRole==='ring'){
    const radius=r*(.16+.84*(1-Math.exp(-age*4.2)));
    g.globalAlpha=particleVisibility(p)*env.ring*clamp(remaining/(p.initialOpening?.22:.60));g.lineWidth=Math.max(.65,r*.24*Math.exp(-age*2.6));g.beginPath();
-   for(let i=0;i<=84;i++){const a=i/84*TAU,rr=radius*(1+.035*Math.sin(a*5+p.seed)+.018*Math.sin(a*3));const xx=Math.cos(a)*rr,yy=Math.sin(a)*rr;i?g.lineTo(xx,yy):g.moveTo(xx,yy);}g.closePath();g.stroke();
+   for(let i=0;i<=40;i++){const a=i/40*TAU,rr=radius*(1+.035*Math.sin(a*5+p.seed)+.018*Math.sin(a*3));const xx=Math.cos(a)*rr,yy=Math.sin(a)*rr;i?g.lineTo(xx,yy):g.moveTo(xx,yy);}g.closePath();g.stroke();
   }else if(p.flatTailSpark){
    g.globalAlpha=flatAfterglintEnvelope(p);g.fillStyle='#FFFFFF';g.rotate(p.angle);g.beginPath();g.ellipse(0,0,r,r*.64,0,0,TAU);g.fill();if(g.globalAlpha>.70){g.fillRect(-r*1.45,-.32,r*2.9,.64);}
   }else{

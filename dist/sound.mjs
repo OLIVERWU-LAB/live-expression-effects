@@ -1,91 +1,43 @@
-import {clamp} from './core.mjs';
-import {AUDIO_URLS} from './sound-assets.mjs';
-// Decode once before the show. Playback only creates lightweight source nodes;
-// no fetch, decoding, JS timer, convolution or per-particle sound work here.
-export const MIX=Object.freeze({master:.38,maxVoices:24,echoDelay:.055,decodeConcurrency:2});
-export class SoundDesigner {
- constructor({context=null,output=null,random=Math.random,fetcher=(...args)=>globalThis.fetch(...args)}={}){
-  Object.assign(this,{context,output,random,fetcher});this.enabled=true;this.authorized=false;this.voices=new Set();this.voiceInfo=new Map();this.buffers=new Map();this.normalization=new Map();this.assetsReady=false;this.loading=false;this.error=null;this.loaded=0;this.promise=null;this.effect='neutral';this.style='cinema';this.ambient=null;this.last=new Map();this.glitterUntil=0;this.nextGlitterAt=0;this.onstate=null;
-  if(context)this.initialize();
- }
- initialize(){
-  if(this.master)return;
-  if(!this.context){const Context=globalThis.AudioContext||globalThis.webkitAudioContext;if(!Context)throw Error('当前浏览器不支持音效播放');this.context=new Context({latencyHint:'interactive'});}
-  const c=this.context;this.master=c.createGain();this.master.gain.value=this.enabled?MIX.master:0;
-  this.compressor=c.createDynamicsCompressor();Object.assign(this.compressor.threshold,{value:-12});this.compressor.knee.value=12;this.compressor.ratio.value=8;this.compressor.attack.value=.002;this.compressor.release.value=.18;this.master.connect(this.compressor);this.compressor.connect(this.output||c.destination);
-  c.onstatechange=()=>this.onstate?.();
- }
- get total(){return Object.keys(AUDIO_URLS).length;}
- get ready(){return this.assetsReady&&this.context?.state==='running';}
- async load(){
-  if(this.assetsReady)return true;if(this.promise)return this.promise;
-  this.loading=true;this.error=null;this.loaded=0;this.onstate?.();
-  this.promise=(async()=>{
-   await Promise.resolve();
-   try{
-    this.initialize();const pending=new Map(),keys=Object.keys(AUDIO_URLS);let index=0;
-    const decode=async()=>{while(index<keys.length){const name=keys[index++],response=await this.fetcher(AUDIO_URLS[name],{signal:AbortSignal.timeout(20000)});if(!response.ok)throw Error(`音效下载失败：${name}（${response.status}）`);const bytes=await response.arrayBuffer(),buffer=await this.context.decodeAudioData(bytes);pending.set(name,buffer);this.loaded=pending.size;this.onstate?.();}};
-    // allSettled prevents a slow failed batch racing the user's next retry.
-    const result=await Promise.allSettled(Array.from({length:MIX.decodeConcurrency},decode));for(const r of result)if(r.status==='rejected')throw r.reason;
-    for(const[name,buffer]of pending){
-     let peak=0,first=buffer.length;for(let ch=0;ch<buffer.numberOfChannels;ch++){const data=buffer.getChannelData(ch);for(let i=0;i<data.length;i++)peak=Math.max(peak,Math.abs(data[i]));}
-     const threshold=Math.max(.00001,peak*.008);for(let ch=0;ch<buffer.numberOfChannels;ch++){const data=buffer.getChannelData(ch);for(let i=0;i<Math.min(first,data.length);i++)if(Math.abs(data[i])>threshold){first=i;break;}}
-     this.buffers.set(name,{buffer,offset:Math.max(0,first/buffer.sampleRate-.002)});this.normalization.set(name,Math.min(64,.8/Math.max(.001,peak)));
-    }
-    this.assetsReady=true;return true;
-   }catch(error){this.error=String(error.message||error);return false;}
-   finally{this.loading=false;this.promise=null;this.onstate?.();}
-  })();return this.promise;
- }
- async unlock(){
-  // Call resume synchronously inside the click gesture, before waiting for files.
-  try{this.initialize();this.authorized=true;const resume=this.enabled&&this.context.state!=='running'?this.context.resume():Promise.resolve();const loaded=this.load();await Promise.all([resume,loaded]);this.onstate?.();return this.ready;}catch(error){this.error=String(error.message||error);this.onstate?.();return false;}
- }
- setEnabled(value){this.enabled=!!value;if(this.master){const t=this.context.currentTime;this.master.gain.cancelScheduledValues(t);this.master.gain.setTargetAtTime(value?MIX.master:0,t,.015);}if(!value)this.stopAll();this.onstate?.();}
- play(name,{when=this.context?.currentTime,gain=.5,rate=1,pan=0,duration,offset,highpass=0,lowpass=0,priority=1,loop=false}={}){
-  if(!this.enabled||!this.ready||when===undefined)return null;const asset=this.buffers.get(name);if(!asset)return null;
-  if(this.voices.size>=MIX.maxVoices){const victim=[...this.voiceInfo].find(([,v])=>v.priority<priority);if(!victim)return null;this.release(victim[0],true);}
-  const c=this.context,s=c.createBufferSource(),g=c.createGain(),nodes=[g];s.buffer=asset.buffer;s.playbackRate.value=rate;s.loop=loop;let end=s;
-  for(const[type,hz]of[['highpass',highpass],['lowpass',lowpass]])if(hz){const f=c.createBiquadFilter();f.type=type;f.frequency.value=hz;f.Q.value=.5;end.connect(f);end=f;nodes.push(f);}
-  end.connect(g);const p=c.createStereoPanner?.();if(p){p.pan.value=clamp(pan,-.75,.75);g.connect(p);p.connect(this.master);nodes.push(p);}else g.connect(this.master);
+import{SoundDesigner as SampledSoundDesigner}from'./sound-bank.mjs';
+import{clamp}from'./core.mjs';import{particleVisibility}from'./particle-visibility.mjs';import{refinedDissolveStart}from'./cinema-refined-particles.mjs';
+export const MIX=Object.freeze({master:.38,maxVoices:24,echoDelay:.065});
+// Preserve the real recordings' timbre. Program the envelopes, dynamics and
+// event timing; never loop a bed or chop a long sparkle into identical fragments.
+export class SoundDesigner extends SampledSoundDesigner{
+ constructor(options={}){super(options);this.shimmers=new Map();this.lastAnalysis=-Infinity;}
+ play(name,{when=this.context?.currentTime,gain=.4,rate=1,pan=0,duration,offset,highpass=0,lowpass=0,priority=1,dynamic=false,fade=.16}={}){
+  if(!this.enabled||!this.ready||when===undefined)return null;this.prune();const asset=this.buffers.get(name);if(!asset)return null;
+  if(this.voices.size>=(priority<3?MIX.maxVoices-6:MIX.maxVoices))return null;
+  const c=this.context,s=c.createBufferSource(),g=c.createGain(),nodes=[g];s.buffer=asset.buffer;s.playbackRate.value=rate;let end=s,filter;
   when=Math.max(c.currentTime,when);offset=offset??asset.offset;
-  const seconds=loop?Infinity:Math.min(duration??Infinity,(asset.buffer.duration-offset)/rate),level=gain*this.normalization.get(name);
-  g.gain.setValueAtTime(0,when);g.gain.linearRampToValueAtTime(level,when+.003);
-  if(!loop){const fade=Math.min(.055,seconds*.24);g.gain.setValueAtTime(level,when+Math.max(.004,seconds-fade));g.gain.linearRampToValueAtTime(0,when+seconds);}
-  this.voices.add(s);this.voiceInfo.set(s,{nodes,priority});s.onended=()=>this.release(s);
-  s.start(when,offset);if(!loop)s.stop(when+seconds+.005);return s;
+  const seconds=Math.max(.05,Math.min(duration??Infinity,(asset.buffer.duration-offset)/rate)),level=gain*(this.normalization.get(name)||1);
+  for(const[type,hz]of[['highpass',highpass],['lowpass',lowpass]])if(hz){const f=c.createBiquadFilter();f.type=type;f.frequency.value=hz;f.Q.value=.5;end.connect(f);end=f;nodes.push(f);if(type==='lowpass')filter=f.frequency;}
+  end.connect(g);const p=c.createStereoPanner?.();if(p){p.pan.value=clamp(pan,-.75,.75);g.connect(p);p.connect(this.master);nodes.push(p);}else g.connect(this.master);
+  g.gain.setValueAtTime(0,when);
+  if(dynamic)g.gain.linearRampToValueAtTime(0,when+.015);
+  else{g.gain.linearRampToValueAtTime(level,when+.006);g.gain.setValueAtTime(level,when+Math.max(.008,seconds-Math.min(fade,seconds*.48)));g.gain.linearRampToValueAtTime(0,when+seconds);}
+  this.voices.add(s);this.voiceInfo.set(s,{nodes,gain:g.gain,panner:p?.pan,filter,level,currentLevel:dynamic?0:level,when,duration:seconds,priority,name,dynamic,lastLit:when});s.onended=()=>this.release(s);s.start(when,offset);s.stop(when+seconds+.008);return s;
  }
- release(source,stop=false){const info=this.voiceInfo.get(source);if(!info)return;this.voiceInfo.delete(source);this.voices.delete(source);if(stop)try{source.stop();}catch{}for(const n of[source,...info.nodes])try{n.disconnect();}catch{}if(this.ambient===source)this.ambient=null;}
- allow(key,interval){const now=this.context.currentTime;if(now-(this.last.get(key)??-Infinity)<interval)return false;this.last.set(key,now);return true;}
- launch(e){this.play('shoot',{gain:.32,pan:(e.x-.5)*1.2,offset:.38,rate:1.35,duration:e.duration||.65,priority:3});}
- big(e){
-  const flat=e.style==='flat',pan=(e.x-.5)*1.2,now=this.context.currentTime;
-  this.play('explode',{gain:flat?.29+this.random()*.18:.72,rate:flat?.90+this.random()*.26:1,pan,priority:4});
-  this.play('fireworks2',{when:now+MIX.echoDelay,gain:flat?.10+this.random()*.07:.24,pan:pan*.7,rate:flat?.90+this.random()*.24:.94+this.random()*.10,priority:2});
-  // Gift pieces do not shimmer. Keep other styles' bed short and leave silence
-  // between successive shells instead of overlapping whole 3-second clips.
-  if(e.style!=='gift'&&this.allow('shining',flat?.48:2.0))this.play('shining',{when:now+.025,gain:flat?.065:.09,rate:.95,pan:pan*.5,duration:flat?.55:.85,priority:1});
- }
- small(e){if(!this.allow('small',.045))return;this.play('explode',{gain:e.style==='flat'?.13+this.random()*.12:.12+this.random()*.06,rate:1.12+this.random()*.30,pan:(e.x-.5)*1.3,duration:.48,priority:3});}
- glitter(e){
-  if(e.style==='gift')return;const now=this.context.currentTime;
-  if(now>=this.glitterUntil){if(now<this.nextGlitterAt)return;this.glitterUntil=now+.32;this.nextGlitterAt=now+1.8;}
-  if(!this.allow('sparks',.18))return;
-  this.play('sparks',{gain:e.style==='flat'?.045:.055,pan:(e.x-.5)*1.1,rate:.88+this.random()*.12,duration:Math.min(.28,this.glitterUntil-now+.035),priority:1});
- }
- confetti(e){if(!this.allow('paper',.10))return;this.play('paper',{gain:.10+this.random()*.035,rate:.96+this.random()*.25,duration:.17+this.random()*.07,highpass:320,lowpass:8500,pan:(e.x-.5)*1.2,priority:2});}
- handle(events){
-  if(!this.ready||!this.enabled)return;
-  for(const e of events){if(e.type==='launch')this.launch(e);
-   else if(e.type==='burst'){if(e.style==='flat')this.small(e);else this.big(e);}
-   else if(e.type==='crackle'){if(e.style==='gift'&&e.collision)this.confetti(e);else if(e.style==='flat'&&e.stage===2)this.big(e);else if(e.stage>=3)this.glitter(e);else this.small(e);}
-   else if(e.type==='glitter')this.glitter(e);
+ release(source){const info=this.voiceInfo.get(source);if(!info)return;if(this.shimmers?.get(info.name)===source)this.shimmers.delete(info.name);super.release(source);}
+ fade(source,seconds=.28){const v=this.voiceInfo.get(source);if(!v||v.fading)return;const now=this.context.currentTime;v.fading=true;v.stopAt=now+seconds+.008;if(v.gain.cancelAndHoldAtTime)v.gain.cancelAndHoldAtTime(now);else{v.gain.cancelScheduledValues(now);v.gain.setValueAtTime(now<v.when?0:v.currentLevel,now);}v.gain.linearRampToValueAtTime(0,now+seconds);try{source.stop(v.stopAt);}catch{}this.voices.delete(source);}
+ prune(){const now=this.context?.currentTime??0;for(const[source,v]of this.voiceInfo)if(now>=(v.stopAt??v.when+v.duration+.02))this.release(source);}
+ launch(e){this.play('shoot',{gain:.25,offset:.38,rate:.99+this.random()*.035,duration:(e.duration||.65)+.09,fade:.23,pan:(e.x-.5)*1.2,priority:3});}
+ big(e){const flat=e.style==='flat',gain=flat?.29+this.random()*.14:.68,rate=(flat?.95:.98)+this.random()*(flat?.13:.045),pan=(e.x-.5)*1.2;this.play('explode',{gain,rate,pan,priority:4,fade:.18});this.play('fireworks2',{when:this.context.currentTime+MIX.echoDelay,gain:gain*.28,rate:.97+this.random()*.06,pan:pan*.7,priority:3,fade:.055});if(e.style!=='gift')this.shimmer(e,false);}
+ small(e){if(!this.allow('small',.065))return;this.play('explode',{gain:(e.style==='flat'?.14:.11)+this.random()*.07,rate:1.06+this.random()*.16,highpass:180,lowpass:6000,pan:(e.x-.5)*1.3,priority:3,fade:.25});}
+ shimmer(e,ending=true){if(e.style==='gift')return;const name=ending?'sparks':'shining',old=this.shimmers.get(name);if(old&&this.voiceInfo.has(old))return;if(!this.allow(name+'-start',1.4))return;const source=this.play(name,{gain:ending?.12:.14,rate:.98+this.random()*.065,pan:(e.x-.5),priority:1,dynamic:true,lowpass:8500,highpass:500});if(source)this.shimmers.set(name,source);}
+ glitter(e){this.shimmer(e,true);}
+ confetti(e){if(!this.allow('paper',.10))return;this.play('paper',{gain:.12+this.random()*.035,rate:.97+this.random()*.13,duration:.33+this.random()*.06,fade:.16,pan:(e.x-.5)*1.2,highpass:320,lowpass:7500,priority:2});}
+ handle(events){if(!this.ready||!this.enabled)return;for(const e of events){if(e.type==='launch')this.launch(e);else if(e.type==='burst'){if(e.style==='flat')this.small(e);else this.big(e);}else if(e.type==='crackle'){if(e.style==='gift'&&e.collision)this.confetti(e);else if(e.style==='flat'&&e.stage===2)this.big(e);else if(e.stage>=3)this.glitter(e);else this.small(e);}else if(e.type==='glitter')this.glitter(e);else if(e.type==='flight-blocked')for(const[source,v]of this.voiceInfo)if(v.name==='shoot')this.fade(source,.18);}}
+ update(dt,world){this.prune();if(!world||!this.ready||!this.enabled)return;const now=this.context.currentTime;if(now-this.lastAnalysis<.05)return;this.lastAnalysis=now;let lit=0,spreadX=0;
+  if(this.style!=='gift')for(const p of world.particles){if(p.life<=0||p.delay>0||(world.viewport&&(p.x<0||p.x>world.viewport.width||p.y<0||p.y>world.viewport.height)))continue;let weight=0;const age=p.maxLife-p.life;
+   if(p.cinemaDust)weight=clamp(age/.1)*clamp(p.life/.55)*(.45+.55*Math.sin(age*29+p.seed)**2);
+   else if(p.ringBlob&&p.refinedCinema)weight=clamp(((world.simulationTime||0)-(p.shellStartedAt||0)-refinedDissolveStart(p))/.3)*clamp(p.life/.4)*(.2+.8*Math.sin(age*11+p.seed)**2);
+   else if(p.flatFx&&(p.whiteFlash||p.flatTailSpark||p.openingGlint))weight=clamp(p.life/.35)*Math.max(0,Math.sin(age*17+p.seed))**2;
+   weight*=particleVisibility(p);lit+=weight;spreadX+=p.x*weight;
   }
+  for(const source of this.shimmers.values()){const v=this.voiceInfo.get(source);if(!v||v.fading)continue;if(lit<.7){if(now-v.lastLit>.18)this.fade(source,.38);continue;}v.lastLit=now;const density=clamp(lit/40),life=clamp((v.when+v.duration-now)/.45),target=v.level*(.35+.65*density)*life;v.currentLevel+=(target-v.currentLevel)*.32;v.gain.setTargetAtTime(v.currentLevel,now,.045);v.filter?.setTargetAtTime(4200+density*4300,now,.10);if(v.panner&&world.viewport)v.panner.setTargetAtTime(clamp((spreadX/lit/world.viewport.width-.5)*1.1,-.7,.7),now,.10);}
  }
- setScene(effect,style){if(effect!==this.effect||style!==this.style){this.ambientStop();this.effect=effect;this.style=style;}}
- update(){} // The supplied clips are event sounds, never an endless ambience loop.
- ambientStop(){if(this.ambient)this.release(this.ambient,true);this.ambient=null;}
- stopAll(){for(const source of [...this.voices])this.release(source,true);this.ambient=null;this.last.clear();this.glitterUntil=0;this.nextGlitterAt=0;}
- pause(){this.stopAll();if(this.context?.state==='running')this.context.suspend().catch(()=>{});}
- async resume(){if(this.authorized&&this.enabled&&this.context?.state==='suspended')try{await this.context.resume();}catch{}this.onstate?.();}
+ setScene(effect,style){if(effect!==this.effect||style!==this.style){for(const[source,v]of this.voiceInfo)if(v.priority<3)this.fade(source,.30);this.effect=effect;this.style=style;}}
+ ambientStop(){for(const[source,v]of this.voiceInfo)if(v.priority<3)this.fade(source,.30);}
+ stopAll(){for(const source of [...this.voiceInfo.keys()])this.fade(source,.18);this.last.clear();}
 }

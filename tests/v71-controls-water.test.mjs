@@ -1,0 +1,13 @@
+import test from'node:test';import assert from'node:assert/strict';import{readFileSync}from'node:fs';import{CONTROL_ICONS}from'../dist/control-icons.mjs';import{WaterSurface}from'../dist/effects.mjs';import{drawWaterSurface,drawWaterRefraction}from'../dist/water-renderer.mjs';
+const read=p=>readFileSync(new URL('../dist/'+p,import.meta.url),'utf8'),noop=()=>{};
+test('all three icons use the same grid, solid single-colour silhouettes and the same exact paths in the actual HTML',()=>{
+ const html=read('index.html'),css=read('style.css');for(const body of Object.values(CONTROL_ICONS))assert.ok(html.includes(body));assert.ok(html.includes('class="control-glyph smile-icon"'));assert.ok(!html.includes('class="filled-icon"'));assert.match(css,/svg\.control-glyph[^}]+fill:currentColor;stroke:none/);for(const body of Object.values(CONTROL_ICONS)){assert.ok(!body.includes('stroke='));assert.ok(!body.includes('fill-opacity'));}assert.equal((html.match(/class="control-glyph(?: smile-icon)?"/g)||[]).length,3);
+});
+test('each water style gets a single fine highlight, following the smooth surface without interior decorative strokes',()=>{
+ const water=new WaterSurface();water.level=150;water.impact(160,390,16);water.update(.15,844,true);
+ for(const digital of[false,true]){const lines=[],curves=[],g=new Proxy({stroke(){lines.push({width:this.lineWidth,color:this.strokeStyle});},bezierCurveTo(...p){curves.push(p);},createLinearGradient:()=>({addColorStop(){}})},{get:(o,k)=>o[k]||noop});drawWaterSurface(g,water,390,844,digital);assert.equal(lines.length,1);assert.ok(lines[0].width<=1.3);assert.equal(curves.length,48);assert.ok(curves.flat().every(Number.isFinite));}
+ assert.ok(read('gift-renderer.mjs').includes('drawWaterSurface(g,water,w,h,false)'));
+});
+test('native refraction is bounded to the water region, uses cached live image input and allocates no full-screen frame',()=>{
+ const water=new WaterSurface();water.level=150;const source={videoWidth:640,videoHeight:480},draws=[],transforms=[],g=new Proxy({drawImage(...args){draws.push(args);},translate(...args){transforms.push(args);}},{get:(o,k)=>o[k]||noop});drawWaterRefraction(g,source,water,390,844,1000,true);assert.ok(draws.length>0&&draws.length<=24);for(const args of draws){assert.equal(args[0],source);assert.equal(args.length,9);const[,sx,sy,sw,sh,dx,dy,dw,dh]=args;assert.ok(sx>=0&&sy>=0&&sx+sw<=640+.01&&sy+sh<=480+.01);assert.ok(dy>=844-156&&dy+dh<=845);assert.equal(dw,390);assert.ok(dh<9);assert.ok(args.slice(1).every(Number.isFinite));}assert.deepEqual(transforms[0],[390,0]);draws.length=0;water.level=0;drawWaterRefraction(g,source,water,390,844,1000,true);assert.equal(draws.length,0);
+});

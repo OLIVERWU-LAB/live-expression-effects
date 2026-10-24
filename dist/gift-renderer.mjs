@@ -1,3 +1,6 @@
+import {drawWaterSurface} from './water-renderer.mjs';
+import {GIFT_BANKS} from './gift-banks.mjs';
+import {loadGiftImage} from './gift-loader.mjs';
 import {loadGiftBank} from './gift-loader.mjs';
 import {mixHex} from './emission.mjs';
 import {particleVisibility} from './particle-visibility.mjs';
@@ -12,7 +15,8 @@ export class GiftRenderer{
  constructor(){this.images=new Map();this.banks=new Map();this.materialImages=new Map();this.material='soft';this.rainTiles=new Map();this.ready=false;this.promise=null;this.error=null;this.tileSize=0;}
  bank(material){
   if(!this.banks.has(material)){
-   const images=new Map(),entries=Object.entries(activeGiftAssets(GIFT_ASSETS)).flatMap(([kind,colors])=>colors.map(color=>({key:kind+color,url:new URL(giftAssetPath(material,kind,color),import.meta.url).href}))),promise=loadGiftBank(entries,this.tileSize).then(loaded=>{for(const [key,image]of loaded)images.set(key,image);if(this.banks.has(material))this.materialImages.set(material,images);else for(const image of images.values())image.close?.();return images;});
+   const images=new Map(),compact=GIFT_BANKS[material];
+   const promise=compact?loadGiftImage(new URL(compact.url,import.meta.url).href).then(image=>{for(const[key,view]of Object.entries(compact.items))images.set(key,{...view,image});this.materialImages.set(material,images);return images;}):loadGiftBank(Object.entries(activeGiftAssets(GIFT_ASSETS)).flatMap(([kind,colors])=>colors.map(color=>({key:kind+color,url:new URL(giftAssetPath(material,kind,color),import.meta.url).href}))),this.tileSize).then(loaded=>{for(const[key,image]of loaded)images.set(key,image);this.materialImages.set(material,images);return images;});
    this.banks.set(material,promise);while(this.banks.size>2){const oldest=this.banks.keys().next().value;this.banks.delete(oldest);for(const image of this.materialImages.get(oldest)?.values()||[])image.close?.();this.materialImages.delete(oldest);}
   }return this.banks.get(material);
  }
@@ -26,12 +30,12 @@ export class GiftRenderer{
  }
  sprite(g,kind,color,x,y,w,h,phase=0,alpha=1,finish=null){
   const bank=this.material==='random'&&finish?this.materialImages.get(finish):this.images,im=bank?.get(kind+color);if(!im)return;
-  const tile=im.naturalHeight||im.height,frames=Math.round((im.naturalWidth||im.width)/tile);
+  const tile=im.tile||im.naturalHeight||im.height,frames=im.frames||Math.round((im.naturalWidth||im.width)/tile);
   // Each sprite is exactly one opaque pose. Crossfading rotated silhouettes
   // creates a second edge/side-on shaft inside rings, tubes and ribbons.
   const index=giftFrameIndex(phase,frames);
   g.save();g.globalAlpha=alpha;
-  g.drawImage(im,index*tile,0,tile,tile,x-w/2,y-h/2,w,h);
+  g.drawImage(im.image||im,(im.x||0)+index*tile,im.y||0,tile,tile,x-w/2,y-h/2,w,h);
   g.restore();
  }
 
@@ -76,9 +80,5 @@ export class GiftRenderer{
   }
   g.restore();
  }
- water(g,water,w,h,time){
-  if(water.level<.2)return;const top=h-water.level,grad=g.createLinearGradient(0,top,0,h);grad.addColorStop(0,'#b5f6fa70');grad.addColorStop(.15,'#56d8e54a');grad.addColorStop(1,'#1e9abf75');
-  const path=()=>{g.beginPath();g.moveTo(0,water.surface(0,w,h));for(let i=1;i<64;i++){const x=i/63*w;g.lineTo(x,water.surface(x,w,h));}};
-  g.save();path();g.lineTo(w,h);g.lineTo(0,h);g.closePath();g.fillStyle=grad;g.fill();path();g.strokeStyle='#e8ffffb5';g.lineWidth=1.3;g.stroke();g.restore();
- }
+ water(g,water,w,h,time){drawWaterSurface(g,water,w,h,false);}
 }
