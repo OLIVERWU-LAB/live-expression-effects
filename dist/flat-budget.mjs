@@ -29,10 +29,14 @@ export function fitFlatViewport(layout,width,height,head){
  if(!layout||width>=650||height<=width)return layout;
  // Fit the entire radial composition once. The distance from an individual
  // edge must not collapse the launch or redirect the five carriers afterwards.
- const x=Math.max(width*.42,Math.min(width*.58,layout.x));
- let y=Math.max(layout.y,Math.min(width*.40,height*.25));
- if(head){y=Math.min(y,head.top-(layout.clearance??32)-2);const distance=Math.hypot(Math.max(head.left-x,0,x-head.right),Math.max(head.top-y,0,y-head.bottom));if(y<28||distance<(layout.clearance??32))return{...layout,scale:Math.min(layout.scale,width/600)};}
- const scale=Math.min(layout.scale,width/550,Math.max(.31,y/275));
+ const cx=head?(head.left+head.right)/2:width*.5,side=layout.zone==='left'?-1:layout.zone==='right'?1:0;
+ const x=Math.max(width*.30,Math.min(width*.70,cx+side*width*.10));
+ // Reserve sky for the five moving centres AND their radial blossoms, rather
+ // than placing the core just above the forehead. Never redirect a live seed.
+ const skyBottom=head?Math.max(68,head.top-26):Math.min(height*.35,width*.68);
+ const ceiling=head?head.top-(layout.clearance??32)-8:height*.30;
+ const y=Math.max(24,Math.min((24+skyBottom)*.5+12,ceiling));
+ const spread=350-90*Math.max(0,Math.min(1,(skyBottom-124)/90)),scale=Math.min(layout.scale*1.12,width/475,Math.max(.30,(skyBottom-20)/spread));
  return{...layout,x,y,scale};
 }
 // Keep the same radial vectors, braking, sizes and staggered birth times as PC.

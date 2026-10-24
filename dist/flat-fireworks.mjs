@@ -35,7 +35,7 @@ export function flatShell(x,y,scale=1,random=Math.random,pattern=FLAT_PATTERN){
   for(let j=0;j<5;j++){
    const a=phase+j*2.39996323,speed=(j===0?200:1150+random()*280)*scale,open=j===0?.20+random()*.01:.22+j*.125+random()*.025;
    const motion=flatCarrierVelocity(Math.cos(a)*speed,Math.sin(a)*speed-35*root,open*tempo,130*root/(tempo*tempo));
-   particles.push(make(parent,'seed',motion.vx,motion.vy,3.7*root,open+.09,'#FFF8E8',random,{delay:.08,flatEmitAt:open*tempo,tailLength:14,trailAge:.14,drag:motion.drag,flatStopSpeed:28,turn:phase+j*.22,cascade:true,clusterIndex:j,flowerScale:[.68,.92,1.16,.78,1.02][j],variant:(hue+j)%FLAT_COLORWAYS.length}));
+   particles.push(make(parent,'seed',motion.vx,motion.vy,3.7*root,open+.09,'#FFF8E8',random,{delay:.08,collisionDelay:1,flatEmitAt:open*tempo,tailLength:14,trailAge:.14,drag:motion.drag,flatStopSpeed:28,turn:phase+j*.22,cascade:true,clusterIndex:j,flowerScale:[.68,.92,1.16,.78,1.02][j],variant:(hue+j)%FLAT_COLORWAYS.length}));
   }
   return{particles,variant:hue};
  }
@@ -43,38 +43,38 @@ export function flatShell(x,y,scale=1,random=Math.random,pattern=FLAT_PATTERN){
  const particles=[];
  for(let j=0;j<5;j++){
   const a=phase+j*2.39996323,speed=(j===0?45:185+random()*65)*scale,open=.20+j*.11+random()*.01;
-  particles.push(make(parent,'seed',Math.cos(a)*speed/tempo,(Math.sin(a)*speed-45*root)/tempo,3.2*root,open+.06,FLAT_PALETTE[3],random,{delay:.08,flatEmitAt:open*tempo,clusterIndex:j,tailLength:10,color:FLAT_COLORWAYS[(hue+j)%FLAT_COLORWAYS.length][0],accent:FLAT_COLORWAYS[(hue+j)%FLAT_COLORWAYS.length][1],variant:(hue+j)%FLAT_COLORWAYS.length,turn:a*.2,petalCount:17+j%3}));
+  particles.push(make(parent,'seed',Math.cos(a)*speed/tempo,(Math.sin(a)*speed-45*root)/tempo,3.2*root,open+.06,FLAT_PALETTE[3],random,{delay:.08,collisionDelay:1,flatEmitAt:open*tempo,clusterIndex:j,tailLength:10,color:FLAT_COLORWAYS[(hue+j)%FLAT_COLORWAYS.length][0],accent:FLAT_COLORWAYS[(hue+j)%FLAT_COLORWAYS.length][1],variant:(hue+j)%FLAT_COLORWAYS.length,turn:a*.2,petalCount:17+j%3}));
  }
  return{particles,variant:hue};
 }
 export function flatChildren(parent,random=Math.random){
  if(parent.flatReprise){return flattenReprise(handRing(parent,random),parent.flatColors,parent);}
  if(parent.cascade){
-  const local={...parent,scale:parent.scale*.62*(parent.flowerScale||1),tempo:1};
+  const local={...parent,scale:parent.scale*.78*(parent.flowerScale||1),tempo:1};
   const children=radialShell(local,parent.turn,random).particles;
   const colors=FLAT_COLORWAYS[parent.variant];
   children.push(make(local,'ring',0,0,64*Math.sqrt(local.scale),1.65,colors[1],random,{delay:.14,gravity:36,flatRing:true}));
   for(let i=0;i<32;i++){
    const a=parent.turn+i*2.39996323,speed=(70+random()*230)*local.scale;
-   children.push(make(local,'dust',Math.cos(a)*speed,Math.sin(a)*speed,Math.min(parent.pattern==='flat-festival'?1.8:parent.pattern==='flat-star-crown'?2.2:3.5,(i%8===0?3.5:i%2===0?1.5+random()*.8:.50+random()*.70))*Math.sqrt(local.scale),1.65+random()*.24,i%2===0?'#FFFFFF':colors[i%3],random,{delay:.06+random()*.08,gravity:90*Math.sqrt(local.scale),luminosity:.20,flatFine:true,whiteFlash:i%2===0}));
+   children.push(make(local,'dust',Math.cos(a)*speed,Math.sin(a)*speed,Math.min(parent.pattern==='flat-festival'?1.8:parent.pattern==='flat-star-crown'?2.2:3.5,(i%8===0?3.5:i%2===0?1.5+random()*.8:.50+random()*.70))*Math.sqrt(local.scale*.62/.78),1.65+random()*.24,i%2===0?'#FFFFFF':colors[i%3],random,{delay:.06+random()*.08,gravity:90*Math.sqrt(local.scale),luminosity:.20,flatFine:true,whiteFlash:i%2===0}));
   }
-  for(const child of children){child.vx+=parent.vx;child.vy+=parent.vy;child.clusterIndex=parent.clusterIndex;child.cascadeChild=true;const longTrail=parent.pattern==='flat-medallion'&&child.flatRole==='comet';child.life=child.maxLife=(longTrail?2.05:child.flatRing?1.90:child.flatFine?(parent.pattern==='flat-medallion'?1.70:1.90):1.62)+random()*(longTrail?.18:.22);child.drag=longTrail?.95:1.35;child.collisionDelay=.25;if(longTrail){child.longTrail=true;child.trailAge=1.10;child.tailLength=84;child.trailTint=colors[child.flatBand===0?1:0];}}
+  for(const child of children){child.vx+=parent.vx;child.vy+=parent.vy;child.clusterIndex=parent.clusterIndex;child.cascadeChild=true;const longTrail=parent.pattern==='flat-medallion'&&child.flatRole==='comet';child.life=child.maxLife=(longTrail?2.05:child.flatRing?1.90:child.flatFine?(parent.pattern==='flat-medallion'?1.70:1.90):1.62)+random()*(longTrail?.18:.22);child.drag=longTrail?.95:1.35;child.collisionDelay=.38;if(longTrail){child.longTrail=true;child.trailAge=1.10;child.tailLength=84;child.trailTint=colors[child.flatBand===0?1:0];}}
   return children;
  }
  const out=[],root=Math.sqrt(parent.scale),T=parent.tempo,color=parent.color,accent=parent.accent;
  if(parent.flatRole==='seed'){
   for(let k=0;k<parent.petalCount;k++){
-   const a=parent.turn+k/parent.petalCount*TAU,speed=(190+random()*18)*root/T;
-   out.push(make(parent,'petal',parent.vx+Math.cos(a)*speed,parent.vy+Math.sin(a)*speed,(10.5+random()*2)*root,1.50,color,random,{angle:a,drag:1.65/T}));
+   const a=parent.turn+k/parent.petalCount*TAU,speed=(190+random()*18)*root/T*1.12;
+   out.push(make(parent,'petal',parent.vx+Math.cos(a)*speed,parent.vy+Math.sin(a)*speed,(10.5+random()*2)*root*1.10,1.50,color,random,{angle:a,drag:1.65/T}));
   }
   out.push(make(parent,'core',parent.vx,parent.vy,3.4*root,.23,accent,random,{flatEmitAt:.16*T,turn:parent.turn,color,accent}));
  }else if(parent.flatRole==='core'&&parent.petalLayer===2){
   const tint=FLAT_COLORWAYS[parent.variant||0][2];
-  for(let k=0;k<12;k++){const a=parent.turn+k/12*TAU+.36,speed=53*root/T;out.push(make(parent,'petal',parent.vx+Math.cos(a)*speed,parent.vy+Math.sin(a)*speed,4.1*root,1.14,tint,random,{angle:a,drag:1.6/T,innerPetal:true,petalLayer:3}));}
+  for(let k=0;k<12;k++){const a=parent.turn+k/12*TAU+.36,speed=53*root/T*1.12;out.push(make(parent,'petal',parent.vx+Math.cos(a)*speed,parent.vy+Math.sin(a)*speed,4.1*root*1.10,1.14,tint,random,{angle:a,drag:1.6/T,innerPetal:true,petalLayer:3}));}
  }else if(parent.flatRole==='core'){
   for(let k=0;k<16;k++){
-   const a=parent.turn+k/16*TAU+.18,speed=100*root/T;
-   out.push(make(parent,'petal',parent.vx+Math.cos(a)*speed,parent.vy+Math.sin(a)*speed,5.2*root,1.05,accent,random,{angle:a,drag:1.8/T,innerPetal:true}));
+   const a=parent.turn+k/16*TAU+.18,speed=100*root/T*1.12;
+   out.push(make(parent,'petal',parent.vx+Math.cos(a)*speed,parent.vy+Math.sin(a)*speed,5.2*root*1.10,1.05,accent,random,{angle:a,drag:1.8/T,innerPetal:true}));
   }
   out.push(make(parent,'core',parent.vx,parent.vy,2.4*root,.25,accent,random,{flatEmitAt:.19*T,turn:parent.turn,color,accent,petalLayer:2}));
   out.push(make(parent,'ring',parent.vx,parent.vy,24*root,1.56,accent,random,{angle:parent.turn}));
