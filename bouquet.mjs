@@ -1,4 +1,4 @@
-import {roundColor} from './dandelion.mjs?v=8acdb352c57c';
+import {roundColor} from './dandelion.mjs?v=8bca007e19ed';
 // A visual interpretation of comet tails -> popping flowers -> crackling stars.
 // Finite, staggered stages; never a recursive particle emitter.
 export const BOUQUET_NAME='繁花爆闪';

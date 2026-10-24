@@ -1,6 +1,6 @@
-import {particleVisibility} from './particle-visibility.mjs?v=8acdb352c57c';
-import {clamp} from './core.mjs?v=8acdb352c57c';
-import {handShell,handRing} from './handglow-particles.mjs?v=8acdb352c57c';
+import {particleVisibility} from './particle-visibility.mjs?v=8bca007e19ed';
+import {clamp} from './core.mjs?v=8bca007e19ed';
+import {handShell,handRing} from './handglow-particles.mjs?v=8bca007e19ed';
 const TAU=Math.PI*2;
 export const FLAT_LAUNCH_BLUE='#59C9F2';
 export const FLAT_PATTERN='flat-petals';

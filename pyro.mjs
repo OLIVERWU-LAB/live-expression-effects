@@ -1,5 +1,5 @@
-import {roundColor} from './dandelion.mjs?v=8acdb352c57c';
-import { clamp } from './core.mjs?v=8acdb352c57c';
+import {roundColor} from './dandelion.mjs?v=8bca007e19ed';
+import { clamp } from './core.mjs?v=8bca007e19ed';
 // Warm/cool paper colours with a quiet cream, rather than arbitrary RGB hues.
 export const PAPER_COLORS=['#FF7897','#62DDD2','#FFD477','#ACA0F3','#FFF3D9'];
 export const FIRE_COLORS=['#73BFE6','#FF9872','#AE8BE0','#FFD18A','#8DD7B6'];
@@ -38,7 +38,7 @@ export function planBurst(w,h,head,side=0,random=Math.random){
  if(candidates.length)break;
  }
  if(!candidates.length)return null;
- const preferred=candidates.filter(p=>p.zone===['above','left','above','right'][side%4]);
+ const preferred=candidates.filter(p=>p.zone===(side%2===0?'left':'right'));
  const list=preferred.length?preferred:candidates,p=list[Math.floor(random()*list.length)];
  p.launchX=clamp(side%3===0?cx:p.x+(random()-.5)*Math.min(w*.10,headWidth*.35),w*.16,w*.84);
  return p;

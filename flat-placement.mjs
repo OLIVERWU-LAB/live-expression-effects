@@ -1,5 +1,5 @@
-import{flatShell}from'./flat-fireworks.mjs?v=8acdb352c57c';
-import{boundsDistance}from'./pyro.mjs?v=8acdb352c57c';
+import{flatShell}from'./flat-fireworks.mjs?v=8bca007e19ed';
+import{boundsDistance}from'./pyro.mjs?v=8bca007e19ed';
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 export const flatRandom=seed=>()=>((seed=Math.imul(seed,1664525)+1013904223>>>0)/4294967296);
 
@@ -17,7 +17,7 @@ export const flatSiteGap=(head,width,height)=>width<650&&height>width?clamp((hea
 export function flatSitesClear(sites,x,y,scale,head,width,height){return !head||sites.every(p=>boundsDistance(x+p.x,y+p.y,head)>=flatSiteGap(head,width,height)+35*scale*p.flowerScale);}
 export function placeFlatBouquet(layout,width,height,head){
  if(!head)return layout;
- const portrait=width<650&&height>width,cx=(head.left+head.right)/2,zone=layout?.zone||'above',side=zone==='left'?-1:zone==='right'?1:0;
+ const portrait=width<650&&height>width,cx=(head.left+head.right)/2,zone=layout?.zone||'above',requestedSide=layout?.requestedSide,side=requestedSide==='left'?-1:requestedSide==='right'?1:zone==='left'?-1:zone==='right'?1:0;
  const seed=(Math.imul(Math.round((layout?.x??width/2)*1013),1664525)^Math.round((layout?.launchX??layout?.y??height/4)*337))>>>0;
  const nominal=portrait?Math.min((layout?.scale??.75)*1.12,width/475,.9):Math.min(layout?.scale??1,width/980,height/620,1.25),gap=flatSiteGap(head,width,height);
  const targetX=portrait?cx+side*width*.09:zone==='left'?head.left*.48:zone==='right'?(head.right+width)*.5:cx,targetY=portrait?head.top*.34:head.top*.58;
@@ -33,6 +33,8 @@ export function placeFlatBouquet(layout,width,height,head){
    for(const x of xs)for(const y of ys){
     const clearance=layout?.clearance??gap;if(boundsDistance(x,y,head)<clearance+6)continue;
     if(sites.some(p=>boundsDistance(x+p.x,y+p.y,head)<gap+(portrait?65:90)*scale*p.flowerScale))continue;
+    // Keep an alternating request on its side even if a smaller complete bouquet is needed.
+    if(!portrait&&requestedSide&&((x-cx)*side<Math.min(32,(head.right-head.left)*.12)))continue;
     const score=Math.hypot((x-targetX)/width,(y-targetY)/height)+variant*.002;
     if(!best||score<best.score)best={...layout,x,y,scale,radius:scale*205,zone,flatSeed,flatPlacement:true,clearance,score};
    }
