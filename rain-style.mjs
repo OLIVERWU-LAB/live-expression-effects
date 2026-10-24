@@ -1,5 +1,5 @@
-import {clamp} from './core.mjs?v=4f8722bd807f';
-import {mixHex} from './emission.mjs?v=4f8722bd807f';
+import {clamp} from './core.mjs?v=a9c88dfd0e4a';
+import {mixHex} from './emission.mjs?v=a9c88dfd0e4a';
 // Flux through the top and upstream edge keeps a slanted rain field filled.
 export function lineRainEntry(width,height,depth,roll){
  const vx=145+depth*90,vy=440+depth*280,leftShare=vx*height/(vy*Math.max(1,width)+vx*height);

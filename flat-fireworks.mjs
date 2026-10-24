@@ -1,6 +1,6 @@
-import {particleVisibility} from './particle-visibility.mjs?v=4f8722bd807f';
-import {clamp} from './core.mjs?v=4f8722bd807f';
-import {handShell,handRing} from './handglow-particles.mjs?v=4f8722bd807f';
+import {particleVisibility} from './particle-visibility.mjs?v=a9c88dfd0e4a';
+import {clamp} from './core.mjs?v=a9c88dfd0e4a';
+import {handShell,handRing} from './handglow-particles.mjs?v=a9c88dfd0e4a';
 const TAU=Math.PI*2;
 export const FLAT_LAUNCH_BLUE='#59C9F2';
 export const FLAT_PATTERN='flat-petals';
@@ -166,16 +166,23 @@ export function flatTrailGeometry(p){
 }
 export function flatLongTailFade(p){return Math.pow(clamp((p.life-.10)/.58),2.5);}
 function flatRay(g,p,age,remaining,head=true){
- const path=flatTrailGeometry(p),w=p.size;
+ const path=flatTrailGeometry(p),w=p.size;if(p.longTrail&&flatLongTailFade(p)<=.003)return;
  g.globalAlpha=particleVisibility(p)*clamp(age/.04)*(p.longTrail?flatLongTailFade(p):clamp(remaining/.60));g.fillStyle=p.trailTint||p.tint;
- if(path.left.length){if(p.longTrail){const last=path.points.at(-1),gradient=g.createLinearGradient(0,0,last.x,last.y),color=p.trailTint||p.tint;gradient.addColorStop(0,color+'ff');gradient.addColorStop(.45,color+'b8');gradient.addColorStop(1,color+'00');g.fillStyle=gradient;}g.beginPath();g.moveTo(path.left[0].x,path.left[0].y);for(const q of path.left.slice(1))g.lineTo(q.x,q.y);for(const q of [...path.right].reverse())g.lineTo(q.x,q.y);g.closePath();g.fill();}
+ if(path.left.length&&g.globalAlpha>.003){
+  if(p.longTrail){
+   // Solid, bounded quads avoid tiny/degenerate GPU gradients in mobile WebKit.
+   // Every quad explicitly owns its colour, alpha and path, including foreground redraws.
+   const alpha=g.globalAlpha,total=path.points.at(-1).d,stride=Math.max(1,Math.ceil((path.points.length-1)/12));
+   for(let i=0;i<path.points.length-1;i+=stride){const j=Math.min(path.points.length-1,i+stride),fade=1-(path.points[i].d+path.points[j].d)/(2*total);g.globalAlpha=alpha*fade;g.fillStyle=p.trailTint||p.tint;g.beginPath();g.moveTo(path.left[i].x,path.left[i].y);g.lineTo(path.left[j].x,path.left[j].y);g.lineTo(path.right[j].x,path.right[j].y);g.lineTo(path.right[i].x,path.right[i].y);g.closePath();g.fill();}g.globalAlpha=alpha;
+  }else{g.beginPath();g.moveTo(path.left[0].x,path.left[0].y);for(const q of path.left.slice(1))g.lineTo(q.x,q.y);for(const q of [...path.right].reverse())g.lineTo(q.x,q.y);g.closePath();g.fill();}
+ }
  // The head remains at the integrated particle coordinate, with no faux ribbon rotation.
  if(head){g.fillStyle=p.cap||p.tint;g.beginPath();g.arc(0,0,p.flatRole==='ribbon'?w*.32:w*.98,0,TAU);g.fill();}
 }
 export function flatEnvelope(age){return{bud:clamp(age/.035)*clamp((.22-age)/.07),petals:clamp(age/.055)*clamp((1.12-age)/.45),ring:clamp(age/.09)*clamp((1.56-age)/.80),dust:clamp(age/.08)*clamp((2-age)/.7)};}
 export function drawFlatFireworks(g,world){
  g.save();g.globalCompositeOperation='source-over';g.lineCap='round';g.lineJoin='round';
- for(const p of world.particles){if(!p.flatFx||p.delay>0)continue;
+ for(const p of world.particles){if(!p.flatFx||p.delay>0||p.life<=0||!Number.isFinite(p.x+p.y+p.size+p.life+p.maxLife))continue;
   const age=(p.maxLife-p.life)/p.tempo,remaining=p.life/p.tempo,env=flatEnvelope(age),r=p.size;
   g.save();g.translate(p.x,p.y);g.fillStyle=p.tint;g.strokeStyle=p.tint;
   if(p.flatReprise){drawFlatReprise(g,p);

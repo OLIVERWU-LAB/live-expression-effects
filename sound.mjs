@@ -1,7 +1,7 @@
-import{SoundDesigner as SampledSoundDesigner}from'./sound-bank.mjs?v=4f8722bd807f';
-import{RainAudio}from'./rain-audio.mjs?v=4f8722bd807f';
-import{proceduralTexture}from'./sound-textures.mjs?v=4f8722bd807f';
-import{clamp}from'./core.mjs?v=4f8722bd807f';import{particleVisibility}from'./particle-visibility.mjs?v=4f8722bd807f';import{refinedDissolveStart}from'./cinema-refined-particles.mjs?v=4f8722bd807f';
+import{SoundDesigner as SampledSoundDesigner}from'./sound-bank.mjs?v=a9c88dfd0e4a';
+import{RainAudio}from'./rain-audio.mjs?v=a9c88dfd0e4a';
+import{proceduralTexture}from'./sound-textures.mjs?v=a9c88dfd0e4a';
+import{clamp}from'./core.mjs?v=a9c88dfd0e4a';import{particleVisibility}from'./particle-visibility.mjs?v=a9c88dfd0e4a';import{refinedDissolveStart}from'./cinema-refined-particles.mjs?v=a9c88dfd0e4a';
 export const MIX=Object.freeze({master:.38,maxVoices:24,echoDelay:.065});
 // Recorded booms/glitter keep their timbre; ascent and contact use small program
 // textures. Envelopes follow events; glitter never loops or repeats cut fragments.
@@ -25,10 +25,10 @@ export class SoundDesigner extends SampledSoundDesigner{
  fade(source,seconds=.28){const v=this.voiceInfo.get(source);if(!v||v.fading)return;const now=this.context.currentTime;v.fading=true;v.stopAt=now+seconds+.008;if(v.gain.cancelAndHoldAtTime)v.gain.cancelAndHoldAtTime(now);else{v.gain.cancelScheduledValues(now);v.gain.setValueAtTime(now<v.when?0:v.currentLevel,now);}v.gain.linearRampToValueAtTime(0,now+seconds);try{source.stop(v.stopAt);}catch{}this.voices.delete(source);}
  prune(){const now=this.context?.currentTime??0;for(const[source,v]of this.voiceInfo)if(now>=(v.stopAt??v.when+v.duration+.02))this.release(source);}
  texture(name){if(!this.buffers.has(name)){this.buffers.set(name,{buffer:proceduralTexture(this.context,name,this.random),offset:0});this.normalization.set(name,1);}return name;}
- launch(e){this.play(this.texture('rise'),{gain:.40,rate:.98+this.random()*.04,duration:(e.duration||.65),fade:.12,highpass:650,lowpass:5000,pan:(e.x-.5)*1.2,priority:3});}
- big(e){const flat=e.style==='flat',gain=flat?.29+this.random()*.14:.68,rate=(flat?.95:.98)+this.random()*(flat?.13:.045),pan=(e.x-.5)*1.2;this.play('explode',{gain,rate,pan,priority:4,fade:.18});this.play('fireworks2',{when:this.context.currentTime+MIX.echoDelay,gain:gain*.12,rate:.97+this.random()*.06,pan:pan*.7,priority:3,fade:.055});if(e.style!=='gift')this.shimmer(e,false);}
+ launch(e){this.play(this.texture('rise'),{gain:.20,rate:.98+this.random()*.04,duration:(e.duration||.65),fade:.12,highpass:450,lowpass:4500,pan:(e.x-.5)*1.2,priority:3});}
+ big(e){const flat=e.style==='flat',gain=flat?.29+this.random()*.14:.68,rate=(flat?.95:.98)+this.random()*(flat?.13:.045),pan=(e.x-.5)*1.2;this.play('explode',{gain,rate,pan,priority:4,fade:.18});if(e.style!=='gift')this.shimmer(e,false);}
  small(e){if(!this.allow('small',.065))return;this.play('explode',{gain:(e.style==='flat'?.14:.11)+this.random()*.07,rate:1.06+this.random()*.16,highpass:180,lowpass:6000,pan:(e.x-.5)*1.3,priority:3,fade:.25});}
- shimmer(e,ending=true){if(e.style==='gift')return;const name=ending?'sparks':'shining',old=this.shimmers.get(name);if(old&&this.voiceInfo.has(old))return;if(!this.allow(name+'-start',1.4))return;const source=this.play(name,{gain:ending?.045:.060,rate:.98+this.random()*.065,pan:(e.x-.5),priority:1,dynamic:true,lowpass:6500,highpass:650});if(source)this.shimmers.set(name,source);}
+ shimmer(e,ending=true){if(e.style==='gift')return;const name='sparks',old=this.shimmers.get(name);if(old&&this.voiceInfo.has(old))return;if(!this.allow(name+'-start',1.4))return;const source=this.play(name,{gain:.030,rate:.98+this.random()*.065,pan:(e.x-.5),priority:1,dynamic:true,lowpass:6500,highpass:650});if(source)this.shimmers.set(name,source);}
  glitter(e){this.shimmer(e,true);}
  confetti(e){if(!this.allow('paper',.16))return;this.play(this.texture('paper-soft'),{gain:.23+this.random()*.035,rate:.96+this.random()*.08,fade:.09,pan:(e.x-.5)*1.2,highpass:900,lowpass:6500,priority:2});}
  handle(events){if(!this.ready||!this.enabled)return;for(const e of events){if(e.type==='launch')this.launch(e);else if(e.type==='burst'){if(e.style==='flat')this.small(e);else this.big(e);}else if(e.type==='crackle'){if(e.style==='gift'&&e.collision)this.confetti(e);else if(e.style==='flat'&&e.stage===2)this.big(e);else if(e.stage>=3)this.glitter(e);else this.small(e);}else if(e.type==='glitter')this.glitter(e);else if(e.type==='flight-blocked')for(const[source,v]of this.voiceInfo)if(v.name==='rise')this.fade(source,.18);}}
