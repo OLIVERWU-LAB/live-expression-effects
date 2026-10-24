@@ -1,24 +1,24 @@
-import {cameraFrameReader} from './camera-frame.mjs?v=c5a4e5600643';
-import {fitFlatViewport} from './flat-budget.mjs?v=c5a4e5600643';
-import {VisionSession} from './vision-session.mjs?v=c5a4e5600643';
-import{ParticleQuality}from'./particle-quality.mjs?v=c5a4e5600643';
-import {applyLiveStyle,lockedState} from './live-playback.mjs?v=c5a4e5600643';
-import {REFERENCE_NAMES} from './reference-bursts.mjs?v=c5a4e5600643';
-import { ExpressionController, clamp, headPolygon, previewHead } from './core.mjs?v=c5a4e5600643';
-import { StickerWorld, SilhouetteCollider } from './effects.mjs?v=c5a4e5600643';
-import {HandCollider,withHands} from './hands.mjs?v=c5a4e5600643';
-import { Renderer } from './renderer.mjs?v=c5a4e5600643';
-import { SHELLS, planBurst } from './pyro.mjs?v=c5a4e5600643';
-import {BOUQUET_NAME} from './bouquet.mjs?v=c5a4e5600643';
-import { SoundDesigner } from './sound.mjs?v=c5a4e5600643';
+import {cameraFrameReader} from './camera-frame.mjs?v=8a63e3112740';
+import {fitFlatViewport} from './flat-budget.mjs?v=8a63e3112740';
+import {VisionSession} from './vision-session.mjs?v=8a63e3112740';
+import{ParticleQuality}from'./particle-quality.mjs?v=8a63e3112740';
+import {applyLiveStyle,lockedState} from './live-playback.mjs?v=8a63e3112740';
+import {REFERENCE_NAMES} from './reference-bursts.mjs?v=8a63e3112740';
+import { ExpressionController, clamp, headPolygon, previewHead } from './core.mjs?v=8a63e3112740';
+import { StickerWorld, SilhouetteCollider } from './effects.mjs?v=8a63e3112740';
+import {HandCollider,withHands} from './hands.mjs?v=8a63e3112740';
+import { Renderer } from './renderer.mjs?v=8a63e3112740';
+import { SHELLS, planBurst } from './pyro.mjs?v=8a63e3112740';
+import {BOUQUET_NAME} from './bouquet.mjs?v=8a63e3112740';
+import { SoundDesigner } from './sound.mjs?v=8a63e3112740';
 const $ = id => document.getElementById(id), stage = $('stage'), video = $('camera');
 const renderer = new Renderer($('scene')), world = new StickerWorld(), expression = new ExpressionController();
 renderer.gift.tileSize=matchMedia('(max-width: 600px)').matches?96:0;
 const sound = new SoundDesigner();
 try { sound.setEnabled(localStorage.getItem('expression-sound') !== 'off'); } catch {}
-function syncSound() { const on = sound.enabled && sound.ready; $('sound-toggle').setAttribute('aria-pressed', String(on)); $('sound-toggle').setAttribute('aria-label', on ? '关闭声音' : '开启声音'); $('sound-toggle').title = on ? '关闭声音' : '开启声音'; $('sound-status').textContent = !sound.enabled ? '静音' : !sound.ready ? '点击右上角开启' : world.style==='cinema' ? '呼啸 · 爆裂 · 余响' : '轻响 · 弹跳 · 铃音'; }
-sound.onstate = syncSound; syncSound();
-function activateAudio() { if(sound.enabled) sound.unlock().then(syncSound); }
+function syncSound() { const on = sound.enabled && sound.ready; $('sound-toggle').setAttribute('aria-pressed', String(on)); $('sound-toggle').setAttribute('aria-label', on ? '关闭声音' : '开启声音'); $('sound-toggle').title = on ? '关闭声音' : '开启声音'; $('sound-status').textContent = !sound.enabled ? '静音' : !sound.ready ? '点击右上角开启' : '升空 · 爆裂 · 碎光'; }
+sound.onstate = ()=>{syncSound();syncLoading();}; syncSound();
+function activateAudio() { sound.unlock().then(syncSound); }
 const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const quality=new ParticleQuality(reduced?180:700);world.limit=quality.limit;
 let mode = 'idle', wanted = false, stream = null, engineReady = false;
@@ -32,11 +32,11 @@ let lastMetric = null, segmentationReady = false, handsReady = false, handLandma
 applyLiveStyle(world,'cinema');
 world.giftMaterialStyle='random';
 renderer.gift.material=world.giftMaterialStyle;
-stage.dataset.build='v68';
+stage.dataset.build='v69';
 const readFaceFrame=cameraFrameReader(480),readGeometryFrame=cameraFrameReader(320);
 let lastGeometryCapture=0,lastGeometryVideoTime=-1;
 const vision=new VisionSession({
- createWorker:()=>new Worker(new URL('./vision.worker.js?v=c5a4e5600643',import.meta.url)),
+ createWorker:()=>new Worker(new URL('./vision.worker.js?v=8a63e3112740',import.meta.url)),
  createBitmap:()=>readFaceFrame(video),
  initOptions:{role:'face'},
  active:()=>wanted&&mode==='camera'&&!suspended,
@@ -45,7 +45,7 @@ const vision=new VisionSession({
  onEvent:handleVisionEvent
 });
 const geometry=new VisionSession({
- createWorker:()=>new Worker(new URL('./vision.worker.js?v=c5a4e5600643',import.meta.url)),
+ createWorker:()=>new Worker(new URL('./vision.worker.js?v=8a63e3112740',import.meta.url)),
  createBitmap:()=>readGeometryFrame(video),initOptions:{role:'geometry'},
  active:()=>wanted&&mode==='camera'&&!suspended&&engineReady,
  onError:(error,phase)=>{record('geometry-error',{phase,message:String(error)});if(phase!=='dropped-frame'){segmentationReady=false;handsReady=false;mask=null;silhouette=null;hands=null;}},
@@ -53,23 +53,23 @@ const geometry=new VisionSession({
 });
 const visionSteps={download:'正在下载识别资源…',runtime:'正在加载识别运行库…',wasm:'正在下载识别引擎…','face-model':'正在下载人脸模型…','face-create':'正在启动人脸模型…',detecting:'正在读取摄像头画面…',ready:'正在恢复表情识别…',idle:'正在准备表情识别…'};
 function syncLoading(){
- const live=mode!=='idle'&&!suspended,recognition=live&&mode==='camera'&&(!engineReady||!vision.hasResult),gift=live&&world.style==='gift'&&!renderer.gift.ready;
- const text=cameraStartupError&&recognition?'识别启动未完成':recognition?(visionSteps[vision.phase]||'正在恢复表情识别…'):gift?(renderer.gift.error?'礼物素材加载失败':'正在加载礼物素材…'):'';
+ const live=mode!=='idle'&&!suspended,recognition=live&&mode==='camera'&&(!engineReady||!vision.hasResult),audio=live&&!sound.assetsReady,gift=live&&world.style==='gift'&&!renderer.gift.ready;
+ const text=cameraStartupError&&recognition?'识别启动未完成':recognition?(visionSteps[vision.phase]||'正在恢复表情识别…'):audio?(sound.error?'音效加载失败':`正在加载音效… ${sound.loaded||0} / ${sound.total||6}`):gift?(renderer.gift.error?'礼物素材加载失败':'正在加载礼物素材…'):'';
  const bytes=vision.progress,download=recognition&&bytes?.loaded&&bytes?.total?' '+(bytes.loaded/1048576).toFixed(1)+' / '+(bytes.total/1048576).toFixed(1)+' MB':'';
  $('loading').hidden=!text;$('loading-copy').textContent=text+download;
- const failure=cameraStartupError||vision.lastError;
- $('loading-detail').textContent=recognition&&failure?'上次未成功：'+failure.slice(0,180):'';
- $('loading-detail').hidden=!$('loading-detail').textContent;
- $('loading-retry').hidden=recognition?!failure:!gift||!renderer.gift.error;
+ const failure=recognition?(cameraStartupError||vision.lastError):audio?sound.error:gift?String(renderer.gift.error||''):null;
+ $('loading-detail').textContent=failure?'上次未成功：'+failure.slice(0,180):'';
+ $('loading-detail').hidden=!failure;$('loading-retry').hidden=!failure;
  $('loading-diagnostics').hidden=!recognition||(!vision.lastError&&performance.now()-vision.startedAt<10000);
  stage.setAttribute('aria-busy',String(!!text));
 }
 $('loading-retry').addEventListener('click',()=>{
  if(mode==='camera'&&(!engineReady||!vision.hasResult)){cameraStartupError=null;cameraStartup='recognition';record('recognition-retry');geometry.dispose();vision.restart().catch(()=>{});}
+ else if(!sound.assetsReady)sound.unlock().then(syncLoading);
  else renderer.gift.load(world.giftMaterialStyle).then(syncLoading);syncLoading();
 });
 $('loading-diagnostics').addEventListener('click',async()=>{
- const detail=JSON.stringify({version:68,browser:navigator.userAgent,source:mode,startup:cameraStartup,startupError:cameraStartupError,wanted,suspended,workerCreated:!!vision.worker,phase:vision.phase,error:vision.lastError,ready:vision.ready,resultReceived:vision.hasResult,pending:vision.pending,attempts:vision.attempt,video:{width:video.videoWidth,height:video.videoHeight,time:video.currentTime,readyState:video.readyState,paused:video.paused},events:log.slice(-18)},null,2);
+ const detail=JSON.stringify({version:69,browser:navigator.userAgent,source:mode,startup:cameraStartup,startupError:cameraStartupError,wanted,suspended,workerCreated:!!vision.worker,phase:vision.phase,error:vision.lastError,ready:vision.ready,resultReceived:vision.hasResult,pending:vision.pending,attempts:vision.attempt,audio:{ready:sound.assetsReady,loaded:sound.loaded,error:sound.error,enabled:sound.enabled},video:{width:video.videoWidth,height:video.videoHeight,time:video.currentTime,readyState:video.readyState,paused:video.paused},events:log.slice(-18)},null,2);
  try{await navigator.clipboard.writeText(detail);$('loading-diagnostics').textContent='已复制诊断';}catch{window.prompt('复制以下诊断信息',detail);}
 });
 function syncStyle() {
@@ -115,6 +115,7 @@ function stop() {
   // Keep the initialized engine in memory for a later start in this same page.
 }
 function usePreview() {
+  sound.load();
   wanted = false; vision.pause();geometry.pause(); storage.set(false); releaseTracks(); resetSignals(); world.clear(); sessionStart = performance.now(); log = []; showSession('preview');
   previewX = .5; previewY = .37; previewStrength = .35; $('preview-strength').value = 35; $('status-copy').textContent = '模拟信号 · 非摄像头识别'; notify(); record('preview-start');
 }
@@ -168,7 +169,7 @@ async function acquireCamera() {
 async function startCamera(automatic = false) {
   if (!isSecureContext || !navigator.mediaDevices?.getUserMedia) { notify('请通过 HTTPS 或 localhost，在支持摄像头的浏览器中体验。'); return; }
   if (!window.Worker || !window.createImageBitmap || !window.OffscreenCanvas) { notify('当前浏览器缺少本地识别能力，请使用新版 Chrome、Edge 或 Safari。'); return; }
-  wanted = true; storage.set(true); notify(); $('start-camera').disabled = true;cameraStartupError=null;
+  sound.load();wanted = true; storage.set(true); notify(); $('start-camera').disabled = true;cameraStartupError=null;
   if (mode !== 'camera') { world.clear(); resetSignals(); sessionStart = performance.now(); log = []; }
   try {
     cameraStartup='camera';record('camera-requested');
@@ -255,7 +256,7 @@ function frame(now) {
   if(now-fpsTime>=1000){fps=frames*1000/(now-fpsTime);fpsTime=now;frames=0;sampledFPS=true;}
   if (mode === 'preview') setState(expression.sample(previewStrength, now).state);
   else if (mode === 'camera' && now - faceTime > 1800) { expression.reset(); setState('neutral'); landmarks = null; }
-  const collider = collisionGeometry(now, dt), active = mode === 'preview' || (mode === 'camera' && (!!lockedEffect || (engineReady && now - faceTime < 1800)));
+  const collider = collisionGeometry(now, dt), active = sound.assetsReady && (world.style!=='gift'||renderer.gift.ready) && (mode === 'preview' || (mode === 'camera' && (!!lockedEffect || (engineReady && now - faceTime < 1800))));
   if(sampledFPS){const before=world.limit;world.limit=quality.sample({now,fps,drawMs:renderer.drawMs,active,visible:!document.hidden,gap});if(world.style==='flat'&&world.effect==='laugh'&&(world.particles.length||world.pendingParticles.length||world.rockets.length))world.limit=before;if(before!==world.limit)record('particle-budget-adjusted',{limit:world.limit});}
   if(world.style==='flat'&&world.effect==='laugh'&&!world.particles.length&&!world.pendingParticles.length&&!world.rockets.length)world.limit=quality.limit;
   if (active && state === 'smile') world.rain(dt * (reduced ? .45 : 1), width, height, expression.smile);
@@ -302,7 +303,7 @@ let dragStart = null;
 stage.addEventListener('pointerdown', e => { if (mode !== 'preview' || e.target.closest('button,input,aside,.hud')) return; pointerDown = true; dragStart = e.pointerId; stage.setPointerCapture(e.pointerId); move(e); });
 function move(e) { if (!pointerDown || mode !== 'preview') return; previewX = clamp(e.clientX / width, .18, .82); previewY = clamp(e.clientY / height, .2, .58); }
 stage.addEventListener('pointermove', move); stage.addEventListener('pointerup', () => pointerDown = false); stage.addEventListener('pointercancel', () => pointerDown = false);
-$('export-session').addEventListener('click', () => { const data = { version: 68, exportedAt: new Date().toISOString(), metrics: mode === 'idle' ? lastMetric : metrics(), note: 'Aggregate performance and interaction events only; no images or face geometry.', events: log }; const url = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })); const a = document.createElement('a'); a.href = url; a.download = 'expression-session.json'; a.click(); setTimeout(() => URL.revokeObjectURL(url), 1000); });
+$('export-session').addEventListener('click', () => { const data = { version: 69, exportedAt: new Date().toISOString(), metrics: mode === 'idle' ? lastMetric : metrics(), note: 'Aggregate performance and interaction events only; no images or face geometry.', events: log }; const url = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })); const a = document.createElement('a'); a.href = url; a.download = 'expression-session.json'; a.click(); setTimeout(() => URL.revokeObjectURL(url), 1000); });
 document.addEventListener('visibilitychange', () => document.hidden ? pause() : resume());
 window.addEventListener('pagehide', e => { pause(); if (!e.persisted) { releaseTracks(); vision.dispose();geometry.dispose(); } });
 window.addEventListener('pageshow', e => { if (e.persisted) resume(); });
