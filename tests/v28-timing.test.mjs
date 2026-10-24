@@ -1,8 +1,8 @@
 import test from 'node:test';import assert from 'node:assert/strict';
 import{StickerWorld}from'../dist/effects.mjs';import{ACTIVE_FLAT_PATTERNS}from'../dist/flat-fireworks.mjs';
 const rng=seed=>()=>{seed=(Math.imul(seed,1664525)+1013904223)>>>0;return seed/4294967296;};
-test('flat automatic rotation contains only the four retained designs',()=>{
- const w=new StickerWorld(rng(8));w.setStyle('flat');assert.equal(ACTIVE_FLAT_PATTERNS.length,4);const seen=new Set();for(let i=0;i<40;i++){const key=w.nextPattern();assert.ok(ACTIVE_FLAT_PATTERNS.includes(key));seen.add(key);w.lastPattern=key;}assert.equal(seen.size,4);
+test('flat automatic rotation contains only the three retained designs',()=>{
+ const w=new StickerWorld(rng(8));w.setStyle('flat');assert.equal(ACTIVE_FLAT_PATTERNS.length,3);const seen=new Set();for(let i=0;i<40;i++){const key=w.nextPattern();assert.ok(ACTIVE_FLAT_PATTERNS.includes(key));seen.add(key);w.lastPattern=key;}assert.equal(seen.size,3);
 });
 test('flat flowers open in distinct staggered beats and their falling tail survives beyond two seconds',()=>{
  for(const key of ACTIVE_FLAT_PATTERNS.filter(k=>k!=='flat-reprise')){const w=new StickerWorld(rng(34));w.setStyle('flat');w.setEffect('laugh');w.burst(1500,800,1,key);const times=[];
