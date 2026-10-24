@@ -1,4 +1,4 @@
-import {clamp,coverPoint,pointInPolygon,collide} from './core.mjs?v=2adad563e72b';
+import {clamp,coverPoint,pointInPolygon,collide} from './core.mjs?v=503ad3f29326';
 
 const FINGERS=[[0,1,2,3,4],[5,6,7,8],[9,10,11,12],[13,14,15,16],[17,18,19,20]];
 const distance=(p,a,b)=>{const dx=b.x-a.x,dy=b.y-a.y,t=clamp(((p.x-a.x)*dx+(p.y-a.y)*dy)/(dx*dx+dy*dy||1));return Math.hypot(p.x-a.x-t*dx,p.y-a.y-t*dy);};
