@@ -1,7 +1,7 @@
-import {particleVisibility} from './particle-visibility.mjs?v=c01b0346bbdd';
-import {giftMaterialTint} from './gift-materials.mjs?v=c01b0346bbdd';
-import {clamp} from './core.mjs?v=c01b0346bbdd';
-import {emissionColor,hexRGB} from './emission.mjs?v=c01b0346bbdd';
+import {particleVisibility} from './particle-visibility.mjs?v=fcfd31a3784c';
+import {giftMaterialTint} from './gift-materials.mjs?v=fcfd31a3784c';
+import {clamp} from './core.mjs?v=fcfd31a3784c';
+import {emissionColor,hexRGB} from './emission.mjs?v=fcfd31a3784c';
 
 // At most five bounded area lights, shared by the halo and person-lighting passes.
 // They remain alive with the sparks, rather than ending with the brief burst flash.

@@ -1,15 +1,15 @@
-import {particleVisibility} from './particle-visibility.mjs?v=c01b0346bbdd';
-import {drawLineRain,drawFlatRain} from './rain-style.mjs?v=c01b0346bbdd';
-import {drawFlatFireworks,drawFlatLaunch} from './flat-fireworks.mjs?v=c01b0346bbdd';
-import {CinemaRenderer} from './cinema-renderer.mjs?v=c01b0346bbdd';
-import {GiftRenderer} from './gift-renderer.mjs?v=c01b0346bbdd';
-import {stickerBurstEnvelope} from './dandelion.mjs?v=c01b0346bbdd';
-import { clamp, SMILE_ZONES } from './core.mjs?v=c01b0346bbdd';
-import { fireworkEnvelope } from './effects.mjs?v=c01b0346bbdd';
-import { Optics } from './optics.mjs?v=c01b0346bbdd';
-import {fireworkLights} from './lighting.mjs?v=c01b0346bbdd';
-import {EMBER_COLORS,emberPhase,mixHex} from './emission.mjs?v=c01b0346bbdd';
-import { PAPER_COLORS, FIRE_COLORS, FIRE_LIGHTS } from './pyro.mjs?v=c01b0346bbdd';
+import {particleVisibility} from './particle-visibility.mjs?v=fcfd31a3784c';
+import {drawLineRain,drawFlatRain} from './rain-style.mjs?v=fcfd31a3784c';
+import {drawFlatFireworks,drawFlatLaunch} from './flat-fireworks.mjs?v=fcfd31a3784c';
+import {CinemaRenderer} from './cinema-renderer.mjs?v=fcfd31a3784c';
+import {GiftRenderer} from './gift-renderer.mjs?v=fcfd31a3784c';
+import {stickerBurstEnvelope} from './dandelion.mjs?v=fcfd31a3784c';
+import { clamp, SMILE_ZONES } from './core.mjs?v=fcfd31a3784c';
+import { fireworkEnvelope } from './effects.mjs?v=fcfd31a3784c';
+import { Optics } from './optics.mjs?v=fcfd31a3784c';
+import {fireworkLights} from './lighting.mjs?v=fcfd31a3784c';
+import {EMBER_COLORS,emberPhase,mixHex} from './emission.mjs?v=fcfd31a3784c';
+import { PAPER_COLORS, FIRE_COLORS, FIRE_LIGHTS } from './pyro.mjs?v=fcfd31a3784c';
 export const lightColors=FIRE_LIGHTS;
 const lightCSS=FIRE_COLORS,palette=PAPER_COLORS;
 function makeCanvas(w, h) { const c = typeof OffscreenCanvas !== 'undefined' ? new OffscreenCanvas(w, h) : document.createElement('canvas'); c.width = w; c.height = h; return c; }

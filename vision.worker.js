@@ -1,5 +1,5 @@
 /* Inference stays off the render thread. Assets persist in Cache Storage. */
-importScripts('./vision-config.js?v=c01b0346bbdd');
+importScripts('./vision-config.js?v=fcfd31a3784c');
 let faceModel = null, handModel = null, lastHands = -Infinity, segmenter = null, latestMask = null, lastSegment = -Infinity;
 const nativeFetch = self.fetch.bind(self), cacheName = 'expression-assets-mp-0.10.21-v1';
 let cacheHits = 0, cacheWrites = 0, cacheAvailable = true;
