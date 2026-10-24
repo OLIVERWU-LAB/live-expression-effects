@@ -1,14 +1,13 @@
+import {planLiveFirework,fireworkLaunchBusy,fireworkLaunchGap} from './firework-playback.mjs';
 import {performanceProfile} from './performance-profile.mjs';
 import {cameraFrameReader} from './camera-frame.mjs';
-import {fitFlatViewport} from './flat-budget.mjs';
 import {VisionSession} from './vision-session.mjs';
 import{ParticleQuality}from'./particle-quality.mjs';
-import {applyLiveStyle,lockedState,flatLaunchBusy,flatLaunchGap,simulationSlices} from './live-playback.mjs';
+import {applyLiveStyle,lockedState,simulationSlices} from './live-playback.mjs';
 import { ExpressionController, clamp, headPolygon, previewHead } from './core.mjs';
 import { StickerWorld, SilhouetteCollider } from './effects.mjs';
 import {HandCollider,withHands} from './hands.mjs';
 import { Renderer } from './renderer.mjs';
-import { planBurst } from './pyro.mjs';
 import { SoundDesigner } from './sound.mjs';
 const $ = id => document.getElementById(id), stage = $('stage'), video = $('camera');
 const renderer = new Renderer($('scene')), world = new StickerWorld(), expression = new ExpressionController();
@@ -258,12 +257,12 @@ function frame(now) {
   if(world.style==='flat'&&world.effect==='laugh'&&!world.particles.length&&!world.pendingParticles.length&&!world.rockets.length)world.limit=quality.limit;
   if (active && state === 'smile') world.rain(dt * (reduced ? .45 : 1), width, height, expression.smile);
   world.head=currentHeadBounds();
-  const reviewBusy=world.style==='flat'?flatLaunchBusy(world):lockedEffect==='fireworks'&&(world.style==='cinema'?world.rockets.length>0:(world.rockets.length||world.launchers.length||world.particles.length||world.blooms.length||world.afterglows.length||world.innerBursts.length));
+  const reviewBusy=fireworkLaunchBusy(world);
   if(active&&state==='laugh'&&(world.style!=='gift'||renderer.gift.ready)&&!reviewBusy&&now>=nextLaunchAt){
-    const plan=planBurst(width,height,world.head,burstSide++),layout=world.style==='flat'?fitFlatViewport(plan,width,height,world.head):plan;
+    const layout=planLiveFirework(world,width,height,world.head,burstSide);
     if(layout&&world.launch(layout.x,layout.y,width,height,layout.scale,layout)){
-      stage.dataset.launchCount=String(++fireworkLaunches);
-      launchGap=world.style==='cinema'?1500+Math.random()*160:world.style==='flat'?flatLaunchGap():lockedEffect?450:world.style==='gift'?1750+Math.random()*200:1100+Math.random()*250;
+      burstSide++;stage.dataset.launchCount=String(++fireworkLaunches);
+      launchGap=fireworkLaunchGap(world.style);
       nextLaunchAt=now+(reduced?2800:launchGap);record('firework-launch',{zone:layout.zone,radius:Math.round(layout.radius)});
     }else nextLaunchAt=now+160;
   }
