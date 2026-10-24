@@ -1,17 +1,15 @@
 {
-  "version": "v67",
-  "pagesCommit": "ab513e243c5732ddf4978adb18f2cb857239b37e",
-  "pagesBuild": "built",
   "url": "https://oliverwu-lab.github.io/live-expression-effects/",
-  "entryFilesVerified": 9,
-  "entryChecks": [
+  "filesVerified": 9,
+  "https": true,
+  "checks": [
     {
       "path": "app.mjs",
       "status": 200,
       "type": "text/javascript; charset=utf-8",
       "localBytes": 31527,
       "verification": "full SHA256",
-      "sha256": "10a76bc64d8f0b1351dd230561c94d92efabcfc5e863da28e517c84f1fbaa012"
+      "sha256": "4edb153d619b9ac3d6d60afbb4c5b00198a16ffa1dfb7c08dbbcb90cf4c6e073"
     },
     {
       "path": "camera-frame.mjs",
@@ -27,7 +25,7 @@
       "type": "text/html; charset=utf-8",
       "localBytes": 6711,
       "verification": "full SHA256",
-      "sha256": "0d9309ca85eec187a4ea1bfe5adb4fb9198d4a8d5cb0596a94213603f503b6f5"
+      "sha256": "c3574af9a72d11cf1f954ff4112c0ee5f2bc35c141a23d3c39d6a7f54550ee02"
     },
     {
       "path": "style.css",
@@ -35,7 +33,7 @@
       "type": "text/css; charset=utf-8",
       "localBytes": 13156,
       "verification": "full SHA256",
-      "sha256": "5e22ff6e104e0dbce6258519f3a322686f8dfd5dea48576fdafa878e72616e84"
+      "sha256": "92ee344193480a5a93c95242a89c2cb212f2328d83878ca4167504eb7ad55688"
     },
     {
       "path": "vision-config.js",
@@ -65,9 +63,9 @@
       "path": "vision-session.mjs",
       "status": 200,
       "type": "text/javascript; charset=utf-8",
-      "localBytes": 5474,
+      "localBytes": 5618,
       "verification": "full SHA256",
-      "sha256": "eb5f111a8212f0660a31c914e2483f23b50e75e0a8d662b76b9403ac2b30c34d"
+      "sha256": "2ea2bef82076d47a76a585ef1fe50c0e5d1b104d1a887a115afd08be94e5303e"
     },
     {
       "path": "vision.worker.js",
@@ -75,42 +73,15 @@
       "type": "application/javascript; charset=utf-8",
       "localBytes": 8512,
       "verification": "full SHA256",
-      "sha256": "7046ba26ad92e1303ea08b59b509c4be1d782730ac7710706e7a2ba62707814b"
+      "sha256": "95470bb7679ead9397fcb597f61807a56823cf2ec655262593a3104c96e8eb57"
     }
   ],
-  "coreCompressedAssetsVerified": [
-    {
-      "name": "vision_bundle.cjs",
-      "packedBytes": 39717,
-      "decodedBytes": 137890,
-      "fullSHA256Verified": true,
-      "progressUpdates": 2,
-      "elapsedMs": 979
-    },
-    {
-      "name": "vision_wasm_internal.js",
-      "packedBytes": 49647,
-      "decodedBytes": 204284,
-      "fullSHA256Verified": true,
-      "progressUpdates": 2,
-      "elapsedMs": 909
-    },
-    {
-      "name": "vision_wasm_internal.wasm",
-      "packedBytes": 2899604,
-      "decodedBytes": 9574032,
-      "fullSHA256Verified": true,
-      "progressUpdates": 46,
-      "elapsedMs": 82506
-    },
-    {
-      "name": "face_landmarker.task",
-      "packedBytes": 3331700,
-      "decodedBytes": 3758596,
-      "fullSHA256Verified": true,
-      "progressUpdates": 52,
-      "elapsedMs": 117399
-    }
-  ],
-  "cameraOnDeviceTested": false
+  "cameraOnDeviceTested": false,
+  "version": "v68",
+  "pagesCommit": "d2c3e999604d87f2c7bdabce56420fc06e25d43f",
+  "pagesBuild": "built",
+  "automatedTestsPassed": 256,
+  "cameraOnUserChromeReportedWorking": true,
+  "userFeedback": "好了",
+  "automatedCameraOnDeviceTested": false
 }
