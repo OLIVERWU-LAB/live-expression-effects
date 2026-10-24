@@ -1,15 +1,16 @@
-import {fitFlatViewport} from './flat-budget.mjs?v=fcfd31a3784c';
-import {VisionSession} from './vision-session.mjs?v=fcfd31a3784c';
-import{ParticleQuality}from'./particle-quality.mjs?v=fcfd31a3784c';
-import {applyLiveStyle,lockedState} from './live-playback.mjs?v=fcfd31a3784c';
-import {REFERENCE_NAMES} from './reference-bursts.mjs?v=fcfd31a3784c';
-import { ExpressionController, clamp, headPolygon, previewHead } from './core.mjs?v=fcfd31a3784c';
-import { StickerWorld, SilhouetteCollider } from './effects.mjs?v=fcfd31a3784c';
-import {HandCollider,withHands} from './hands.mjs?v=fcfd31a3784c';
-import { Renderer } from './renderer.mjs?v=fcfd31a3784c';
-import { SHELLS, planBurst } from './pyro.mjs?v=fcfd31a3784c';
-import {BOUQUET_NAME} from './bouquet.mjs?v=fcfd31a3784c';
-import { SoundDesigner } from './sound.mjs?v=fcfd31a3784c';
+import {cameraFrameReader} from './camera-frame.mjs?v=391a638dd15e';
+import {fitFlatViewport} from './flat-budget.mjs?v=391a638dd15e';
+import {VisionSession} from './vision-session.mjs?v=391a638dd15e';
+import{ParticleQuality}from'./particle-quality.mjs?v=391a638dd15e';
+import {applyLiveStyle,lockedState} from './live-playback.mjs?v=391a638dd15e';
+import {REFERENCE_NAMES} from './reference-bursts.mjs?v=391a638dd15e';
+import { ExpressionController, clamp, headPolygon, previewHead } from './core.mjs?v=391a638dd15e';
+import { StickerWorld, SilhouetteCollider } from './effects.mjs?v=391a638dd15e';
+import {HandCollider,withHands} from './hands.mjs?v=391a638dd15e';
+import { Renderer } from './renderer.mjs?v=391a638dd15e';
+import { SHELLS, planBurst } from './pyro.mjs?v=391a638dd15e';
+import {BOUQUET_NAME} from './bouquet.mjs?v=391a638dd15e';
+import { SoundDesigner } from './sound.mjs?v=391a638dd15e';
 const $ = id => document.getElementById(id), stage = $('stage'), video = $('camera');
 const renderer = new Renderer($('scene')), world = new StickerWorld(), expression = new ExpressionController();
 renderer.gift.tileSize=matchMedia('(max-width: 600px)').matches?96:0;
@@ -30,21 +31,45 @@ let lastMetric = null, segmentationReady = false, handsReady = false, handLandma
 applyLiveStyle(world,'cinema');
 world.giftMaterialStyle='random';
 renderer.gift.material=world.giftMaterialStyle;
-stage.dataset.build='v66';
+stage.dataset.build='v67';
+const readFaceFrame=cameraFrameReader(480),readGeometryFrame=cameraFrameReader(320);
+let lastGeometryCapture=0,lastGeometryVideoTime=-1;
 const vision=new VisionSession({
- createWorker:()=>new Worker(new URL('./vision.worker.js?v=fcfd31a3784c',import.meta.url)),
- createBitmap:()=>createImageBitmap(video,{resizeWidth:480,resizeHeight:Math.max(1,Math.round(480*video.videoHeight/video.videoWidth))}),
+ createWorker:()=>new Worker(new URL('./vision.worker.js?v=391a638dd15e',import.meta.url)),
+ createBitmap:()=>readFaceFrame(video),
+ initOptions:{role:'face'},
  active:()=>wanted&&mode==='camera'&&!suspended,
  onState:status=>{engineReady=status.ready;if(mode==='camera'&&!status.ready){$('status-copy').textContent=status.attempt?'正在恢复表情识别…':'识别准备中';}syncLoading();},
  onError:(error,phase)=>{record('vision-error',{phase,message:String(error)});if(phase!=='dropped-frame'){segmentationReady=false;handsReady=false;mask=null;silhouette=null;handLandmarks=[];hands=null;faceTime=-Infinity;}},
  onEvent:handleVisionEvent
 });
+const geometry=new VisionSession({
+ createWorker:()=>new Worker(new URL('./vision.worker.js?v=391a638dd15e',import.meta.url)),
+ createBitmap:()=>readGeometryFrame(video),initOptions:{role:'geometry'},
+ active:()=>wanted&&mode==='camera'&&!suspended&&engineReady,
+ onError:(error,phase)=>{record('geometry-error',{phase,message:String(error)});if(phase!=='dropped-frame'){segmentationReady=false;handsReady=false;mask=null;silhouette=null;hands=null;}},
+ onEvent:handleGeometryEvent
+});
+const visionSteps={runtime:'正在加载识别运行库…',wasm:'正在下载识别引擎…','face-model':'正在下载人脸模型…','face-create':'正在启动人脸模型…',detecting:'正在读取摄像头画面…',ready:'正在恢复表情识别…',idle:'正在准备表情识别…'};
 function syncLoading(){
- const live=mode!=='idle'&&!suspended,recognition=live&&mode==='camera'&&(!engineReady||vision.preparing),gift=live&&world.style==='gift'&&!renderer.gift.ready;
- const text=recognition?(vision.attempt?'正在恢复表情识别…':'正在加载识别组件…'):gift?(renderer.gift.error?'礼物素材加载失败':'正在加载礼物素材…'):'';
- $('loading').hidden=!text;$('loading-copy').textContent=text;$('loading-retry').hidden=recognition||!gift||!renderer.gift.error;stage.setAttribute('aria-busy',String(!!text));
+ const live=mode!=='idle'&&!suspended,recognition=live&&mode==='camera'&&(!engineReady||!vision.hasResult),gift=live&&world.style==='gift'&&!renderer.gift.ready;
+ const text=recognition?(visionSteps[vision.phase]||'正在恢复表情识别…'):gift?(renderer.gift.error?'礼物素材加载失败':'正在加载礼物素材…'):'';
+ const bytes=vision.progress,download=recognition&&bytes?.loaded&&bytes?.total?' '+(bytes.loaded/1048576).toFixed(1)+' / '+(bytes.total/1048576).toFixed(1)+' MB':'';
+ $('loading').hidden=!text;$('loading-copy').textContent=text+download;
+ $('loading-detail').textContent=recognition&&vision.lastError?'上次未成功：'+vision.lastError.slice(0,180):'';
+ $('loading-detail').hidden=!$('loading-detail').textContent;
+ $('loading-retry').hidden=recognition?!vision.lastError:!gift||!renderer.gift.error;
+ $('loading-diagnostics').hidden=!recognition||(!vision.lastError&&performance.now()-vision.startedAt<10000);
+ stage.setAttribute('aria-busy',String(!!text));
 }
-$('loading-retry').addEventListener('click',()=>{renderer.gift.load(world.giftMaterialStyle).then(syncLoading);syncLoading();});
+$('loading-retry').addEventListener('click',()=>{
+ if(mode==='camera'&&(!engineReady||!vision.hasResult)){geometry.dispose();vision.restart().catch(()=>{});}
+ else renderer.gift.load(world.giftMaterialStyle).then(syncLoading);syncLoading();
+});
+$('loading-diagnostics').addEventListener('click',async()=>{
+ const detail=JSON.stringify({version:67,browser:navigator.userAgent,source:mode,phase:vision.phase,error:vision.lastError,ready:vision.ready,resultReceived:vision.hasResult,pending:vision.pending,attempts:vision.attempt,video:{width:video.videoWidth,height:video.videoHeight,time:video.currentTime,readyState:video.readyState,paused:video.paused},events:log.slice(-18)},null,2);
+ try{await navigator.clipboard.writeText(detail);$('loading-diagnostics').textContent='已复制诊断';}catch{window.prompt('复制以下诊断信息',detail);}
+});
 function syncStyle() {
   stage.dataset.style=world.style;
   if(world.style==='gift')renderer.gift.load(world.giftMaterialStyle).then(syncLoading);
@@ -81,14 +106,14 @@ function showSession(source) {
 }
 function releaseTracks() { cameraEpoch++; stream?.getTracks().forEach(t => t.stop()); stream = null; video.srcObject = null; stage.classList.remove('camera-active'); }
 function stop() {
-  record('session-ended', metrics()); lastMetric = metrics(); wanted = false; vision.pause(); storage.set(false); releaseTracks(); mode = 'idle'; stage.dataset.mode='idle'; resetSignals(); world.clear();
+  record('session-ended', metrics()); lastMetric = metrics(); wanted = false; vision.pause();geometry.pause(); storage.set(false); releaseTracks(); mode = 'idle'; stage.dataset.mode='idle'; resetSignals(); world.clear();
   $('welcome').hidden = false; $('hud').hidden = true; $('face-hint').hidden = true; $('stop-camera').hidden = true; $('resume-camera').hidden = true;
   $('source-label').textContent = 'CAMERA OFF'; $('status-copy').textContent = '表情互动特效'; $('live-dot').classList.remove('active'); $('bottom-note').textContent = '开启摄像头以使用表情控制。'; stage.classList.remove('rain', 'firework');
   $('start-camera').disabled = false; notify();syncLoading();
   // Keep the initialized engine in memory for a later start in this same page.
 }
 function usePreview() {
-  wanted = false; vision.pause(); storage.set(false); releaseTracks(); resetSignals(); world.clear(); sessionStart = performance.now(); log = []; showSession('preview');
+  wanted = false; vision.pause();geometry.pause(); storage.set(false); releaseTracks(); resetSignals(); world.clear(); sessionStart = performance.now(); log = []; showSession('preview');
   previewX = .5; previewY = .37; previewStrength = .35; $('preview-strength').value = 35; $('status-copy').textContent = '模拟信号 · 非摄像头识别'; notify(); record('preview-start');
 }
 function ensureEngine(){return vision.start();}
@@ -107,9 +132,20 @@ function handleVisionEvent(data){
       if (data.mask) { mask = data.mask; maskTime = performance.now(); silhouetteKey = ''; }
       if (data.face) {
         landmarks = data.face; faceTime = performance.now();
+        if(geometry.paused)geometry.resume();else if(!geometry.worker&&!geometry.retry)geometry.start().catch(()=>{});
         const result = expression.sample(data.smile, faceTime); setState(result.state);
       } else { landmarks = null; expression.reset(); setState('neutral'); }
     }
+}
+function handleGeometryEvent(data){
+ if(mode!=='camera'||suspended)return;
+ if(data.type==='result'){
+  if(data.mask){mask=data.mask;maskTime=performance.now();silhouetteKey='';}
+  if(data.hands!=null){handLandmarks=data.hands;handTime=performance.now();handKey='';}
+ }else if(data.type==='segmentation-ready'){segmentationReady=true;record('silhouette-ready');}
+ else if(data.type==='hands-ready'){handsReady=true;record('hands-ready');}
+ else if(data.type==='segmentation-error'){segmentationReady=false;record('silhouette-error',{message:data.message});}
+ else if(data.type==='hands-error'){handsReady=false;handLandmarks=[];hands=null;record('hands-error',{message:data.message});}
 }
 function setState(next) {
   next=lockedState(next,lockedEffect,mode);
@@ -147,9 +183,14 @@ async function startCamera(automatic = false) {
     notify(messages[error.name] || '摄像头暂时无法开启，请检查设备后重试。'); wanted = false; storage.set(false);
   }
 }
-function capture(now) {
-  if(mode!=='camera'||suspended||!engineReady||vision.pending||video.readyState<2||video.currentTime===lastVideoTime||now-lastInference<interval)return;
-  if(vision.capture(video,{trackHands:state==='smile',timestamp:performance.now()})){lastInference=now;lastVideoTime=video.currentTime;}
+function capture(now){
+ if(mode!=='camera'||suspended||!engineReady||video.readyState<2)return;
+ if(!vision.pending&&video.currentTime!==lastVideoTime&&now-lastInference>=interval){
+  if(vision.capture(video,{timestamp:performance.now()})){lastInference=now;lastVideoTime=video.currentTime;}
+ }
+ if(geometry.ready&&!geometry.pending&&video.currentTime!==lastGeometryVideoTime&&now-lastGeometryCapture>=180){
+  if(geometry.capture(video,{trackHands:state==='smile',timestamp:performance.now()})){lastGeometryCapture=now;lastGeometryVideoTime=video.currentTime;}
+ }
 }
 function previewPolygon() {
   const r = Math.min(width * .13, height * .14), cx = width * previewX, cy = height * previewY, ry = r * 1.28;
@@ -226,11 +267,11 @@ async function resume() {
   if (!wanted || mode !== 'camera') return;
   if (stream?.getVideoTracks().some(t => t.readyState === 'live')) { stream.getVideoTracks().forEach(t => t.enabled = true); try { await video.play(); } catch { await startCamera(true); } }
   else await startCamera(true);
-  vision.resume();
+  vision.resume();geometry.resume();
   $('status-copy').textContent = engineReady ? '本地识别中' : '识别准备中'; record('resumed');
 }
 function pause() {
-  sound.pause(); suspended = true; vision.pause(); video.pause(); stream?.getVideoTracks().forEach(t => t.enabled = false); resetSignals(); $('status-copy').textContent = '已暂停 · 返回继续'; record('paused');
+  sound.pause(); suspended = true; vision.pause();geometry.pause(); video.pause(); stream?.getVideoTracks().forEach(t => t.enabled = false); resetSignals(); $('status-copy').textContent = '已暂停 · 返回继续'; record('paused');
 }
 
 $('toggle-ui').addEventListener('click',()=>{const hidden=stage.classList.toggle('ui-hidden');$('toggle-ui').setAttribute('aria-pressed',String(hidden));$('toggle-ui').setAttribute('aria-label',hidden?'显示界面':'隐藏界面');$('toggle-ui').title=hidden?'显示界面':'隐藏界面';});
@@ -249,9 +290,9 @@ let dragStart = null;
 stage.addEventListener('pointerdown', e => { if (mode !== 'preview' || e.target.closest('button,input,aside,.hud')) return; pointerDown = true; dragStart = e.pointerId; stage.setPointerCapture(e.pointerId); move(e); });
 function move(e) { if (!pointerDown || mode !== 'preview') return; previewX = clamp(e.clientX / width, .18, .82); previewY = clamp(e.clientY / height, .2, .58); }
 stage.addEventListener('pointermove', move); stage.addEventListener('pointerup', () => pointerDown = false); stage.addEventListener('pointercancel', () => pointerDown = false);
-$('export-session').addEventListener('click', () => { const data = { version: 66, exportedAt: new Date().toISOString(), metrics: mode === 'idle' ? lastMetric : metrics(), note: 'Aggregate performance and interaction events only; no images or face geometry.', events: log }; const url = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })); const a = document.createElement('a'); a.href = url; a.download = 'expression-session.json'; a.click(); setTimeout(() => URL.revokeObjectURL(url), 1000); });
+$('export-session').addEventListener('click', () => { const data = { version: 67, exportedAt: new Date().toISOString(), metrics: mode === 'idle' ? lastMetric : metrics(), note: 'Aggregate performance and interaction events only; no images or face geometry.', events: log }; const url = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })); const a = document.createElement('a'); a.href = url; a.download = 'expression-session.json'; a.click(); setTimeout(() => URL.revokeObjectURL(url), 1000); });
 document.addEventListener('visibilitychange', () => document.hidden ? pause() : resume());
-window.addEventListener('pagehide', e => { pause(); if (!e.persisted) { releaseTracks(); vision.dispose(); } });
+window.addEventListener('pagehide', e => { pause(); if (!e.persisted) { releaseTracks(); vision.dispose();geometry.dispose(); } });
 window.addEventListener('pageshow', e => { if (e.persisted) resume(); });
 async function autoStart() {
   // Existing camera permission can resume even on the first visit to this revision;

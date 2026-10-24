@@ -1,4 +1,4 @@
-import { clamp } from './core.mjs?v=fcfd31a3784c';
+import { clamp } from './core.mjs?v=391a638dd15e';
 // Original procedural sound design. No remote audio, microphone or decoding step.
 export const MIX=Object.freeze({master:.30,maxVoices:48,sticker:{room:.42,send:.18},cinema:{room:1.65,send:.26}});
 export class SoundDesigner {
