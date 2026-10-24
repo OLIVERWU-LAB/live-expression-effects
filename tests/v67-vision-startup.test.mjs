@@ -27,9 +27,15 @@ test('a hung auxiliary worker cannot block face results in the independently ini
 test('continuing download progress keeps initialization alive beyond 90 seconds, bounded to five minutes',()=>{
  let now=0,next=0;const timers=new Map(),worker={postMessage(){},terminate(){}},session=new VisionSession({createWorker:()=>worker,createBitmap:()=>{},now:()=>now,setTimer:(fn,ms)=>{timers.set(++next,{fn,at:now+ms});return next;},clearTimer:id=>timers.delete(id)});session.start().catch(()=>{});
  for(let i=1;i<=12;i++){now=i*10000;worker.onmessage({data:{type:'progress',phase:'wasm',loaded:i*10000,total:4000000}});assert.equal(session.worker,worker);assert.ok([...timers.values()].some(t=>t.at>now));}
- now=290000;worker.onmessage({data:{type:'progress',phase:'wasm'}});assert.equal([...timers.values()][0].at,300000);session.dispose();
+ now=290000;worker.onmessage({data:{type:'progress',phase:'wasm'}});assert.equal([...timers.values()][0].at,300000);worker.onmessage({data:{type:'progress',phase:'download',asset:'wasm',loaded:200,total:500}});worker.onmessage({data:{type:'progress',phase:'download',asset:'face',loaded:100,total:200}});assert.equal(session.progress.loaded,300);assert.equal(session.progress.total,700);session.dispose();
 });
 
 test('compressed requests reuse complete legacy model cache entries before making a network request',async()=>{
  const w=worker(),calls=[];w.scope.VISION_PACK={'face_landmarker.task':{}};w.scope.caches={open:async()=>({match:async url=>{calls.push(url);return url==='https://test/project/vendor/face_landmarker.task'?new Response('cached-model'):null;}})};const response=await w.scope.fetch('https://test/project/vendor/compressed/face_landmarker.task.gz');assert.equal(await response.text(),'cached-model');assert.equal(calls.length,2);
+});
+
+for(const scenario of ['cold-camera','ui-fault'])test('actual app startup with real HTML IDs: '+scenario,async()=>{
+ const {execFileSync}=await import('node:child_process');
+ const output=execFileSync(process.execPath,['--experimental-vm-modules',new URL('./helpers/v67-app-smoke.mjs',import.meta.url).pathname,...(scenario==='ui-fault'?['--ui-fault']:[])],{encoding:'utf8',timeout:15000});
+ assert.match(output,scenario==='ui-fault'?/error is visible and retryable/:/accepts a first face result/);
 });

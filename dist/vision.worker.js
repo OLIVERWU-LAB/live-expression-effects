@@ -49,11 +49,11 @@ async function initialize(requestedRole='face') {
   const api = self.module.exports;progress('wasm');const files = await api.FilesetResolver.forVisionTasks(self.VISION_ASSETS.wasm);
   // importScripts itself has no asynchronous cache hook, so its loader uses cached bytes.
   const loader = await bytes(files.wasmLoaderPath), loaderURL = URL.createObjectURL(new Blob([loader], { type: 'application/javascript' }));
-  const wasm=await bytes(files.wasmBinaryPath,'wasm'),wasmURL=URL.createObjectURL(new Blob([wasm],{type:'application/wasm'}));
+  const [wasm,model]=await Promise.all([bytes(files.wasmBinaryPath,role==='face'?'download':'wasm'),role==='face'?bytes(self.VISION_ASSETS.model,'download'):Promise.resolve(null)]),wasmURL=URL.createObjectURL(new Blob([wasm],{type:'application/wasm'}));
   const localFiles={...files,wasmLoaderPath:loaderURL,wasmBinaryPath:wasmURL};
   try {
    if(role==='face'){
-    progress('face-model');const model=await bytes(self.VISION_ASSETS.model,'face-model');progress('face-create');
+    progress('face-create');
     faceModel = await api.FaceLandmarker.createFromOptions(localFiles, { baseOptions: { modelAssetBuffer: model, delegate: 'CPU' }, runningMode: 'VIDEO', numFaces: 1, outputFaceBlendshapes: true, minFaceDetectionConfidence: .55, minFacePresenceConfidence: .55, minTrackingConfidence: .55 });
     postMessage({ type: 'ready', cached: cacheHits > 0, cacheAvailable, cacheHits, cacheWrites });
     return;

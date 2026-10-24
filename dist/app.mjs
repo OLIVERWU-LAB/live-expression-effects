@@ -22,6 +22,7 @@ function activateAudio() { if(sound.enabled) sound.unlock().then(syncSound); }
 const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const quality=new ParticleQuality(reduced?180:700);world.limit=quality.limit;
 let mode = 'idle', wanted = false, stream = null, engineReady = false;
+let cameraStartup = 'idle', cameraStartupError = null;
 let cameraRequest = null, cameraEpoch = 0, suspended = document.hidden, lastVideoTime = -1, lastInference = 0, interval = 65;
 let width = 1, height = 1, landmarks = null, mask = null, maskTime = 0, faceTime = -Infinity, polygon = null, silhouette = null, silhouetteKey = '', lastCenter = null;
 let lockedEffect=null,fireworkLaunches=0;
@@ -50,24 +51,25 @@ const geometry=new VisionSession({
  onError:(error,phase)=>{record('geometry-error',{phase,message:String(error)});if(phase!=='dropped-frame'){segmentationReady=false;handsReady=false;mask=null;silhouette=null;hands=null;}},
  onEvent:handleGeometryEvent
 });
-const visionSteps={runtime:'正在加载识别运行库…',wasm:'正在下载识别引擎…','face-model':'正在下载人脸模型…','face-create':'正在启动人脸模型…',detecting:'正在读取摄像头画面…',ready:'正在恢复表情识别…',idle:'正在准备表情识别…'};
+const visionSteps={download:'正在下载识别资源…',runtime:'正在加载识别运行库…',wasm:'正在下载识别引擎…','face-model':'正在下载人脸模型…','face-create':'正在启动人脸模型…',detecting:'正在读取摄像头画面…',ready:'正在恢复表情识别…',idle:'正在准备表情识别…'};
 function syncLoading(){
  const live=mode!=='idle'&&!suspended,recognition=live&&mode==='camera'&&(!engineReady||!vision.hasResult),gift=live&&world.style==='gift'&&!renderer.gift.ready;
- const text=recognition?(visionSteps[vision.phase]||'正在恢复表情识别…'):gift?(renderer.gift.error?'礼物素材加载失败':'正在加载礼物素材…'):'';
+ const text=cameraStartupError&&recognition?'识别启动未完成':recognition?(visionSteps[vision.phase]||'正在恢复表情识别…'):gift?(renderer.gift.error?'礼物素材加载失败':'正在加载礼物素材…'):'';
  const bytes=vision.progress,download=recognition&&bytes?.loaded&&bytes?.total?' '+(bytes.loaded/1048576).toFixed(1)+' / '+(bytes.total/1048576).toFixed(1)+' MB':'';
  $('loading').hidden=!text;$('loading-copy').textContent=text+download;
- $('loading-detail').textContent=recognition&&vision.lastError?'上次未成功：'+vision.lastError.slice(0,180):'';
+ const failure=cameraStartupError||vision.lastError;
+ $('loading-detail').textContent=recognition&&failure?'上次未成功：'+failure.slice(0,180):'';
  $('loading-detail').hidden=!$('loading-detail').textContent;
- $('loading-retry').hidden=recognition?!vision.lastError:!gift||!renderer.gift.error;
+ $('loading-retry').hidden=recognition?!failure:!gift||!renderer.gift.error;
  $('loading-diagnostics').hidden=!recognition||(!vision.lastError&&performance.now()-vision.startedAt<10000);
  stage.setAttribute('aria-busy',String(!!text));
 }
 $('loading-retry').addEventListener('click',()=>{
- if(mode==='camera'&&(!engineReady||!vision.hasResult)){geometry.dispose();vision.restart().catch(()=>{});}
+ if(mode==='camera'&&(!engineReady||!vision.hasResult)){cameraStartupError=null;cameraStartup='recognition';record('recognition-retry');geometry.dispose();vision.restart().catch(()=>{});}
  else renderer.gift.load(world.giftMaterialStyle).then(syncLoading);syncLoading();
 });
 $('loading-diagnostics').addEventListener('click',async()=>{
- const detail=JSON.stringify({version:67,browser:navigator.userAgent,source:mode,phase:vision.phase,error:vision.lastError,ready:vision.ready,resultReceived:vision.hasResult,pending:vision.pending,attempts:vision.attempt,video:{width:video.videoWidth,height:video.videoHeight,time:video.currentTime,readyState:video.readyState,paused:video.paused},events:log.slice(-18)},null,2);
+ const detail=JSON.stringify({version:67,browser:navigator.userAgent,source:mode,startup:cameraStartup,startupError:cameraStartupError,wanted,suspended,workerCreated:!!vision.worker,phase:vision.phase,error:vision.lastError,ready:vision.ready,resultReceived:vision.hasResult,pending:vision.pending,attempts:vision.attempt,video:{width:video.videoWidth,height:video.videoHeight,time:video.currentTime,readyState:video.readyState,paused:video.paused},events:log.slice(-18)},null,2);
  try{await navigator.clipboard.writeText(detail);$('loading-diagnostics').textContent='已复制诊断';}catch{window.prompt('复制以下诊断信息',detail);}
 });
 function syncStyle() {
@@ -166,19 +168,29 @@ async function acquireCamera() {
 async function startCamera(automatic = false) {
   if (!isSecureContext || !navigator.mediaDevices?.getUserMedia) { notify('请通过 HTTPS 或 localhost，在支持摄像头的浏览器中体验。'); return; }
   if (!window.Worker || !window.createImageBitmap || !window.OffscreenCanvas) { notify('当前浏览器缺少本地识别能力，请使用新版 Chrome、Edge 或 Safari。'); return; }
-  wanted = true; vision.resume(); storage.set(true); notify(); $('start-camera').disabled = true;
+  wanted = true; storage.set(true); notify(); $('start-camera').disabled = true;cameraStartupError=null;
   if (mode !== 'camera') { world.clear(); resetSignals(); sessionStart = performance.now(); log = []; }
   try {
-    // Show video as soon as permission is granted; model readiness never gates the camera picture.
+    cameraStartup='camera';record('camera-requested');
     await acquireCamera(); if (!wanted || !stream) return;
+    // Begin recognition before updating the session UI. A UI failure must never
+    // leave a live camera with an idle recognition session.
+    mode='camera';cameraStartup='recognition';record('camera-playing');
+    record('recognition-requested');vision.resume();const engine=ensureEngine();engine.catch(()=>{});
     showSession('camera'); stage.classList.add('camera-active'); $('status-copy').textContent = engineReady ? '表情识别已就绪' : '画面已就绪 · 识别准备中';
     $('start-camera').disabled = false; lastVideoTime = -1;
-    await ensureEngine(); if (!wanted) return;
+    await engine; if (!wanted) return;cameraStartup='ready';
     $('status-copy').textContent = suspended ? '已暂停 · 返回继续' : '本地识别中'; $('resume-camera').hidden = true; notify();
     record(automatic ? 'camera-auto-resumed' : 'camera-started');
   } catch (error) {
     $('start-camera').disabled = false;
-    if (stream) return; // The session retries recognition automatically while retaining the picture.
+    record('camera-startup-error',{step:cameraStartup,message:String(error?.message||error)});
+    if (stream) {
+      // Worker failures already have a retry and a visible reason. Other errors
+      // must also remain visible instead of being silently mistaken for loading.
+      if(!vision.lastError){cameraStartupError=String(error?.message||error);syncLoading();}
+      return;
+    }
     const messages = { NotAllowedError: '请允许此网站使用摄像头，然后再试一次。', NotFoundError: '没有找到摄像头，可以先看效果预览。', NotReadableError: '摄像头可能正被其他应用占用，请关闭占用后再试。' };
     notify(messages[error.name] || '摄像头暂时无法开启，请检查设备后重试。'); wanted = false; storage.set(false);
   }
