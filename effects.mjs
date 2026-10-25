@@ -1,18 +1,18 @@
-import {thinFlat,prioritizeFlat,markPortraitFlat,flatBirthBudget} from './flat-budget.mjs?v=9577abe74187';
-import{flatRandom,flatFlowerSites,flatSitesClear}from'./flat-placement.mjs?v=9577abe74187';
-import{thinCinema,interleaveCinema}from'./particle-quality.mjs?v=9577abe74187';
-import {REFINED_CINEMA_PATTERN,refinedCinemaShell,refinedCinemaChildren} from './cinema-refined-particles.mjs?v=9577abe74187';
-import {ORIGINAL_CINEMA_PATTERN,originalCinemaShell,originalCinemaChildren} from './cinema-original-particles.mjs?v=9577abe74187';
-import {contactRain,lineRainEntry,rainRate,portraitRainScale} from './rain-style.mjs?v=9577abe74187';
-import {handShell,handRing} from './handglow-particles.mjs?v=9577abe74187';
-import {FLAT_PATTERN,FLAT_PATTERNS,ACTIVE_FLAT_PATTERNS,FLAT_PALETTE,flatShell,flatChildren,flatOpening,flatAfterglints} from './flat-fireworks.mjs?v=9577abe74187';
-import {withHeadCollider,resolveBurstPoint} from './head-collision.mjs?v=9577abe74187';
-import {GIFT_PATTERNS,CINEMA_PATTERNS,GIFT_PALETTE,GIFT_BEAD_COLORS,giftShell,giftBeadChildren,cinemaShell,cinemaRingChildren,referencePattern} from './reference-bursts.mjs?v=9577abe74187';
-import {GIFT_COLORS,giftMaterial,giftSplash,giftLaunchOrigin,giftConfetti} from './gift-style.mjs?v=9577abe74187';
-import { clamp, collide, coverPoint } from './core.mjs?v=9577abe74187';
-import {chooseColors,roundColor} from './dandelion.mjs?v=9577abe74187';
-import {bouquetShell,poppingFlower,innerCrownParticles} from './bouquet.mjs?v=9577abe74187';
-import { SHELLS, PATTERNS, ACTIVE_PATTERNS, STAGED_PATTERNS, STICKER_PATTERN_BAG, rocketPoint, shellParticles, crossetteChildren, burstIsSafe, boundsDistance } from './pyro.mjs?v=9577abe74187';
+import {thinFlat,prioritizeFlat,markPortraitFlat,flatBirthBudget} from './flat-budget.mjs?v=ce2650cbc6cf';
+import{flatRandom,flatFlowerSites,flatSitesClear}from'./flat-placement.mjs?v=ce2650cbc6cf';
+import{thinCinema,interleaveCinema}from'./particle-quality.mjs?v=ce2650cbc6cf';
+import {REFINED_CINEMA_PATTERN,refinedCinemaShell,refinedCinemaChildren} from './cinema-refined-particles.mjs?v=ce2650cbc6cf';
+import {ORIGINAL_CINEMA_PATTERN,originalCinemaShell,originalCinemaChildren} from './cinema-original-particles.mjs?v=ce2650cbc6cf';
+import {contactRain,lineRainEntry,slantedDropEntry,rainRate,portraitRainScale} from './rain-style.mjs?v=ce2650cbc6cf';
+import {handShell,handRing} from './handglow-particles.mjs?v=ce2650cbc6cf';
+import {FLAT_PATTERN,FLAT_PATTERNS,ACTIVE_FLAT_PATTERNS,FLAT_PALETTE,flatShell,flatChildren,flatOpening,flatAfterglints} from './flat-fireworks.mjs?v=ce2650cbc6cf';
+import {withHeadCollider,resolveBurstPoint} from './head-collision.mjs?v=ce2650cbc6cf';
+import {GIFT_PATTERNS,CINEMA_PATTERNS,GIFT_PALETTE,GIFT_BEAD_COLORS,giftShell,giftBeadChildren,cinemaShell,cinemaRingChildren,referencePattern} from './reference-bursts.mjs?v=ce2650cbc6cf';
+import {GIFT_COLORS,giftMaterial,giftSplash,giftLaunchOrigin,giftConfetti} from './gift-style.mjs?v=ce2650cbc6cf';
+import { clamp, collide, coverPoint } from './core.mjs?v=ce2650cbc6cf';
+import {chooseColors,roundColor} from './dandelion.mjs?v=ce2650cbc6cf';
+import {bouquetShell,poppingFlower,innerCrownParticles} from './bouquet.mjs?v=ce2650cbc6cf';
+import { SHELLS, PATTERNS, ACTIVE_PATTERNS, STAGED_PATTERNS, STICKER_PATTERN_BAG, rocketPoint, shellParticles, crossetteChildren, burstIsSafe, boundsDistance } from './pyro.mjs?v=ce2650cbc6cf';
 
 export class WaterSurface {
   constructor() { this.level = 0; this.y = new Float32Array(64); this.v = new Float32Array(64); }
@@ -188,8 +188,8 @@ export class StickerWorld {
       const depth = .35 + this.random() * .65;
       const size = (digital ? (7.2 + Math.pow(this.random(), 1.25) * 6.8) * (.78+depth*.22) : this.style==='gift'?(18+this.random()*13)*2/3*.78:this.style==='flat'?5+this.random()**1.5*17:18+this.random()*13)*portraitRainScale(this.style,width,height);
       const life = height / 210 + 4;
-      const spawnRandom=this.random(),rainX=this.style==='gift'?(((this.rainSequence=(this.rainSequence||0)+1)*.61803398875+spawnRandom*.12)%1)*width:spawnRandom*width,entry=digital?lineRainEntry(width,height,depth,spawnRandom):null;
-      this.add({ type: 'drop', x: entry?.x??rainX, y: prefill-->0?this.random()*height*.88:(entry?.y??-45), vx: digital?entry.vx:this.style==='flat'?52+depth*45:-10+this.random()*20, vy: digital ? entry.vy : 360 + this.random() * 180, gravity:digital?620:this.style==='gift'?500:this.style==='flat'?470:65, size, life, maxLife: life, variant: Math.floor(this.random() * 5), angle: this.style==='flat'?-.23:0, spin: 0, touched: 0, generation: 0, depth, rainTone:Math.floor(this.random()*5),rainVariant:this.random()<.10?'hollow':this.random()<.16?'soft':'solid',dropShape:Math.floor(this.random()*3),rainLength:digital?26+depth*44:0, volume: size ** 3 });
+      const spawnRandom=this.random(),rainX=this.style==='gift'?(((this.rainSequence=(this.rainSequence||0)+1)*.61803398875+spawnRandom*.12)%1)*width:spawnRandom*width,dropVX=52+depth*45,dropVY=360+this.random()*180,entry=digital?lineRainEntry(width,height,depth,spawnRandom):this.style==='gift'?slantedDropEntry(width,height,dropVX,dropVY,rainX/width):null;
+      this.add({ type: 'drop', x: this.style==='gift'&&prefill>0?rainX:entry?.x??rainX, y: prefill-->0?this.random()*height*.88:(entry?.y??-45), vx: digital?entry.vx:['flat','gift'].includes(this.style)?dropVX:-10+this.random()*20, vy: digital ? entry.vy : dropVY, gravity:digital?620:this.style==='gift'?500:this.style==='flat'?470:65, size, life, maxLife: life, variant: Math.floor(this.random() * 5), angle: ['flat','gift'].includes(this.style)?-.23:0, spin: 0, touched: 0, generation: 0, depth, rainTone:Math.floor(this.random()*5),rainVariant:this.random()<.10?'hollow':this.random()<.16?'soft':'solid',dropShape:Math.floor(this.random()*3),rainLength:digital?26+depth*44:0, volume: size ** 3 });
     }
   }
   split(parent) {

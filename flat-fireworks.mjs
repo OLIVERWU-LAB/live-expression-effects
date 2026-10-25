@@ -1,6 +1,6 @@
-import {particleVisibility} from './particle-visibility.mjs?v=9577abe74187';
-import {clamp} from './core.mjs?v=9577abe74187';
-import {handShell,handRing} from './handglow-particles.mjs?v=9577abe74187';
+import {particleVisibility} from './particle-visibility.mjs?v=ce2650cbc6cf';
+import {clamp} from './core.mjs?v=ce2650cbc6cf';
+import {handShell,handRing} from './handglow-particles.mjs?v=ce2650cbc6cf';
 const TAU=Math.PI*2;
 export const FLAT_LAUNCH_BLUE='#59C9F2';
 export const FLAT_PATTERN='flat-petals';
@@ -56,13 +56,12 @@ export function flatChildren(parent,random=Math.random){
   const colors=FLAT_COLORWAYS[parent.variant];
   children.push(make(local,'ring',0,0,64*Math.sqrt(local.scale),1.65,colors[1],random,{delay:.14,gravity:36,flatRing:true}));
   for(let i=0;i<32;i++){
-   const a=parent.turn+i*2.39996323,speed=(70+random()*230)*local.scale;
-   children.push(make(local,'dust',Math.cos(a)*speed,Math.sin(a)*speed,Math.min(parent.pattern==='flat-festival'?1.8:parent.pattern==='flat-star-crown'?2.2:3.5,(i%8===0?3.5:i%2===0?1.5+random()*.8:.50+random()*.70))*Math.sqrt(local.scale*.62/.78),1.65+random()*.24,i%2===0?'#FFFFFF':colors[i%3],random,{delay:.06+random()*.08,gravity:90*Math.sqrt(local.scale),luminosity:.20,flatFine:true,whiteFlash:i%2===0}));
+   const a=parent.turn+i/32*TAU,speed=(100+(i%4)*45)*local.scale;
+   children.push(make(local,'dust',Math.cos(a)*speed,Math.sin(a)*speed,Math.min(parent.pattern==='flat-festival'?1.8:parent.pattern==='flat-star-crown'?2.2:3.5,(i%8===0?3.5:i%2===0?1.5+random()*.8:.50+random()*.70))*Math.sqrt(local.scale*.62/.78),1.65+random()*.24,i%2===0?'#FFFFFF':colors[i%3],random,{delay:.06+random()*.08,gravity:90*Math.sqrt(local.scale),luminosity:.20,flatFine:true,flatRadialIndex:i,flatRadialCount:32,whiteFlash:i%2===0}));
   }
   // The carrier chooses the flower's real birth position, but its remaining
   // flight velocity must not sweep the whole radial explosion to one side.
-  const carry=Math.min(.12,22*local.scale/(Math.hypot(parent.vx,parent.vy)||1));
-  for(const child of children){child.vx+=parent.vx*carry;child.vy+=parent.vy*carry;child.clusterIndex=parent.clusterIndex;child.cascadeChild=true;const longTrail=parent.pattern==='flat-medallion'&&child.flatRole==='comet';child.life=child.maxLife=(longTrail?2.05:child.flatRing?1.90:child.flatFine?(parent.pattern==='flat-medallion'?1.70:1.90):1.62)+random()*(longTrail?.18:.22);child.drag=longTrail?.95:1.35;child.collisionDelay=.38;if(longTrail){child.longTrail=true;child.trailAge=1.10;child.tailLength=84;child.trailTint=colors[child.flatBand===0?1:0];}if(parent.pattern==='flat-star-crown'&&child.tailLength){child.trailAge=.56;child.tailLength=40;child.trailDistance=170;}}
+  for(const child of children){child.clusterIndex=parent.clusterIndex;child.cascadeChild=true;const longTrail=parent.pattern==='flat-medallion'&&child.flatRole==='comet';child.life=child.maxLife=(longTrail?2.05:child.flatRing?1.90:child.flatFine?(parent.pattern==='flat-medallion'?1.70:1.90):1.62)+random()*(longTrail?.18:.22);child.drag=longTrail?.95:1.35;child.collisionDelay=.38;if(longTrail){child.longTrail=true;child.trailAge=1.10;child.tailLength=84;child.trailTint=colors[child.flatBand===0?1:0];}if(parent.pattern==='flat-star-crown'&&child.tailLength){child.trailAge=.56;child.tailLength=40;child.trailDistance=170;}}
   return children;
  }
  const out=[],root=Math.sqrt(parent.scale),T=parent.tempo,color=parent.color,accent=parent.accent;
@@ -94,27 +93,24 @@ function radialShell(parent,phase,random){
  let band=0;const emit=(role,count,speed,size,palette,offset=0,extra={})=>{
   const flatBand=band++;
   for(let i=0;i<count;i++){
-   // Stable, slight spacing and reach variations loosen the perfect circular
-   // rows. Every ray keeps its own radial direction; no common sideways push.
-   const organic=ACTIVE_FLAT_PATTERNS.includes(key),seed=parent.seed+flatBand*1.73,
-    spacing=organic?.10*Math.sin(seed+i*2.39996)+.045*Math.sin(seed*.3+i*.81):0,
-    reach=organic?1+.065*Math.sin(seed*.7+i*2.39996)+.035*Math.sin(seed*.2+i*.73):1,
-    a=phase+(i+offset+spacing)/count*TAU,medallionRay=key==='flat-medallion'&&role==='comet',velocity=(speed+(i%2?8:-8))*s*(medallionRay?.92:1)*reach;
-   p.push(make(parent,role,Math.cos(a)*velocity,Math.sin(a)*velocity-22*r,size*(i%2?.9:1)*r,2.05+random()*.24,palette[i%palette.length],random,{angle:a,flatBand,tempo:1,gravity:(medallionRay?145:115)*r,drag:1.0,tailLength:['comet','ribbon','leaf','spoke'].includes(role)?24:0,trailAge:.28,cap:'#FFF2D6',...extra}));
+   // Equal angular steps and equal launch speed within each band. All heads
+   // start at the real flower centre; gravity bends their paths after birth.
+   const a=phase+(i+offset)/count*TAU,medallionRay=key==='flat-medallion'&&role==='comet',velocity=speed*s*(medallionRay?.92:1);
+   p.push(make(parent,role,Math.cos(a)*velocity,Math.sin(a)*velocity,size*r,2.05+random()*.24,palette[i%palette.length],random,{angle:a,flatBand,flatRadialIndex:i,flatRadialCount:count,tempo:1,gravity:(medallionRay?145:115)*r,drag:1.0,tailLength:['comet','ribbon','leaf','spoke'].includes(role)?24:0,trailAge:.28,cap:'#FFF2D6',...extra}));
   }
  };
  if(key==='flat-medallion'){
   emit('comet',24,360,5.4,[colors[1],colors[2]],0,{cap:'#FFF2D6',tailScale:1,outerGlints:true});
   emit('comet',16,235,3.8,[colors[0]],.3,{cap:'#FFF2D6',tailScale:1.25});
-  emit('comet',7,95,2.7,[colors[2]],.2,{tailScale:.65});
+  emit('comet',8,95,2.7,[colors[2]],.2,{tailScale:.65});
   emit('dust',24,405,1.9,[colors[0]],.35);emit('dust',12,160,1.3,['#FFF2D6']);
  }else if(key==='flat-star-crown'){
   emit('comet',16,290,3.9,[colors[3],colors[1]],.2,{cap:null,tailScale:1.25});
   emit('star',8,350,15,[colors[0]],0,{points:5,tailLength:24,trailAge:.27,trailWidth:2.5*r,trailTint:colors[1],outerGlints:true});
-  // Each primary crown star carries three smaller, loosely spaced companions.
+  // Each primary crown star carries three smaller companions, paired across the centre.
   for(const anchor of p.filter(q=>q.flatRole==='star'))for(let j=0;j<3;j++){
-   const a=anchor.angle+(random()-.5)*.16,speed=(270+random()*95)*s;
-   p.push(make(parent,'star',Math.cos(a)*speed,Math.sin(a)*speed-22*r,(3+random()*3.2)*r,2.05+random()*.24,colors[j%2?2:0],random,{angle:a,points:5,crownSatellite:true,delay:.035+random()*.09,gravity:115*r,drag:1.0}));
+   const a=anchor.angle+(j-1)*.075,speed=(285+j*26)*s;
+   p.push(make(parent,'star',Math.cos(a)*speed,Math.sin(a)*speed,(3.2+j*1.1)*r,2.05+random()*.24,colors[j%2?2:0],random,{angle:a,points:5,crownSatellite:true,flatRadialIndex:anchor.flatRadialIndex*3+j,flatRadialCount:24,delay:.045+j*.025,gravity:115*r,drag:1.0}));
   }
   emit('comet',20,150,3.4,[colors[0]],.25,{cap:null});
   emit('star',16,325,4.5,[colors[2]],.35,{points:4});
@@ -133,11 +129,7 @@ function radialShell(parent,phase,random){
   emit('comet',12,245,4.8,[colors[1],colors[2]],.5,{cap:null,trailAge:.24});
   emit('star',24,400,5.5,[colors[0],colors[2],colors[1]],.5,{points:5,outerGlints:true});
   emit('dust',24,423,1.7,[colors[3],colors[1]],.25);
-  let index=0;
-  for(const q of p)if(q.flatRole==='ribbon'){
-   const k=index++,factor=[.82,1.15,.98,1.07][k%4];q.vx*=factor;q.vy=(q.vy+22*r)*factor-22*r;
-   q.size*=[.72,1.2,.86,1.08][k%4];q.trailAge=[.21,.34,.28,.38][k%4];
-  }
+
  }else{
   emit('comet',16,220,4.2,[colors[0],colors[2]],0,{cap:colors[0],tailScale:1.3});
   emit('star',16,290,17,[colors[2]],.5,{points:4});
