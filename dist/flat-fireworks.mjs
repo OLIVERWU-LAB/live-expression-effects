@@ -61,7 +61,7 @@ export function flatChildren(parent,random=Math.random){
   }
   // The carrier chooses the flower's real birth position, but its remaining
   // flight velocity must not sweep the whole radial explosion to one side.
-  for(const child of children){child.clusterIndex=parent.clusterIndex;child.cascadeChild=true;const longTrail=parent.pattern==='flat-medallion'&&child.flatRole==='comet';child.life=child.maxLife=(longTrail?2.05:child.flatRing?1.90:child.flatFine?(child.whiteFlash?2.40:1.85):1.62)+random()*(longTrail?.18:.22);child.drag=longTrail?.95:1.35;child.collisionDelay=.38;if(longTrail){child.longTrail=true;child.trailAge=1.10;child.tailLength=84;child.trailTint=colors[child.flatBand===0?1:0];}if(parent.pattern==='flat-star-crown'&&child.tailLength){child.trailAge=.56;child.tailLength=40;child.trailDistance=170;}}
+  for(const child of children){child.gravity*=1.6;child.clusterIndex=parent.clusterIndex;child.cascadeChild=true;const longTrail=parent.pattern==='flat-medallion'&&child.flatRole==='comet';child.life=child.maxLife=(longTrail?2.05:child.flatRing?1.90:child.flatFine?(child.whiteFlash?2.40:1.85):1.62)+random()*(longTrail?.18:.22);child.drag=longTrail?.95:1.35;child.collisionDelay=.38;if(longTrail){child.longTrail=true;child.trailAge=1.10;child.tailLength=84;child.trailTint=colors[child.flatBand===0?1:0];}if(parent.pattern==='flat-star-crown'&&child.tailLength){child.trailAge=.56;child.tailLength=40;child.trailDistance=170;}}
   return children;
  }
  const out=[],root=Math.sqrt(parent.scale),T=parent.tempo,color=parent.color,accent=parent.accent;

@@ -54,3 +54,24 @@ export function placeFlatBouquet(layout,width,height,head){
  if(fixed&&requestedSide&&!layout.flatAllowOpposite)return placeFlatBouquet({...layout,flatAllowOpposite:true},width,height,head);
  return null;
 }
+
+// Open the accepted five-centre composition a little wider, keeping its seed,
+// blossom sizes and direction pattern. Translate the whole bouquet only when
+// a small move can preserve the existing head/viewport clearance.
+export function widenFlatBouquet(layout,width,height,head){
+ if(!layout)return layout;
+ const spread=layout.flatSpreadScale??layout.scale;
+ if(!head||layout.flatSeed==null)return{...layout,flatSpreadScale:spread*1.12};
+ const dx=Math.min(56,width*.04),dy=Math.min(32,height*.05),edge=16+60*layout.scale,ceiling=(width<650&&height>width?Math.min(height*.58,head.top+(head.bottom-head.top)*.28):height*.62)-edge;
+ for(const factor of[1.12,1.09,1.06,1.03]){
+  const sites=flatFlowerSites(layout.scale,layout.flatSeed,spread*factor);let best=null;
+  for(const sx of[0,-.5,.5,-1,1])for(const sy of[0,-.5,.5,-1,1]){
+   const x=layout.x+sx*dx,y=layout.y+sy*dy;
+   if(boundsDistance(x,y,head)<(layout.clearance??flatSiteGap(head,width,height))+6||!flatSitesClear(sites,x,y,layout.scale,head,width,height))continue;
+   if(!sites.every(p=>{const sideEdge=16+165*layout.scale*.78*p.flowerScale;return x+p.x>=sideEdge&&x+p.x<=width-sideEdge&&y+p.y>=edge&&y+p.y<=ceiling;}))continue;
+   const score=Math.hypot(sx*dx,sy*dy);if(!best||score<best.score)best={x,y,score};
+  }
+  if(best)return{...layout,x:best.x,y:best.y,flatSpreadScale:spread*factor};
+ }
+ return layout;
+}

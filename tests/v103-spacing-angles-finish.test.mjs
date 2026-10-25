@@ -28,7 +28,7 @@ test('actual five flower births keep their restored composition and viewport-bas
  const counts=new Set();
  for(const[width,height,top]of[[390,844,160],[390,844,260],[1280,720,160],[1280,720,240]])for(const center of[.3,.5,.7])for(let seed=0;seed<4;seed++){
   const head={left:width*center-(width<650?82:125),right:width*center+(width<650?82:125),top,bottom:top+250},w=new StickerWorld(flatRandom(seed));w.setStyle('flat');w.setEffect('laugh');w.setPattern('flat-star-crown');w.viewport={width,height};w.head=head;w.limit=width<650?420:650;
-  const plan=planLiveFirework(w,width,height,head,seed,flatRandom(seed+31));assert.ok(plan);assert.ok(plan.flatSpreadScale>0&&plan.flatSpreadScale<=plan.scale);assert.ok(w.launch(plan.x,plan.y,width,height,plan.scale,plan));
+  const plan=planLiveFirework(w,width,height,head,seed,flatRandom(seed+31));assert.ok(plan);assert.ok(plan.flatSpreadScale>0&&plan.flatSpreadScale<=plan.scale*1.12+1e-9);assert.ok(w.launch(plan.x,plan.y,width,height,plan.scale,plan));
   const births=new Map();let expected;
   for(let f=0;f<360;f++){w.update(1/60,width,height,null);for(const e of w.consumeEvents())if(e.type==='burst')expected=e.flowerCount;for(const p of w.particles)if(p.cascadeChild&&!births.has(p.clusterIndex))births.set(p.clusterIndex,p);assert.equal(w.pendingParticles.length,0);assert.ok(w.particles.length<=w.limit);}
   assert.equal(births.size,expected);assert.equal(expected,5);counts.add(expected);

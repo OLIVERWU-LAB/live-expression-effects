@@ -359,7 +359,7 @@ export class StickerWorld {
         if(p.trailClock>=(this.trailStep||.016)){p.trailClock%=(this.trailStep||.016);p.trail.unshift({x:p.x,y:p.y,age:p.maxLife-p.life});}
         const age=p.maxLife-p.life;p.trail=p.trail.filter(q=>age-q.age<=(p.trailAge??.28)).slice(0,p.tailLength);
       }
-      if(p.outerGlints&&!p.outerSpent&&p.life<=.32){p.outerSpent=true;if(p.retireRemaining==null){secondary.push(...flatAfterglints(p,this.random));this.event('glitter',{x:clamp(p.x/width),stage:3});}}
+      if(p.outerGlints&&!p.outerSpent&&p.life<=.32){p.outerSpent=true;if(p.retireRemaining==null&&(!p.flatFx||this.particles.length+secondary.length<this.limit*.80)){secondary.push(...flatAfterglints(p,this.random));this.event('glitter',{x:clamp(p.x/width),stage:3});}}
       if (p.type === 'drop' && !p.giftSplash && !p.rainRipple && p.life > 0 && p.y >= this.water.surface(p.x, width, height) - 2) { if(!p.generation&&['cinema','glow','flat','gift'].includes(this.style))additions.push({...p,y:this.water.surface(p.x,width,height)-3,hitNormal:{x:0,y:-1},hitRegion:'water'});this.water.impact(p.x, width, ['cinema','glow'].includes(this.style) ? Math.cbrt(p.volume ?? p.size ** 3) * 3.2 : p.size); p.life = 0; }
     }
     for (const p of additions) this.split(p);

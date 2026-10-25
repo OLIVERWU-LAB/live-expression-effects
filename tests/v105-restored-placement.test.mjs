@@ -2,8 +2,16 @@ import test from'node:test';import assert from'node:assert/strict';import{readFi
 const reference=JSON.parse(readFileSync(new URL('./fixtures/v105-five-centres.json',import.meta.url),'utf8'));
 import{flatShell,flatChildren}from'../dist/flat-fireworks.mjs';
 import{prioritizeFlat}from'../dist/flat-budget.mjs';
-test('the actual phone and desktop launch planner reproduces the last five-flower arrangement exactly',()=>{
- for(const row of reference.planned){const actual=planLiveFirework({style:'flat'},row.width,row.height,row.head,row.side,flatRandom(31+row.side));assert.ok(actual);for(const[key,value]of Object.entries(row.layout))assert.ok(Math.abs(actual[key]-value)<1e-9,`${row.width}/${row.side}/${key}: old placement changed`);}
+test('the launch planner gently widens the accepted five-flower layout while keeping its seed and flower sizes',()=>{
+ let widened=0;
+ for(const row of reference.planned){
+  const actual=planLiveFirework({style:'flat'},row.width,row.height,row.head,row.side,flatRandom(31+row.side));assert.ok(actual);
+  assert.equal(actual.flatSeed,row.layout.flatSeed);assert.equal(actual.scale,row.layout.scale);assert.equal(actual.radius,row.layout.radius);
+  assert.ok(actual.flatSpreadScale>=row.layout.flatSpreadScale-1e-9&&actual.flatSpreadScale<=row.layout.flatSpreadScale*1.12+1e-9);
+  assert.ok(Math.abs(actual.x-row.layout.x)<=Math.min(56,row.width*.04)+1e-9);assert.ok(Math.abs(actual.y-row.layout.y)<=32+1e-9);
+  if(actual.flatSpreadScale>row.layout.flatSpreadScale*1.02)widened++;
+ }
+ assert.ok(widened>=20,'most normal portrait and desktop compositions gain space');
 });
 test('a seven-star admitted ring still divides the full circle into seven equal directions',()=>{
  const parent=flatShell(400,100,.8,flatRandom(3),'flat-star-crown').particles[0],stars=flatChildren(parent,flatRandom(4)).filter(p=>p.flatRole==='star'&&p.outerGlints),chosen=prioritizeFlat(stars,7);
