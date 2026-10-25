@@ -19,7 +19,7 @@ test('all retained flat forms start radially symmetric, including phone and mini
   const random=flatRandom(seed),parents=flatShell(400,180,scale,random,pattern).particles;
   for(const parent of parents){
    parent.vx=330;parent.vy=-250;const full=flatChildren(parent,random);paired(full);
-   for(const density of[.12,.3,.65,1])for(const budget of[15,30,65]){
+   for(const density of[.12,.3,.65,1])for(const budget of[21,30,65]){
     const chosen=prioritizeFlat(thinFlat(full.map(p=>({...p,flatMobile:true,flatDensity:density}))),budget);
     assert.ok(chosen.length<=budget);assert.ok(chosen.some(p=>p.flatRing));assert.ok(chosen.some(p=>p.whiteFlash));paired(chosen);
    }

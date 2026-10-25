@@ -9,11 +9,11 @@ test('low budgets preserve radial coverage of every cluster instead of only the 
  const particles=[];for(let clusterIndex=0;clusterIndex<5;clusterIndex++)for(let flatBand=0;flatBand<2;flatBand++)for(let i=0;i<24;i++)particles.push({flatRole:'comet',clusterIndex,flatBand,angle:i/24*Math.PI*2,flatDensity:.18});
  for(const selected of[thinFlat(particles),prioritizeFlat(particles,60)])for(let c=0;c<5;c++)for(let b=0;b<2;b++){const group=selected.filter(p=>p.clusterIndex===c&&p.flatBand===b);assert.ok(group.length>=6);const sectors=new Set(group.map(p=>Math.floor((p.angle+.00001)/(Math.PI*2)*6)));assert.equal(sectors.size,6);}
 });
-test('portrait launch composition keeps five flowers mostly visible and finish at low frame cadence without queued births',()=>{
+test('portrait launch composition keeps three or four flowers mostly visible and finish at low frame cadence without queued births',()=>{
  for(const width of[320,390,430])for(const key of ACTIVE_FLAT_PATTERNS)for(const limit of[150,300,420]){
   const world=new StickerWorld(rng(31));world.setStyle('flat');world.setEffect('laugh');world.limit=limit;world.viewport={width,height:844};world.head={left:width*.28,right:width*.72,top:160,bottom:450};const plan=fitFlatViewport(planBurst(width,844,world.head,0,rng(3)),width,844,world.head);world.burst(plan.x,plan.y,plan.scale,key,.5,plan.flatSeed);const flowers=new Map();let queue=0;
   for(let f=0;f<180;f++){world.update(1/30,width,844,null);queue=Math.max(queue,world.pendingParticles.length);assert.ok(world.particles.length<=limit);for(const p of world.particles)if(p.clusterIndex!=null&&p.flatEmitAt==null&&!p.flatFine&&!['dust','ring'].includes(p.flatRole)&&p.life>.4&&p.delay<=0){if(!flowers.has(p.clusterIndex))flowers.set(p.clusterIndex,{seen:0,visible:0});const g=flowers.get(p.clusterIndex);g.seen++;if(p.x>=0&&p.x<=width&&p.y>=0&&p.y<844)g.visible++;}}
-  assert.equal(world.events.filter(e=>e.stage===2).length,5,`${width}/${key}/${limit}`);assert.equal(flowers.size,5);for(const g of flowers.values())assert.ok(g.visible/g.seen>.90,`${width}/${key}/${limit}: ${g.visible/g.seen}`);assert.equal(queue,0);assert.equal(world.particles.length,0);
+  assert.equal(world.events.filter(e=>e.stage===2).length,world.lastFlatFlowerCount,`${width}/${key}/${limit}`);assert.equal(flowers.size,world.lastFlatFlowerCount);for(const g of flowers.values())assert.ok(g.visible/g.seen>.90,`${width}/${key}/${limit}: ${g.visible/g.seen}`);assert.equal(queue,0);assert.equal(world.particles.length,0);
  }
 });
 test('mobile and low-core desktops have bounded initial pixels, particles and temporal tail samples',()=>{

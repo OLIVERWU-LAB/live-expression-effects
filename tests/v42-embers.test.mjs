@@ -4,7 +4,7 @@ test('realistic live mode only launches reprises, migrates retired selections an
  assert.deepEqual(ACTIVE_CINEMA_PATTERNS,['cinema-rings']);const w=new StickerWorld(rng(4));w.setStyle('cinema');w.setPattern('cinema-shell');assert.equal(w.pattern,'cinema-rings');for(const selection of['auto','cinema-shell','cinema-rings']){w.pattern=selection;for(let i=0;i<20;i++)assert.equal(w.nextPattern(),'cinema-rings');}w.setStyle('glow');w.setPattern('cinema-shell');assert.equal(w.nextPattern(),'cinema-shell');w.setStyle('cinema');assert.equal(w.pattern,'cinema-rings');
 });
 test('medallion tails hold longer and retain their smooth final fade',()=>{
- const seed=flatShell(500,300,1,rng(4),'flat-medallion').particles[0],ps=flatChildren(seed,rng(5)),tails=ps.filter(p=>p.longTrail);assert.ok(tails.length>0);assert.ok(tails.every(p=>p.maxLife>=2.05&&p.maxLife<=2.23));assert.ok(ps.filter(p=>p.flatFine).every(p=>p.maxLife>=1.70&&p.maxLife<=1.92));
+ const seed=flatShell(500,300,1,rng(4),'flat-medallion').particles[0],ps=flatChildren(seed,rng(5)),tails=ps.filter(p=>p.longTrail);assert.ok(tails.length>0);assert.ok(tails.every(p=>p.maxLife>=2.05&&p.maxLife<=2.23));assert.ok(ps.filter(p=>p.flatFine).every(p=>p.whiteFlash?p.maxLife>=2.40&&p.maxLife<=2.62:p.maxLife>=1.85&&p.maxLife<=2.07));
  const p=tails[0],at=t=>flatLongTailFade({...p,life:p.maxLife-t});assert.equal(at(1.35),1);assert.ok(at(p.maxLife-.39)<.20);assert.ok(at(p.maxLife-.1)<1e-12);let previous=1;for(let t=0;t<p.maxLife;t+=.01){const alpha=at(t);assert.ok(alpha<=previous+1e-8);assert.ok(previous-alpha<.05);previous=alpha;}assert.equal(at(p.maxLife),0);
 });
 test('reprise keeps independently phased brightness and continuous scraps-to-glints timing',()=>{

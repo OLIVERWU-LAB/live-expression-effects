@@ -1,7 +1,7 @@
 import test from 'node:test';import assert from 'node:assert/strict';import{readFileSync}from'node:fs';import{createHash}from'node:crypto';
 import{flatShell,flatChildren,ACTIVE_FLAT_PATTERNS}from'../dist/flat-fireworks.mjs';import{giftShell,GIFT_ASSETS}from'../dist/reference-bursts.mjs';import{StickerWorld}from'../dist/effects.mjs';
 const rng=seed=>()=>{seed=(Math.imul(seed,1664525)+1013904223)>>>0;return seed/4294967296;};
-test('every flat bouquet gives its five flowers different but coordinated colourways',()=>{for(const key of ACTIVE_FLAT_PATTERNS.filter(k=>k!=='flat-reprise')){const seeds=flatShell(1200,500,1,rng(31),key).particles;assert.equal(new Set(seeds.map(p=>p.variant)).size,5);const signatures=seeds.map(p=>{const children=flatChildren(p,rng(5));return [...new Set(children.map(p=>p.tint))].sort().join();});assert.equal(new Set(signatures).size,5);}});
+test('every flat bouquet gives its three or four flowers different but coordinated colourways',()=>{for(const key of ACTIVE_FLAT_PATTERNS.filter(k=>k!=='flat-reprise')){const seeds=flatShell(1200,500,1,rng(31),key).particles;assert.equal(new Set(seeds.map(p=>p.variant)).size,seeds.length);const signatures=seeds.map(p=>{const children=flatChildren(p,rng(5));return [...new Set(children.map(p=>p.tint))].sort().join();});assert.equal(new Set(signatures).size,seeds.length);}});
 test('gift scattering varies with bounded lobe presets without changing gravity or first-wave size',()=>{
  const shells=Array.from({length:12},(_,seed)=>giftShell('gift-scatter',900,350,1,rng(seed)).particles);assert.ok(new Set(shells.map(p=>p[0].layoutPreset)).size>=3);
  for(const p of shells){assert.equal(p.length,41);assert.ok(p.every(q=>q.gravity===255&&q.giftSplitAt===null&&q.delay<=.045));}

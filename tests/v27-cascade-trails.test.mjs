@@ -1,10 +1,10 @@
 import test from 'node:test';import assert from 'node:assert/strict';
 import{StickerWorld}from'../dist/effects.mjs';import{flatShell,flatTrailGeometry,FLAT_CASCADES}from'../dist/flat-fireworks.mjs';
 const rng=seed=>()=>{seed=(Math.imul(seed,1664525)+1013904223)>>>0;return seed/4294967296;};
-test('five white carriers split into five distinct live-centred flowers at fast-petal pace',()=>{
+test('three or four white carriers split into five distinct live-centred flowers at fast-petal pace',()=>{
  for(const key of FLAT_CASCADES)for(const dt of[.008,.016,.033]){
   const w=new StickerWorld(rng(17));w.setStyle('flat');w.setEffect('laugh');w.burst(900,550,1,key);
-  const seeds=w.particles.filter(p=>p.flatRole==='seed');assert.equal(seeds.length,5);assert.ok(seeds.every(p=>p.flatRole==='seed'&&p.flatEmitAt>=.19&&p.flatEmitAt<.75));
+  const seeds=w.particles.filter(p=>p.flatRole==='seed');assert.ok(seeds.length===3||seeds.length===4);assert.ok(seeds.every(p=>p.flatRole==='seed'&&p.flatEmitAt>=.19&&p.flatEmitAt<.75));
   seeds[1].x+=34;seeds[1].vx*=-1;const centres=new Set();let children=0;
   for(let i=0;i<Math.ceil(.95/dt);i++){
    const before=new Set(w.particles);w.update(dt,1800,1800,null);
@@ -12,7 +12,7 @@ test('five white carriers split into five distinct live-centred flowers at fast-
     const source=seeds.find(q=>q.seed===p.emitterId);assert.ok(source);assert.equal(p.birthX,source.x);assert.equal(p.birthY,source.y);assert.ok(p.delay===0||(p.flatFine||p.flatRing||p.crownSatellite)&&p.delay<=.14);assert.ok(p.gravity>0);centres.add(source.seed);children++;
    }
   }
-  assert.equal(centres.size,5);assert.ok(children>=170);assert.ok(w.particles.every(p=>p.flatRole!=='seed'));
+  assert.equal(centres.size,seeds.length);assert.ok(children>=100);assert.ok(w.particles.every(p=>p.flatRole!=='seed'));
   for(let i=0;i<150;i++)w.update(.02,1800,1800,null);assert.equal(w.particles.length,0);
  }
 });
@@ -35,5 +35,5 @@ test('cascade flowers stay within particle budgets even with repeated overlappin
 });
 
 test('budget reduction does not delete pending white emitters before their flowers open',()=>{
- for(const key of FLAT_CASCADES){const w=new StickerWorld(rng(71));w.limit=150;w.setStyle('flat');w.setEffect('laugh');w.burst(900,550,1,key);for(let i=0;i<55;i++)w.update(.02,1800,1800,null);assert.equal(w.events.filter(e=>e.type==='crackle'&&e.stage===2).length,5);assert.ok(w.particles.length<=150);}
+ for(const key of FLAT_CASCADES){const w=new StickerWorld(rng(71));w.limit=150;w.setStyle('flat');w.setEffect('laugh');w.burst(900,550,1,key);for(let i=0;i<55;i++)w.update(.02,1800,1800,null);assert.equal(w.events.filter(e=>e.type==='crackle'&&e.stage===2).length,w.lastFlatFlowerCount);assert.ok(w.particles.length<=150);}
 });

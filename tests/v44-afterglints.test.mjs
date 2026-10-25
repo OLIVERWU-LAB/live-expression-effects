@@ -1,9 +1,9 @@
 import test from'node:test';import assert from'node:assert/strict';import{StickerWorld}from'../dist/effects.mjs';import{flatShell,flatChildren,FLAT_CASCADES,flatAfterglints,flatAfterglintEnvelope,drawFlatFireworks}from'../dist/flat-fireworks.mjs';import{cinemaShell,cinemaRingChildren,CINEMA_REPRISE_HUES,RING_HUES}from'../dist/reference-bursts.mjs';import{CinemaRenderer}from'../dist/cinema-renderer.mjs';
 const rng=s=>()=>((s=Math.imul(s,1664525)+1013904223>>>0)/4294967296),sat=h=>{const a=[1,3,5].map(i=>parseInt(h.slice(i,i+2),16)/255),hi=Math.max(...a);return(hi-Math.min(...a))/(hi||1);};
-test('crown and festival sparks overlap head fade and end promptly; medallion has no independent afterglints',()=>{
+test('all three forms retain a short white sparkle finish after their coloured heads',()=>{
  for(const key of FLAT_CASCADES){const parent=flatChildren(flatShell(900,500,1,rng(31),key).particles[0],rng(12)).find(p=>p.outerGlints&&Math.floor(p.seed)%2===0),w=new StickerWorld(rng(2));assert.ok(parent);w.setStyle('flat');w.setEffect('laugh');Object.assign(parent,{x:900,y:500,delay:0});w.add(parent);let born=[],post=[];
   for(let i=0;i<400;i++){w.update(.01,1800,1800,null);const ps=w.particles.filter(p=>p.flatTailSpark);if(!born.length&&ps.length){born=ps;assert.ok(ps.every(p=>Math.hypot(p.x-parent.x,p.y-parent.y)<8));}if(parent.life<=0&&ps.length)post.push({t:i,x:ps[0].x,y:ps[0].y,light:flatAfterglintEnvelope(ps[0])});}
-  if(key==='flat-medallion'){assert.equal(born.length,0);assert.equal(post.length,0);}else{assert.equal(born.length,2);assert.ok(born.every(p=>p.noRecollision&&!p.outerGlints&&p.maxLife>=.32&&p.maxLife<=.40));assert.ok(post.length<=12,'avoid a separate long afterglow after the head dies');}assert.equal(w.particles.length,0);
+  assert.equal(born.length,2);assert.ok(born.every(p=>p.noRecollision&&!p.outerGlints&&p.maxLife>=.72&&p.maxLife<=.86));assert.ok(post.length>=35&&post.length<=60,'white glints linger briefly after the coloured head, then clear');assert.equal(w.particles.length,0);
  }
 });
 test('late sparks render as tiny independent white chips and central festival flashes have a strict size cap',()=>{

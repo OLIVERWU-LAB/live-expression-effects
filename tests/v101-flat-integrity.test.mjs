@@ -32,13 +32,13 @@ test('overlapping flat volleys admit every ring, every radial band and white gli
    }
    return chosen;
   };
-  let index=0,next=0;const random=flatRandom(9);
+  let index=0,next=0,expectedFlowers=0;const random=flatRandom(9);
   for(let frame=0;frame<fps*12;frame++){
    const t=frame/fps;if(t<8&&t>=next&&!fireworkLaunchBusy(w)){const p=planLiveFirework(w,width,height,w.head,index,random);if(p&&w.launch(p.x,p.y,width,height,p.scale,p)){index++;next=t+fireworkLaunchGap('flat',random)/1000;}}
    const slices=Math.ceil(60/fps);for(let n=0;n<slices;n++)w.update(1/fps/slices,width,height,null);
-   w.consumeEvents();assert.ok(w.particles.length<=limit);assert.equal(w.pendingParticles.length,0,'no flowers delayed by a full particle pool');
+   for(const e of w.consumeEvents())if(e.type==='burst')expectedFlowers+=e.flowerCount;assert.ok(w.particles.length<=limit);assert.equal(w.pendingParticles.length,0,'no flowers delayed by a full particle pool');
   }
-  assert.ok(index>=5);assert.equal(births,index*5);assert.equal(drawnRings,births);assert.equal(w.particles.length,0);totalFlowers+=births;
+  assert.ok(index>=5);assert.equal(births,expectedFlowers);assert.equal(drawnRings,births);assert.equal(w.particles.length,0);totalFlowers+=births;
  }
- assert.ok(totalFlowers>=1000);
+ assert.ok(totalFlowers>=600);
 });

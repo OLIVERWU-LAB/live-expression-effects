@@ -5,7 +5,7 @@ export const flatRandom=seed=>()=>((seed=Math.imul(seed,1664525)+1013904223>>>0)
 // Size follows the viewport, never the current head position or launch side.
 export const flatViewportScale=(width,height)=>width<650&&height>width?Math.min(.72,width/850):Math.min(1.2,width/1400,height/850);
 
-// Predict the five actual moving carriers, rather than bending radial vectors
+// Predict the actual moving carriers, rather than bending radial vectors
 // towards whatever space remains when they explode. All live cascades share
 // this carrier choreography; only their later flower components differ.
 export function flatFlowerSites(scale,seed,spreadScale=scale){
@@ -25,11 +25,11 @@ export function placeFlatBouquet(layout,width,height,head){
  const targetX=portrait?cx+side*width*.09:side<0?head.left*.48:side>0?(head.right+width)*.5:cx,targetY=portrait?head.top*.34:head.top*.58;
  // A small, bounded search runs only once per launch, never per animation frame.
  for(let step=0;step<16;step++){
-  const scale=fixed??Math.max(.22,nominal*Math.pow(.9,step)),spreadScale=fixed?Math.max(.16,fixed*Math.pow(.9,step)):scale;let best=null;
+  const scale=fixed??Math.max(.22,nominal*Math.pow(.9,step)),spreadScale=fixed?Math.max(fixed*.82,fixed*Math.pow(.9,step)):scale;let best=null;
   for(let variant=0;variant<(fixed&&step===0?32:8);variant++){
-   const flatSeed=(seed+Math.imul(variant,2654435761))>>>0,sites=flatFlowerSites(scale,flatSeed,spreadScale),edge=16+60*scale;
-   const sideEdge=p=>fixed?16+165*scale*.78*p.flowerScale:edge;
-   const minX=Math.max(...sites.map(p=>sideEdge(p)-p.x-Math.min(0,p.vx*.55))),maxX=Math.min(...sites.map(p=>width-sideEdge(p)-p.x-Math.max(0,p.vx*.55))),minY=Math.max(...sites.map(p=>edge-p.y-Math.min(0,p.vy*.55))),maxY=Math.min(...sites.map(p=>(portrait?Math.min(height*.58,head.top+(head.bottom-head.top)*.28):height*.62)-edge-p.y));
+   const flatSeed=(seed+Math.imul(variant,2654435761))>>>0,sites=flatFlowerSites(scale,flatSeed,spreadScale),edge=16+32*scale;
+   const sideEdge=p=>16+200*scale*.78*p.flowerScale;
+   const minX=Math.max(...sites.map(p=>sideEdge(p)-p.x)),maxX=Math.min(...sites.map(p=>width-sideEdge(p)-p.x)),minY=Math.max(...sites.map(p=>edge-p.y)),maxY=Math.min(...sites.map(p=>(portrait?Math.min(height*.58,head.top+(head.bottom-head.top)*.28):height*.62)-edge-p.y));
    if(maxX<minX||maxY<minY)continue;
    const xs=Array.from({length:9},(_,i)=>minX+(maxX-minX)*i/8),ys=Array.from({length:9},(_,i)=>minY+(maxY-minY)*i/8);
    xs.push(clamp(targetX,minX,maxX));ys.push(clamp(head.top-Math.max(...sites.map(p=>p.y+gap+(portrait?65:90)*scale*p.flowerScale)),minY,maxY));
