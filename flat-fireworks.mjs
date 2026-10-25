@@ -1,6 +1,6 @@
-import {particleVisibility} from './particle-visibility.mjs?v=40500dfc15ea';
-import {clamp} from './core.mjs?v=40500dfc15ea';
-import {handShell,handRing} from './handglow-particles.mjs?v=40500dfc15ea';
+import {particleVisibility} from './particle-visibility.mjs?v=653d4c7f5108';
+import {clamp} from './core.mjs?v=653d4c7f5108';
+import {handShell,handRing} from './handglow-particles.mjs?v=653d4c7f5108';
 const TAU=Math.PI*2;
 export const FLAT_LAUNCH_BLUE='#59C9F2';
 export const FLAT_PATTERN='flat-petals';
@@ -29,12 +29,12 @@ export function flatShell(x,y,scale=1,random=Math.random,pattern=FLAT_PATTERN,sp
  if(pattern==='flat-reprise'){const shell=handShell('cinema-rings',x,y,scale,random);return{...shell,particles:flattenReprise(shell.particles,FLAT_COLORWAYS[shell.variant],null)};}
  const tempo=flatTempo(pattern),root=Math.sqrt(scale),phase=random()*TAU,hue=Math.floor(random()*3),parent={x,y,scale,tempo,pattern,variant:hue,seed:random()*100};
  if(FLAT_CASCADES.includes(pattern)){
-  // Three clear blossoms on phones; roomier compositions can use four.
-  // Spread their centres along a shallow arc, without a crowded central flower.
-  const particles=[],count=scale>.65&&random()<.35?4:3,spacing=(count===3?260:230)*spreadScale;
+  // Four irregularly spaced directions around the apex. This changes only
+  // the centres; every later flower keeps its accepted equal-angle ray shape.
+  const particles=[],count=4;
   for(let j=0;j<count;j++){
-   const slot=(count===3?[1,0,2]:[1,2,0,3])[j],relative=slot-(count-1)/2,gravity=130*Math.sqrt(spreadScale)/(tempo*tempo),open=.20+j*(count===3?.18:.16),duration=open*tempo;
-   const motion=flatCarrierOffset(relative*spacing,Math.abs(relative)<1?-Math.min(15,20*spreadScale):0,duration,gravity);
+   const a=phase+j*TAU/4+(random()-.5)*.20,radius=(279+random()*42)*spreadScale,gravity=130*Math.sqrt(spreadScale)/(tempo*tempo),open=.20+j*.16,duration=open*tempo;
+   const motion=flatCarrierOffset(Math.cos(a)*radius,Math.sin(a)*radius*.45,duration,gravity);
    particles.push(make(parent,'seed',motion.vx,motion.vy,3.7*root,open+.09,'#FFF8E8',random,{delay:.08,collisionDelay:1,flatEmitAt:duration,tailLength:14,trailAge:.14,drag:motion.drag,gravity,flatStopSpeed:28,turn:phase,cascade:true,clusterIndex:j,flowerCount:count,flowerScale:1,variant:(hue+j)%FLAT_COLORWAYS.length}));
   }
   return{particles,variant:hue};
@@ -216,7 +216,7 @@ export function drawFlatLaunch(g,r){
  g.beginPath();g.moveTo(left[0].x,left[0].y);for(const p of left)g.lineTo(p.x,p.y);for(const p of right.reverse())g.lineTo(p.x,p.y);g.closePath();g.fill();g.restore();
 }
 
-// A compact first flower opens at the launch apex before the three or four live seeds spread.
+// A compact first flower opens at the launch apex before the four live seeds spread.
 export const flatOpeningGlint=(age,p)=>.16+.84*(.5+.5*Math.sin(age*p.glintRate+p.glintPhase))**3;
 export function flatOpening(x,y,scale,variant,random=Math.random,pattern=FLAT_PATTERN){
  if(pattern==='flat-reprise')return[];

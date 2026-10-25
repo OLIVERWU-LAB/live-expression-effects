@@ -1,5 +1,5 @@
 /* Inference stays off the render thread. Assets persist in Cache Storage. */
-importScripts('./vision-config.js?v=40500dfc15ea','./vision-pack.js?v=40500dfc15ea','./vision-download.js?v=40500dfc15ea');
+importScripts('./vision-config.js?v=653d4c7f5108','./vision-pack.js?v=653d4c7f5108','./vision-download.js?v=653d4c7f5108');
 let role='face';
 const progress=phase=>postMessage({type:'progress',phase});
 let faceModel = null, handModel = null, lastHands = -Infinity, segmenter = null, latestMask = null, lastSegment = -Infinity;
