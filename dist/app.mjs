@@ -25,6 +25,7 @@ let cameraStartup = 'idle', cameraStartupError = null;
 let cameraRequest = null, cameraEpoch = 0, suspended = document.hidden, lastVideoTime = -1, lastInference = 0, interval = 65;
 let width = 1, height = 1, landmarks = null, mask = null, maskTime = 0, faceTime = -Infinity, polygon = null, silhouette = null, silhouetteKey = '', lastCenter = null;
 let lockedEffect=null,fireworkLaunches=0,giftPreloadStarted=false;
+const names = { neutral: '待机', smile: '雨滴', laugh: '烟花' };
 let neutralHintSince=null;
 let state = 'neutral', previewStrength = .35, previewX = .5, previewY = .37, pointerDown = false;
 let lastFrame = 0, uiTime = 0, nextLaunchAt = 0, burstSide = 0, launchGap = 1800, fps = 0, fpsTime = 0, frames = 0, inferenceMs = 0, log = [], sessionStart = performance.now();
@@ -80,15 +81,18 @@ function syncStyle() {
 function syncPlayback(){
   for(const b of document.querySelectorAll('[data-playback]'))b.setAttribute('aria-pressed',String(b.dataset.playback===lockedEffect));
   stage.dataset.lockedPlayback=lockedEffect||'auto';
+  $('playback-lock-hint').hidden=!lockedEffect;
+  $('preview-strength').disabled=!!lockedEffect;
+  if(lockedEffect){$('smile-hint').hidden=true;neutralHintSince=null;}
+  syncMeter();
 }
 function choosePlayback(effect){
   lockedEffect=lockedEffect===effect?null:effect;
   if(lockedEffect&&mode==='idle')usePreview();
   sound.stopAll();world.clear();state='neutral';nextLaunchAt=0;
-  syncPlayback();setState(expression.state);record('locked-playback',{effect:lockedEffect||'auto'});
+  setState(expression.state);syncPlayback();record('locked-playback',{effect:lockedEffect||'auto'});
 }
 syncStyle();
-const names = { neutral: '待机', smile: '雨滴', laugh: '烟花' };
 const storage = { get() { try { return localStorage.getItem('expression-camera-intent'); } catch { return null; } }, set(value) { try { localStorage.setItem('expression-camera-intent', value ? 'yes' : 'no'); } catch {} } };
 function record(type, detail = {}) { log.push({ elapsedMs: Math.round(performance.now() - sessionStart), type, ...detail }); if (log.length > 200) log.shift(); }
 function notify(text = '') { $('notice').textContent = text; $('notice').hidden = !text; }
@@ -231,11 +235,19 @@ function currentHeadBounds() {
   const left=Math.min(...polygon.map(p=>p.x)),right=Math.max(...polygon.map(p=>p.x)),top=Math.min(...polygon.map(p=>p.y)),bottom=Math.max(...polygon.map(p=>p.y));
   return{left:left-(right-left)*.10,right:right+(right-left)*.10,top:top-(bottom-top)*.18,bottom};
 }
+function syncMeter(){
+  const value=lockedEffect==='rain'?35:lockedEffect==='fireworks'?85:Math.round(expression.smile*100);
+  const label=names[lockedState(state,lockedEffect,mode)];
+  $('strength-value').textContent=String(value);$('gauge-cursor').style.left=`calc(${value}% + ${5-value*.1}px)`;
+  $('smile-gauge').setAttribute('aria-valuenow',String(value));
+  $('smile-gauge').setAttribute('aria-label',lockedEffect?'锁定播放强度':'笑容强度');
+  $('smile-gauge').setAttribute('aria-valuetext',`${value}% ${label}${lockedEffect?'，当前模式已锁定':''}`);$('effect-name').textContent=label;
+}
 function updateUI(now) {
   if (now - uiTime < 100) return; uiTime = now;
   syncLoading();
   stage.dataset.giftAssets=renderer.gift.ready?'ready':renderer.gift.error?'failed':'loading';
-  const value = Math.round(expression.smile * 100); $('strength-value').textContent = String(value); $('gauge-cursor').style.left = `calc(${value}% + ${5-value*.1}px)`; $('smile-gauge').setAttribute('aria-valuenow',String(value)); $('smile-gauge').setAttribute('aria-valuetext',`${value}% ${names[state]}`); $('effect-name').textContent = names[state];
+  syncMeter();
   stage.classList.toggle('rain', state === 'smile'); stage.classList.toggle('firework', state === 'laugh');
   const promptEligible=mode==='camera'&&engineReady&&!suspended&&!lockedEffect&&$('loading').hidden&&now-faceTime<900&&state==='neutral';
   if(!promptEligible)neutralHintSince=null;else if(neutralHintSince===null)neutralHintSince=now;
