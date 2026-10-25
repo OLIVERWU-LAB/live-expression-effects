@@ -12,8 +12,9 @@ test('desktop head offsets preserve both launch sides and complete safe flat bou
   const head={left:1280*center-125,right:1280*center+125,top:240,bottom:500};
   const layout=planLiveFirework(w,1280,720,head,index,flatRandom(31));assert.ok(layout);
   assert.equal(layout.launchX,index?1152:128);
-  assert.ok(index?layout.x>1280*center:layout.x<1280*center);
-  assert.ok(flatSitesClear(flatFlowerSites(layout.scale,layout.flatSeed),layout.x,layout.y,layout.scale,head,1280,720));
+  // The origin alternates; the apex may move across the head to preserve size.
+  assert.equal(layout.requestedSide,index?'right':'left');
+  assert.ok(flatSitesClear(flatFlowerSites(layout.scale,layout.flatSeed,layout.flatSpreadScale),layout.x,layout.y,layout.scale,head,1280,720));
  }
 });
 test('all styles alternate launch origins on desktop and phone without steering their radial particles',()=>{

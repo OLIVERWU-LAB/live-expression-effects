@@ -221,10 +221,10 @@ export class StickerWorld {
     if (this.effect !== 'laugh' || this.rockets.length >= 3) return false;
     const gift=this.style==='gift',pattern=this.nextPattern(),preferredX=layout?.launchX??width*(.24+this.random()*.52),origin=gift?giftLaunchOrigin(preferredX,x,width,height,this.head):{x:preferredX,y:height+22},sx=origin.x,sy=origin.y;
     const duration=(gift?.52:this.style==='flat'?.46:.58)+this.random()*.10;
-    this.rockets.push({sx,sy,tx:x,ty:y,x:sx,y:sy,arc:clamp((sy-y)*(.045+this.random()*.025),12,40),age:0,delayRemaining:0,duration,scale,pattern,variant:pattern==='willow'?3:Math.floor(this.random()*5),trail:[],trailClock:0,radius:layout?.radius||scale*205,flatSeed:layout?.flatSeed,flatSites:layout?.flatSeed==null?null:flatFlowerSites(scale,layout.flatSeed),planned:!!layout,clearance:layout?.clearance??84});
+    this.rockets.push({sx,sy,tx:x,ty:y,x:sx,y:sy,arc:clamp((sy-y)*(.045+this.random()*.025),12,40),age:0,delayRemaining:0,duration,scale,pattern,variant:pattern==='willow'?3:Math.floor(this.random()*5),trail:[],trailClock:0,radius:layout?.radius||scale*205,flatSeed:layout?.flatSeed,flatSites:layout?.flatSeed==null?null:flatFlowerSites(scale,layout.flatSeed,layout.flatSpreadScale??scale),flatSpreadScale:layout?.flatSpreadScale,planned:!!layout,clearance:layout?.clearance??84});
     this.event('launch',{x:sx/width,pattern,duration});return true;
   }
-  burst(x,y,scale=1,pattern=this.nextPattern(),eventX=.5,flatSeed=null) {
+  burst(x,y,scale=1,pattern=this.nextPattern(),eventX=.5,flatSeed=null,flatSpreadScale=scale) {
     if(this.effect!=='laugh')return;
     if(this.style==='flat'&&pattern==='flat-reprise')pattern='flat-petals';
     if(pattern==='cinema-inner')pattern='cinema-shell';
@@ -232,7 +232,7 @@ export class StickerWorld {
     if(!['cinema','glow'].includes(this.style)&&pattern==='orbit')pattern='crossette';
     this.lastPattern=pattern;
     const shellRandom=flatSeed==null?this.random:flatRandom(flatSeed);
-    const flat=this.style==='flat'&&FLAT_PATTERNS.includes(pattern),digital=['cinema','glow'].includes(this.style),referenceCinema=digital&&referencePattern(this.style,pattern),shell=flat?flatShell(x,y,scale,shellRandom,pattern):this.style==='gift'?giftShell(pattern,x,y,scale,this.random,this.giftMaterialStyle):referenceCinema?(pattern===REFINED_CINEMA_PATTERN?refinedCinemaShell(x,y,scale,this.random,this.simulationTime):pattern===ORIGINAL_CINEMA_PATTERN?originalCinemaShell(x,y,scale,this.random):(this.style==='glow'?handShell:cinemaShell)(pattern,x,y,scale,this.random)):pattern==='bouquet'?bouquetShell(x,y,scale,this.random):shellParticles(pattern,x,y,scale,digital,this.random);
+    const flat=this.style==='flat'&&FLAT_PATTERNS.includes(pattern),digital=['cinema','glow'].includes(this.style),referenceCinema=digital&&referencePattern(this.style,pattern),shell=flat?flatShell(x,y,scale,shellRandom,pattern,flatSpreadScale):this.style==='gift'?giftShell(pattern,x,y,scale,this.random,this.giftMaterialStyle):referenceCinema?(pattern===REFINED_CINEMA_PATTERN?refinedCinemaShell(x,y,scale,this.random,this.simulationTime):pattern===ORIGINAL_CINEMA_PATTERN?originalCinemaShell(x,y,scale,this.random):(this.style==='glow'?handShell:cinemaShell)(pattern,x,y,scale,this.random)):pattern==='bouquet'?bouquetShell(x,y,scale,this.random):shellParticles(pattern,x,y,scale,digital,this.random);
     this.blooms.push({x,y,age:0,flatFx:flat,life:digital?1.8:.9,size:Math.min(digital?46:62,Math.max(digital?24:38,(digital?38:52)*scale)),rotation:this.random()*1.2,variant:shell.variant,pattern,power:digital?.5:.55,seed:this.random()*100,referenceCinema,tint:referenceCinema?'#FFD54A':undefined});
     if([ORIGINAL_CINEMA_PATTERN,REFINED_CINEMA_PATTERN].includes(pattern))this.blooms.at(-1).classicCinema=true;
     if(pattern===REFINED_CINEMA_PATTERN)this.blooms.at(-1).refinedCinema=true;
@@ -284,7 +284,7 @@ export class StickerWorld {
       if(r.age>=r.duration&&!r.cancelled&&!r.detonated){
         if(r.flatSites&&!flatSitesClear(r.flatSites,r.tx,r.ty,r.scale,this.head,width,height)){r.cancelled=true;this.event('flight-blocked',{x:r.tx/width,reason:'head-moved-into-flowers'});continue;}
         const point=referencePattern(this.style,r.pattern)&&r.planned?resolveBurstPoint(r,this.head,width,height):{x:r.tx,y:r.ty};
-        if(point){if(Math.hypot(point.x-r.tx,point.y-r.ty)>1)this.event('flight-adjusted',{x:point.x/width});this.burst(point.x,point.y,r.scale,r.pattern,point.x/width,r.flatSeed);r.detonated=true;}
+        if(point){if(Math.hypot(point.x-r.tx,point.y-r.ty)>1)this.event('flight-adjusted',{x:point.x/width});this.burst(point.x,point.y,r.scale,r.pattern,point.x/width,r.flatSeed,r.flatSpreadScale);r.detonated=true;}
         else{r.clearWait=(r.clearWait||0)+dt;if(r.clearWait>.85){r.cancelled=true;this.event('flight-blocked',{x:r.tx/width,reason:'no-clear-sky'});}}
       }
     }

@@ -25,7 +25,7 @@ function make(parent,role,vx,vy,size,life,tint,random,extra={}){
 }
 // Old flower choreography retained, but only five live carriers are created here.
 // Their actual, integrated positions now own every later explosion centre.
-export function flatShell(x,y,scale=1,random=Math.random,pattern=FLAT_PATTERN){
+export function flatShell(x,y,scale=1,random=Math.random,pattern=FLAT_PATTERN,spreadScale=scale){
  if(pattern==='flat-reprise'){const shell=handShell('cinema-rings',x,y,scale,random);return{...shell,particles:flattenReprise(shell.particles,FLAT_COLORWAYS[shell.variant],null)};}
  const tempo=flatTempo(pattern),root=Math.sqrt(scale),phase=random()*TAU,hue=Math.floor(random()*3),parent={x,y,scale,tempo,pattern,variant:hue,seed:random()*100};
  if(FLAT_CASCADES.includes(pattern)){
@@ -34,9 +34,9 @@ export function flatShell(x,y,scale=1,random=Math.random,pattern=FLAT_PATTERN){
   // No final flower coordinates are stored; the moving carrier owns the origin.
   const particles=[];
   for(let j=0;j<5;j++){
-   const a=phase+j*2.39996323,speed=(j===0?200:1150+random()*280)*scale,open=j===0?.20+random()*.01:.22+j*.125+random()*.025;
-   const motion=flatCarrierVelocity(Math.cos(a)*speed*(j?1.85:1),Math.sin(a)*speed*(j?1.20:1)-35*root,open*tempo,130*root/(tempo*tempo));
-   particles.push(make(parent,'seed',motion.vx,motion.vy,3.7*root,open+.09,'#FFF8E8',random,{delay:.08,collisionDelay:1,flatEmitAt:open*tempo,tailLength:14,trailAge:.14,drag:motion.drag,flatStopSpeed:28,turn:phase+j*.22,cascade:true,clusterIndex:j,flowerScale:[.68,.92,1.16,.78,1.02][j],variant:(hue+j)%FLAT_COLORWAYS.length}));
+   const spreadRoot=Math.sqrt(spreadScale),gravity=130*spreadRoot/(tempo*tempo),a=phase+j*2.39996323,speed=(j===0?200:1150+random()*280)*spreadScale,open=j===0?.20+random()*.01:.22+j*.125+random()*.025;
+   const motion=flatCarrierVelocity(Math.cos(a)*speed*(j?1.85:1),Math.sin(a)*speed*(j?1.20:1)-35*spreadRoot,open*tempo,gravity);
+   particles.push(make(parent,'seed',motion.vx,motion.vy,3.7*root,open+.09,'#FFF8E8',random,{delay:.08,collisionDelay:1,flatEmitAt:open*tempo,tailLength:14,trailAge:.14,drag:motion.drag,gravity,flatStopSpeed:28,turn:phase+j*.22,cascade:true,clusterIndex:j,flowerScale:[.68,.92,1.16,.78,1.02][j],variant:(hue+j)%FLAT_COLORWAYS.length}));
   }
   return{particles,variant:hue};
  }
