@@ -1,15 +1,23 @@
 import{placeFlatBouquet}from'./flat-placement.mjs';
 // Sample around each circle, separately for every flower and radial band.
 // Never remove a carrier: that would remove an entire future blossom.
-const sample=(a,n)=>n>=a.length?a:n?Array.from({length:n},(_,i)=>a[Math.floor(i*a.length/n)]):[];
-const key=p=>[p.clusterIndex??'opening',p.flatRole,p.flatBand??(p.petalLayer|| (p.innerPetal?2:1)),!!p.crownSatellite,p.flatMobile?(p.flatTailSpark?'tail':p.whiteFlash?'white':'color'):'',p.openingFlash?'flash':p.openingGlint?'glint':''].join(':');
+const isPaired=a=>a.length>1&&a.every(p=>p.flatRadialCount%2===0&&p.flatRadialIndex!=null);
+const sample=(a,n)=>{
+ if(n>=a.length)return a;if(!n)return[];
+ if(!isPaired(a))return Array.from({length:n},(_,i)=>a[Math.floor(i*a.length/n)]);
+ const byIndex=new Map(a.map(p=>[p.flatRadialIndex,p])),pairs=[];
+ for(const p of a){const opposite=(p.flatRadialIndex+p.flatRadialCount/2)%p.flatRadialCount;if(p.flatRadialIndex<opposite&&byIndex.has(opposite))pairs.push([p,byIndex.get(opposite)]);}
+ const count=Math.min(pairs.length,Math.floor(n/2));return count?Array.from({length:count},(_,i)=>pairs[Math.floor(i*pairs.length/count)]).flat():[];
+};
+const key=p=>[p.emitterId??'opening',p.clusterIndex??'opening',p.flatRole,p.flatBand??(p.petalLayer|| (p.innerPetal?2:1)),!!p.crownSatellite,(p.flatMobile||p.flatRadialIndex!=null)?(p.flatTailSpark?'tail':p.whiteFlash?'white':'color'):'',p.openingFlash?'flash':p.openingGlint?'glint':''].join(':');
 const groupsOf=particles=>{const groups=new Map();for(const p of particles){const k=key(p);if(!groups.has(k))groups.set(k,[]);groups.get(k).push(p);}return [...groups.values()];};
+const minimumForGroup=g=>isPaired(g)?2:g[0].flatMobile&&g[0].whiteFlash?Math.min(g.length,3):1;
 export function prioritizeFlat(particles,budget){
  const emitters=particles.filter(p=>p.flatEmitAt!=null),rest=particles.filter(p=>p.flatEmitAt==null);
  if(emitters.length>=budget)return emitters;
  const all=groupsOf(rest).sort((a,b)=>((a[0].flatRole==='ring'?0:a[0].flatFine||a[0].flatRole==='dust'?2:1)-(b[0].flatRole==='ring'?0:b[0].flatFine||b[0].flatRole==='dust'?2:1))),room=Math.min(rest.length,Math.max(0,budget-emitters.length));if(!all.length)return emitters;
  // A ring and every radial band get an explicit slot before density detail.
- const reserve=all.map(g=>g[0].flatMobile&&g[0].whiteFlash?Math.min(g.length,3):1),reserved=reserve.reduce((a,b)=>a+b,0);
+ const reserve=all.map(minimumForGroup),reserved=reserve.reduce((a,b)=>a+b,0);
  const minimum=reserved<=room?reserve:all.map((g,i)=>i<room?1:0),used=minimum.reduce((a,b)=>a+b,0);
  const counts=all.map((g,i)=>minimum[i]+Math.floor((room-used)*(g.length-minimum[i])/Math.max(1,rest.length-used)));
  for(let i=0,n=room-counts.reduce((a,b)=>a+b,0);n>0;i=(i+1)%all.length)if(counts[i]<all[i].length){counts[i]++;n--;}
@@ -25,7 +33,7 @@ export function thinFlat(particles){
   // Taking eight petals per ring on a 150-slot device fills it before flower 5.
   const low=p.flatMobile&&density<.3;
   const minimum=importantFlash?(p.flatTailSpark?2:low?3:6):p.flatRole==='petal'?(low?(p.petalLayer===3?3:p.innerPetal?4:6):(p.petalLayer===3?6:8)):['comet','ribbon','leaf','spoke','star'].includes(p.flatRole)?(p.crownSatellite?2:Math.min(low?4:6,g.length)):1;
-  return sample(g,Math.min(g.length,Math.max(minimum,Math.round(g.length*(detail&&!importantFlash?density*density:density)))));
+  return sample(g,Math.min(g.length,Math.max(isPaired(g)?Math.max(2,minimum):minimum,Math.round(g.length*(detail&&!importantFlash?density*density:density)))));
  });
 }
 export function fitFlatViewport(layout,width,height,head){
@@ -54,8 +62,8 @@ export function markPortraitFlat(shell,viewport){
 // Reserve capacity for the later flowers and the overlapping next volley.
 // One early flower must not consume 70% of the entire shared pool.
 export function flatBirthBudget(particles,limit,share){
- const flowers=new Set(particles.filter(p=>p.cascadeChild).map(p=>p.emitterId));
- if(flowers.size)return Math.max(flowers.size,Math.floor(limit*.10)*flowers.size);
+ const flowers=new Set(particles.filter(p=>p.cascadeChild).map(p=>`${p.emitterId}:${p.clusterIndex}`));
+ if(flowers.size){const required=groupsOf(particles.filter(p=>p.flatEmitAt==null)).reduce((n,g)=>n+minimumForGroup(g),0);return Math.max(required,Math.floor(limit*.10)*flowers.size);}
  if(particles.some(p=>p.cascade))return Math.max(5,Math.floor(limit*.13));
  if(particles.some(p=>p.flatTailSpark))return Math.max(2,Math.floor(limit*.025));
  return Math.floor(limit*share);

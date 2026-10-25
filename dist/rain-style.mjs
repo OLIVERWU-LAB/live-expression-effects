@@ -5,6 +5,10 @@ export function lineRainEntry(width,height,depth,roll){
  const vx=145+depth*90,vy=440+depth*280,leftShare=vx*height/(vy*Math.max(1,width)+vx*height);
  return roll<leftShare?{x:-24,y:-45+roll/leftShare*(height+45),vx,vy}:{x:(roll-leftShare)/(1-leftShare)*width,y:-45,vx,vy};
 }
+export function slantedDropEntry(width,height,vx,vy,roll){
+ const sideShare=vx*height/(vy*Math.max(1,width)+vx*height);
+ return roll<sideShare?{x:-24,y:-45+roll/sideShare*(height+45)}:{x:(roll-sideShare)/(1-sideShare)*width,y:-45};
+}
 export const lineRainCoverage=(width,height)=>1+(145+.675*90)*height/((440+.675*280)*Math.max(1,width));
 export const FLAT_RAIN_COLORS=Object.freeze(['#42C9DE','#50D0E1','#38BED8','#69D9E6','#49C7DD']);
 export const portraitRainScale=(style,width,height)=>width<650&&height>width?(style==='flat'?.60:style==='gift'?.75:1):1;

@@ -3,7 +3,7 @@ import{flatRandom,flatFlowerSites,flatSitesClear}from'./flat-placement.mjs';
 import{thinCinema,interleaveCinema}from'./particle-quality.mjs';
 import {REFINED_CINEMA_PATTERN,refinedCinemaShell,refinedCinemaChildren} from './cinema-refined-particles.mjs';
 import {ORIGINAL_CINEMA_PATTERN,originalCinemaShell,originalCinemaChildren} from './cinema-original-particles.mjs';
-import {contactRain,lineRainEntry,rainRate,portraitRainScale} from './rain-style.mjs';
+import {contactRain,lineRainEntry,slantedDropEntry,rainRate,portraitRainScale} from './rain-style.mjs';
 import {handShell,handRing} from './handglow-particles.mjs';
 import {FLAT_PATTERN,FLAT_PATTERNS,ACTIVE_FLAT_PATTERNS,FLAT_PALETTE,flatShell,flatChildren,flatOpening,flatAfterglints} from './flat-fireworks.mjs';
 import {withHeadCollider,resolveBurstPoint} from './head-collision.mjs';
@@ -188,8 +188,8 @@ export class StickerWorld {
       const depth = .35 + this.random() * .65;
       const size = (digital ? (7.2 + Math.pow(this.random(), 1.25) * 6.8) * (.78+depth*.22) : this.style==='gift'?(18+this.random()*13)*2/3*.78:this.style==='flat'?5+this.random()**1.5*17:18+this.random()*13)*portraitRainScale(this.style,width,height);
       const life = height / 210 + 4;
-      const spawnRandom=this.random(),rainX=this.style==='gift'?(((this.rainSequence=(this.rainSequence||0)+1)*.61803398875+spawnRandom*.12)%1)*width:spawnRandom*width,entry=digital?lineRainEntry(width,height,depth,spawnRandom):null;
-      this.add({ type: 'drop', x: entry?.x??rainX, y: prefill-->0?this.random()*height*.88:(entry?.y??-45), vx: digital?entry.vx:this.style==='flat'?52+depth*45:-10+this.random()*20, vy: digital ? entry.vy : 360 + this.random() * 180, gravity:digital?620:this.style==='gift'?500:this.style==='flat'?470:65, size, life, maxLife: life, variant: Math.floor(this.random() * 5), angle: this.style==='flat'?-.23:0, spin: 0, touched: 0, generation: 0, depth, rainTone:Math.floor(this.random()*5),rainVariant:this.random()<.10?'hollow':this.random()<.16?'soft':'solid',dropShape:Math.floor(this.random()*3),rainLength:digital?26+depth*44:0, volume: size ** 3 });
+      const spawnRandom=this.random(),rainX=this.style==='gift'?(((this.rainSequence=(this.rainSequence||0)+1)*.61803398875+spawnRandom*.12)%1)*width:spawnRandom*width,dropVX=52+depth*45,dropVY=360+this.random()*180,entry=digital?lineRainEntry(width,height,depth,spawnRandom):this.style==='gift'?slantedDropEntry(width,height,dropVX,dropVY,rainX/width):null;
+      this.add({ type: 'drop', x: this.style==='gift'&&prefill>0?rainX:entry?.x??rainX, y: prefill-->0?this.random()*height*.88:(entry?.y??-45), vx: digital?entry.vx:['flat','gift'].includes(this.style)?dropVX:-10+this.random()*20, vy: digital ? entry.vy : dropVY, gravity:digital?620:this.style==='gift'?500:this.style==='flat'?470:65, size, life, maxLife: life, variant: Math.floor(this.random() * 5), angle: ['flat','gift'].includes(this.style)?-.23:0, spin: 0, touched: 0, generation: 0, depth, rainTone:Math.floor(this.random()*5),rainVariant:this.random()<.10?'hollow':this.random()<.16?'soft':'solid',dropShape:Math.floor(this.random()*3),rainLength:digital?26+depth*44:0, volume: size ** 3 });
     }
   }
   split(parent) {
