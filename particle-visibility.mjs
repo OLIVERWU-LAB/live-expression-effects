@@ -1,3 +1,3 @@
-import {clamp} from './core.mjs?v=ce2650cbc6cf';
+import {clamp} from './core.mjs?v=40500dfc15ea';
 // Resource pressure fades live particles before their slots can be reused.
 export const particleVisibility=p=>p.retireRemaining==null?1:clamp(p.retireRemaining/.24);

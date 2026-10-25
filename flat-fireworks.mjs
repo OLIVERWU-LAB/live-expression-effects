@@ -1,6 +1,6 @@
-import {particleVisibility} from './particle-visibility.mjs?v=ce2650cbc6cf';
-import {clamp} from './core.mjs?v=ce2650cbc6cf';
-import {handShell,handRing} from './handglow-particles.mjs?v=ce2650cbc6cf';
+import {particleVisibility} from './particle-visibility.mjs?v=40500dfc15ea';
+import {clamp} from './core.mjs?v=40500dfc15ea';
+import {handShell,handRing} from './handglow-particles.mjs?v=40500dfc15ea';
 const TAU=Math.PI*2;
 export const FLAT_LAUNCH_BLUE='#59C9F2';
 export const FLAT_PATTERN='flat-petals';
@@ -29,14 +29,13 @@ export function flatShell(x,y,scale=1,random=Math.random,pattern=FLAT_PATTERN,sp
  if(pattern==='flat-reprise'){const shell=handShell('cinema-rings',x,y,scale,random);return{...shell,particles:flattenReprise(shell.particles,FLAT_COLORWAYS[shell.variant],null)};}
  const tempo=flatTempo(pattern),root=Math.sqrt(scale),phase=random()*TAU,hue=Math.floor(random()*3),parent={x,y,scale,tempo,pattern,variant:hue,seed:random()*100};
  if(FLAT_CASCADES.includes(pattern)){
-  // One launch -> five moving carriers -> five distinct, staggered flowers.
-  // Open the carrier spread before ignition; every blossom keeps radial rays.
-  // No final flower coordinates are stored; the moving carrier owns the origin.
-  const particles=[];
-  for(let j=0;j<5;j++){
-   const spreadRoot=Math.sqrt(spreadScale),gravity=130*spreadRoot/(tempo*tempo),a=phase+j*2.39996323,speed=(j===0?200:1150+random()*280)*spreadScale,open=j===0?.20+random()*.01:.22+j*.125+random()*.025;
-   const motion=flatCarrierVelocity(Math.cos(a)*speed*(j?1.85:1),Math.sin(a)*speed*(j?1.20:1)-35*spreadRoot,open*tempo,gravity);
-   particles.push(make(parent,'seed',motion.vx,motion.vy,3.7*root,open+.09,'#FFF8E8',random,{delay:.08,collisionDelay:1,flatEmitAt:open*tempo,tailLength:14,trailAge:.14,drag:motion.drag,gravity,flatStopSpeed:28,turn:phase+j*.22,cascade:true,clusterIndex:j,flowerScale:[.68,.92,1.16,.78,1.02][j],variant:(hue+j)%FLAT_COLORWAYS.length}));
+  // Three clear blossoms on phones; roomier compositions can use four.
+  // Spread their centres along a shallow arc, without a crowded central flower.
+  const particles=[],count=scale>.65&&random()<.35?4:3,spacing=(count===3?260:230)*spreadScale;
+  for(let j=0;j<count;j++){
+   const slot=(count===3?[1,0,2]:[1,2,0,3])[j],relative=slot-(count-1)/2,gravity=130*Math.sqrt(spreadScale)/(tempo*tempo),open=.20+j*(count===3?.18:.16),duration=open*tempo;
+   const motion=flatCarrierOffset(relative*spacing,Math.abs(relative)<1?-Math.min(15,20*spreadScale):0,duration,gravity);
+   particles.push(make(parent,'seed',motion.vx,motion.vy,3.7*root,open+.09,'#FFF8E8',random,{delay:.08,collisionDelay:1,flatEmitAt:duration,tailLength:14,trailAge:.14,drag:motion.drag,gravity,flatStopSpeed:28,turn:phase,cascade:true,clusterIndex:j,flowerCount:count,flowerScale:1,variant:(hue+j)%FLAT_COLORWAYS.length}));
   }
   return{particles,variant:hue};
  }
@@ -61,7 +60,7 @@ export function flatChildren(parent,random=Math.random){
   }
   // The carrier chooses the flower's real birth position, but its remaining
   // flight velocity must not sweep the whole radial explosion to one side.
-  for(const child of children){child.clusterIndex=parent.clusterIndex;child.cascadeChild=true;const longTrail=parent.pattern==='flat-medallion'&&child.flatRole==='comet';child.life=child.maxLife=(longTrail?2.05:child.flatRing?1.90:child.flatFine?(parent.pattern==='flat-medallion'?1.70:1.90):1.62)+random()*(longTrail?.18:.22);child.drag=longTrail?.95:1.35;child.collisionDelay=.38;if(longTrail){child.longTrail=true;child.trailAge=1.10;child.tailLength=84;child.trailTint=colors[child.flatBand===0?1:0];}if(parent.pattern==='flat-star-crown'&&child.tailLength){child.trailAge=.56;child.tailLength=40;child.trailDistance=170;}}
+  for(const child of children){child.clusterIndex=parent.clusterIndex;child.cascadeChild=true;const longTrail=parent.pattern==='flat-medallion'&&child.flatRole==='comet';child.life=child.maxLife=(longTrail?2.05:child.flatRing?1.90:child.flatFine?(child.whiteFlash?2.40:1.85):1.62)+random()*(longTrail?.18:.22);child.drag=longTrail?.95:1.35;child.collisionDelay=.38;if(longTrail){child.longTrail=true;child.trailAge=1.10;child.tailLength=84;child.trailTint=colors[child.flatBand===0?1:0];}if(parent.pattern==='flat-star-crown'&&child.tailLength){child.trailAge=.56;child.tailLength=40;child.trailDistance=170;}}
   return children;
  }
  const out=[],root=Math.sqrt(parent.scale),T=parent.tempo,color=parent.color,accent=parent.accent;
@@ -105,15 +104,11 @@ function radialShell(parent,phase,random){
   emit('comet',8,95,2.7,[colors[2]],.2,{tailScale:.65});
   emit('dust',24,405,1.9,[colors[0]],.35);emit('dust',12,160,1.3,['#FFF2D6']);
  }else if(key==='flat-star-crown'){
-  emit('comet',16,290,3.9,[colors[3],colors[1]],.2,{cap:null,tailScale:1.25});
+  emit('comet',16,290,3.9,[colors[3],colors[1]],0,{cap:null,tailScale:1.25});
   emit('star',8,350,15,[colors[0]],0,{points:5,tailLength:24,trailAge:.27,trailWidth:2.5*r,trailTint:colors[1],outerGlints:true});
-  // Each primary crown star carries three smaller companions, paired across the centre.
-  for(const anchor of p.filter(q=>q.flatRole==='star'))for(let j=0;j<3;j++){
-   const a=anchor.angle+(j-1)*.075,speed=(285+j*26)*s;
-   p.push(make(parent,'star',Math.cos(a)*speed,Math.sin(a)*speed,(3.2+j*1.1)*r,2.05+random()*.24,colors[j%2?2:0],random,{angle:a,points:5,crownSatellite:true,flatRadialIndex:anchor.flatRadialIndex*3+j,flatRadialCount:24,delay:.045+j*.025,gravity:115*r,drag:1.0}));
-  }
-  emit('comet',20,150,3.4,[colors[0]],.25,{cap:null});
-  emit('star',16,325,4.5,[colors[2]],.35,{points:4});
+  // One clear, equal-angle star crown. Tiny satellite stars used to make
+  // the visible gaps look unequal, even when the primary eight were regular.
+  emit('comet',16,150,3.4,[colors[0]],0,{cap:null});
  }else if(key==='flat-swirl'){
   emit('leaf',27,300,8.5,[colors[0],colors[1],colors[2]],0,{cap:null,curl:.52,tailScale:1.20});
   emit('star',27,370,4.5,[colors[2],colors[3]],.2,{points:4});
@@ -221,7 +216,7 @@ export function drawFlatLaunch(g,r){
  g.beginPath();g.moveTo(left[0].x,left[0].y);for(const p of left)g.lineTo(p.x,p.y);for(const p of right.reverse())g.lineTo(p.x,p.y);g.closePath();g.fill();g.restore();
 }
 
-// A compact first flower opens at the launch apex before the five live seeds spread.
+// A compact first flower opens at the launch apex before the three or four live seeds spread.
 export const flatOpeningGlint=(age,p)=>.16+.84*(.5+.5*Math.sin(age*p.glintRate+p.glintPhase))**3;
 export function flatOpening(x,y,scale,variant,random=Math.random,pattern=FLAT_PATTERN){
  if(pattern==='flat-reprise')return[];
@@ -238,6 +233,14 @@ export function flatOpening(x,y,scale,variant,random=Math.random,pattern=FLAT_PA
 
 // Keep the measured endpoint with gentler braking, so a carrier does not coast
 // almost motionless for the last part of its timed flight.
+// Solve the initial velocity against the same fixed-step integration used by
+// placement prediction. Only birth velocity is stored; live seeds still fly.
+export function flatCarrierOffset(x,y,duration,gravity){
+ let travel=0,fall=0,decay=1,vy=0,t=0;const drag=3;
+ while(t<duration){const dt=Math.min(1/120,duration-t),d=Math.exp(-drag*dt);decay*=d;travel+=decay*dt;vy=(vy+gravity*dt)*d;fall+=vy*dt;t+=dt;}
+ return{vx:x/travel,vy:(y-fall)/travel,drag};
+}
+
 export function flatCarrierVelocity(vx,vy,duration,gravity){
  const drag=3,oldE=(1-Math.exp(-9*duration))/9,newE=(1-Math.exp(-drag*duration))/drag;
  return{vx:vx*oldE/newE,vy:(vy*oldE+gravity*(duration-oldE)/9-gravity*(duration-newE)/drag)/newE,drag};
@@ -259,8 +262,8 @@ function drawFlatReprise(g,p){
 export function outerGlintEnvelope(p){const elapsed=clamp((p.maxLife-p.life-.36)/.55),late=clamp((.80-p.life)/.45),pulse=Math.pow(Math.max(0,Math.sin((p.maxLife-p.life)*19+p.seed)),4);return particleVisibility(p)*elapsed*late*clamp((p.life-.10)/.22)*pulse;}
 // Independent late sparks remain after their coloured head has burned away.
 export function flatAfterglints(parent,random=Math.random){
- if(parent.pattern==='flat-medallion'||Math.floor(parent.seed)%2!==0)return[];const root=Math.sqrt(parent.scale||1);
- return Array.from({length:2},(_,i)=>{const a=parent.seed+i*2.4,life=.32+random()*.08;return make(parent,'dust',parent.vx*.82+Math.cos(a)*(8+i*5),parent.vy*.82+Math.sin(a)*(8+i*5),(1.75+random()*.65)*root,life,'#FFFFFF',random,{x:parent.x+Math.cos(a)*(3+i*4)*root,y:parent.y+Math.sin(a)*(3+i*4)*root,flatTailSpark:true,whiteFlash:true,outerGlints:false,gravity:90*root,drag:1.1,tempo:1,life,maxLife:life,hasCollided:parent.hasCollided||false,hitRegion:parent.hitRegion,hitAge:parent.hitAge||0,noRecollision:true,trail:[],tailLength:0,collisionDelay:0});});
+ if(Math.floor(parent.seed)%2!==0)return[];const root=Math.sqrt(parent.scale||1);
+ return Array.from({length:2},(_,i)=>{const a=parent.seed+i*2.4,life=.72+random()*.14;return make(parent,'dust',parent.vx*.82+Math.cos(a)*(8+i*5),parent.vy*.82+Math.sin(a)*(8+i*5),(1.75+random()*.65)*root,life,'#FFFFFF',random,{x:parent.x+Math.cos(a)*(3+i*4)*root,y:parent.y+Math.sin(a)*(3+i*4)*root,flatTailSpark:true,whiteFlash:true,outerGlints:false,gravity:90*root,drag:1.1,tempo:1,life,maxLife:life,hasCollided:parent.hasCollided||false,hitRegion:parent.hitRegion,hitAge:parent.hitAge||0,noRecollision:true,trail:[],tailLength:0,collisionDelay:0});});
 }
 export function flatAfterglintEnvelope(p){const age=p.maxLife-p.life,pulse=Math.pow(.5+.5*Math.sin(age*22+p.seed),3);return particleVisibility(p)*clamp(age/.045)*clamp(p.life/.18)*(.18+.82*pulse);}
 

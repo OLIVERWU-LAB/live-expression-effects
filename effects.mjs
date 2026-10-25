@@ -1,18 +1,18 @@
-import {thinFlat,prioritizeFlat,markPortraitFlat,flatBirthBudget} from './flat-budget.mjs?v=ce2650cbc6cf';
-import{flatRandom,flatFlowerSites,flatSitesClear}from'./flat-placement.mjs?v=ce2650cbc6cf';
-import{thinCinema,interleaveCinema}from'./particle-quality.mjs?v=ce2650cbc6cf';
-import {REFINED_CINEMA_PATTERN,refinedCinemaShell,refinedCinemaChildren} from './cinema-refined-particles.mjs?v=ce2650cbc6cf';
-import {ORIGINAL_CINEMA_PATTERN,originalCinemaShell,originalCinemaChildren} from './cinema-original-particles.mjs?v=ce2650cbc6cf';
-import {contactRain,lineRainEntry,slantedDropEntry,rainRate,portraitRainScale} from './rain-style.mjs?v=ce2650cbc6cf';
-import {handShell,handRing} from './handglow-particles.mjs?v=ce2650cbc6cf';
-import {FLAT_PATTERN,FLAT_PATTERNS,ACTIVE_FLAT_PATTERNS,FLAT_PALETTE,flatShell,flatChildren,flatOpening,flatAfterglints} from './flat-fireworks.mjs?v=ce2650cbc6cf';
-import {withHeadCollider,resolveBurstPoint} from './head-collision.mjs?v=ce2650cbc6cf';
-import {GIFT_PATTERNS,CINEMA_PATTERNS,GIFT_PALETTE,GIFT_BEAD_COLORS,giftShell,giftBeadChildren,cinemaShell,cinemaRingChildren,referencePattern} from './reference-bursts.mjs?v=ce2650cbc6cf';
-import {GIFT_COLORS,giftMaterial,giftSplash,giftLaunchOrigin,giftConfetti} from './gift-style.mjs?v=ce2650cbc6cf';
-import { clamp, collide, coverPoint } from './core.mjs?v=ce2650cbc6cf';
-import {chooseColors,roundColor} from './dandelion.mjs?v=ce2650cbc6cf';
-import {bouquetShell,poppingFlower,innerCrownParticles} from './bouquet.mjs?v=ce2650cbc6cf';
-import { SHELLS, PATTERNS, ACTIVE_PATTERNS, STAGED_PATTERNS, STICKER_PATTERN_BAG, rocketPoint, shellParticles, crossetteChildren, burstIsSafe, boundsDistance } from './pyro.mjs?v=ce2650cbc6cf';
+import {thinFlat,prioritizeFlat,markPortraitFlat,flatBirthBudget} from './flat-budget.mjs?v=40500dfc15ea';
+import{flatRandom,flatFlowerSites,flatSitesClear}from'./flat-placement.mjs?v=40500dfc15ea';
+import{thinCinema,interleaveCinema}from'./particle-quality.mjs?v=40500dfc15ea';
+import {REFINED_CINEMA_PATTERN,refinedCinemaShell,refinedCinemaChildren} from './cinema-refined-particles.mjs?v=40500dfc15ea';
+import {ORIGINAL_CINEMA_PATTERN,originalCinemaShell,originalCinemaChildren} from './cinema-original-particles.mjs?v=40500dfc15ea';
+import {contactRain,lineRainEntry,slantedDropEntry,rainRate,portraitRainScale} from './rain-style.mjs?v=40500dfc15ea';
+import {handShell,handRing} from './handglow-particles.mjs?v=40500dfc15ea';
+import {FLAT_PATTERN,FLAT_PATTERNS,ACTIVE_FLAT_PATTERNS,FLAT_PALETTE,flatShell,flatChildren,flatOpening,flatAfterglints} from './flat-fireworks.mjs?v=40500dfc15ea';
+import {withHeadCollider,resolveBurstPoint} from './head-collision.mjs?v=40500dfc15ea';
+import {GIFT_PATTERNS,CINEMA_PATTERNS,GIFT_PALETTE,GIFT_BEAD_COLORS,giftShell,giftBeadChildren,cinemaShell,cinemaRingChildren,referencePattern} from './reference-bursts.mjs?v=40500dfc15ea';
+import {GIFT_COLORS,giftMaterial,giftSplash,giftLaunchOrigin,giftConfetti} from './gift-style.mjs?v=40500dfc15ea';
+import { clamp, collide, coverPoint } from './core.mjs?v=40500dfc15ea';
+import {chooseColors,roundColor} from './dandelion.mjs?v=40500dfc15ea';
+import {bouquetShell,poppingFlower,innerCrownParticles} from './bouquet.mjs?v=40500dfc15ea';
+import { SHELLS, PATTERNS, ACTIVE_PATTERNS, STAGED_PATTERNS, STICKER_PATTERN_BAG, rocketPoint, shellParticles, crossetteChildren, burstIsSafe, boundsDistance } from './pyro.mjs?v=40500dfc15ea';
 
 export class WaterSurface {
   constructor() { this.level = 0; this.y = new Float32Array(64); this.v = new Float32Array(64); }
@@ -244,7 +244,7 @@ export class StickerWorld {
       bloom.tint=pair[0];for(const p of shell.particles){p.roundColors=pair;p.tint=pair[0];p.fireworkStage=1;}
     }
     if(this.style==='glow')this.blooms.at(-1).tint=shell.tint;
-    if(flat){shell.particles.push(...flatOpening(x,y,this.viewport?.width<650?Math.max(scale,.28):scale,shell.variant,shellRandom,pattern));const density=this.limit>=700?1:Math.max(.12,(this.limit-20)/700);for(const p of shell.particles)p.flatDensity=density;}
+    if(flat){this.lastFlatFlowerCount=shell.particles.filter(p=>p.cascade).length;shell.particles.push(...flatOpening(x,y,this.viewport?.width<650?Math.max(scale,.28):scale,shell.variant,shellRandom,pattern));const density=this.limit>=700?1:Math.max(.12,(this.limit-20)/700);for(const p of shell.particles)p.flatDensity=density;}
     if(flat)markPortraitFlat(shell,this.viewport);
     if(this.style==='gift'){this.blooms.at(-1).tint=GIFT_COLORS[0];this.blooms.at(-1).giftFinish=shell.finish;}
     for(const p of (this.style==='gift'||referenceCinema||flat?this.fitBatch(shell.particles):shell.particles))this.add(p);
@@ -253,7 +253,7 @@ export class StickerWorld {
       this.innerBursts.push({x,y,scale,variant:shell.variant,roundColors:p.roundColors,seed:b.seed,age:0,delay:.64,pattern});
       if(this.innerBursts.length>3)this.innerBursts.shift();
     }
-    this.event('burst',{x:eventX,pattern,scale});
+    this.event('burst',{x:eventX,pattern,scale,flowerCount:flat?this.lastFlatFlowerCount:undefined});
   }
   keepTrail(p,life=.65) {
     if(this.style==='cinema'&&p.ringBlob)return; // A spent short reprise tail must not reappear as a lingering trail.
@@ -359,7 +359,7 @@ export class StickerWorld {
         if(p.trailClock>=(this.trailStep||.016)){p.trailClock%=(this.trailStep||.016);p.trail.unshift({x:p.x,y:p.y,age:p.maxLife-p.life});}
         const age=p.maxLife-p.life;p.trail=p.trail.filter(q=>age-q.age<=(p.trailAge??.28)).slice(0,p.tailLength);
       }
-      if(p.outerGlints&&p.pattern!=='flat-medallion'&&!p.outerSpent&&p.life<=.32){p.outerSpent=true;if(p.retireRemaining==null){secondary.push(...flatAfterglints(p,this.random));this.event('glitter',{x:clamp(p.x/width),stage:3});}}
+      if(p.outerGlints&&!p.outerSpent&&p.life<=.32){p.outerSpent=true;if(p.retireRemaining==null){secondary.push(...flatAfterglints(p,this.random));this.event('glitter',{x:clamp(p.x/width),stage:3});}}
       if (p.type === 'drop' && !p.giftSplash && !p.rainRipple && p.life > 0 && p.y >= this.water.surface(p.x, width, height) - 2) { if(!p.generation&&['cinema','glow','flat','gift'].includes(this.style))additions.push({...p,y:this.water.surface(p.x,width,height)-3,hitNormal:{x:0,y:-1},hitRegion:'water'});this.water.impact(p.x, width, ['cinema','glow'].includes(this.style) ? Math.cbrt(p.volume ?? p.size ** 3) * 3.2 : p.size); p.life = 0; }
     }
     for (const p of additions) this.split(p);

@@ -1,5 +1,5 @@
-import {roundColor} from './dandelion.mjs?v=ce2650cbc6cf';
-import { clamp } from './core.mjs?v=ce2650cbc6cf';
+import {roundColor} from './dandelion.mjs?v=40500dfc15ea';
+import { clamp } from './core.mjs?v=40500dfc15ea';
 // Warm/cool paper colours with a quiet cream, rather than arbitrary RGB hues.
 export const PAPER_COLORS=['#FF7897','#62DDD2','#FFD477','#ACA0F3','#FFF3D9'];
 export const FIRE_COLORS=['#73BFE6','#FF9872','#AE8BE0','#FFD18A','#8DD7B6'];

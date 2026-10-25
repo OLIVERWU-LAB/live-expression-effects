@@ -1,5 +1,5 @@
 // Restored from v35 (69ee743), before the v36 handglow-inspired rewrite.
-import {clamp} from './core.mjs?v=ce2650cbc6cf';
+import {clamp} from './core.mjs?v=40500dfc15ea';
 const TAU=Math.PI*2;
 function particle(x,y,vx,vy,size,life,variant,random,extra={}){return{type:'spark',x,y,vx,vy,size,life,maxLife:life,variant,angle:0,spin:0,touched:0,secondary:0,trail:[],trailClock:0,tailLength:20,collisionDelay:.65,seed:random()*100,gravity:70,drag:1.4,drift:0,delay:0,scale:1,luminosity:.8,...extra};}
 export const CINEMA_PAIRS=Object.freeze([
