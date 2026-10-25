@@ -1,3 +1,4 @@
+import{fileURLToPath}from'node:url';
 import test from'node:test';import assert from'node:assert/strict';import{readFileSync}from'node:fs';import{runInNewContext}from'node:vm';import{webcrypto}from'node:crypto';import{cameraFrameReader}from'../dist/camera-frame.mjs';import{VisionSession}from'../dist/vision-session.mjs';
 const base=new URL('../dist/',import.meta.url),pause=()=>new Promise(r=>setTimeout(r,0));
 test('video bitmap failure uses one reusable canvas and preserves portrait aspect ratio',async()=>{
@@ -36,6 +37,6 @@ test('compressed requests reuse complete legacy model cache entries before makin
 
 for(const scenario of ['cold-camera','ui-fault'])test('actual app startup with real HTML IDs: '+scenario,async()=>{
  const {execFileSync}=await import('node:child_process');
- const output=execFileSync(process.execPath,['--experimental-vm-modules',new URL('./helpers/app-smoke.mjs',import.meta.url).pathname,...(scenario==='ui-fault'?['--ui-fault']:[])],{encoding:'utf8',timeout:15000});
+ const output=execFileSync(process.execPath,['--experimental-vm-modules',fileURLToPath(new URL('./helpers/app-smoke.mjs',import.meta.url)),...(scenario==='ui-fault'?['--ui-fault']:[])],{encoding:'utf8',timeout:15000});
  assert.match(output,scenario==='ui-fault'?/error is visible and retryable/:/accepts a first face result/);
 });
