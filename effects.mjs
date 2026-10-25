@@ -1,18 +1,18 @@
-import {thinFlat,prioritizeFlat,markPortraitFlat} from './flat-budget.mjs?v=b0f14ddab528';
-import{flatRandom,flatFlowerSites,flatSitesClear}from'./flat-placement.mjs?v=b0f14ddab528';
-import{thinCinema,interleaveCinema}from'./particle-quality.mjs?v=b0f14ddab528';
-import {REFINED_CINEMA_PATTERN,refinedCinemaShell,refinedCinemaChildren} from './cinema-refined-particles.mjs?v=b0f14ddab528';
-import {ORIGINAL_CINEMA_PATTERN,originalCinemaShell,originalCinemaChildren} from './cinema-original-particles.mjs?v=b0f14ddab528';
-import {contactRain,lineRainEntry,rainRate,portraitRainScale} from './rain-style.mjs?v=b0f14ddab528';
-import {handShell,handRing} from './handglow-particles.mjs?v=b0f14ddab528';
-import {FLAT_PATTERN,FLAT_PATTERNS,ACTIVE_FLAT_PATTERNS,FLAT_PALETTE,flatShell,flatChildren,flatOpening,flatAfterglints} from './flat-fireworks.mjs?v=b0f14ddab528';
-import {withHeadCollider,resolveBurstPoint} from './head-collision.mjs?v=b0f14ddab528';
-import {GIFT_PATTERNS,CINEMA_PATTERNS,GIFT_PALETTE,GIFT_BEAD_COLORS,giftShell,giftBeadChildren,cinemaShell,cinemaRingChildren,referencePattern} from './reference-bursts.mjs?v=b0f14ddab528';
-import {GIFT_COLORS,giftMaterial,giftSplash,giftLaunchOrigin,giftConfetti} from './gift-style.mjs?v=b0f14ddab528';
-import { clamp, collide, coverPoint } from './core.mjs?v=b0f14ddab528';
-import {chooseColors,roundColor} from './dandelion.mjs?v=b0f14ddab528';
-import {bouquetShell,poppingFlower,innerCrownParticles} from './bouquet.mjs?v=b0f14ddab528';
-import { SHELLS, PATTERNS, ACTIVE_PATTERNS, STAGED_PATTERNS, STICKER_PATTERN_BAG, rocketPoint, shellParticles, crossetteChildren, burstIsSafe, boundsDistance } from './pyro.mjs?v=b0f14ddab528';
+import {thinFlat,prioritizeFlat,markPortraitFlat,flatBirthBudget} from './flat-budget.mjs?v=9577abe74187';
+import{flatRandom,flatFlowerSites,flatSitesClear}from'./flat-placement.mjs?v=9577abe74187';
+import{thinCinema,interleaveCinema}from'./particle-quality.mjs?v=9577abe74187';
+import {REFINED_CINEMA_PATTERN,refinedCinemaShell,refinedCinemaChildren} from './cinema-refined-particles.mjs?v=9577abe74187';
+import {ORIGINAL_CINEMA_PATTERN,originalCinemaShell,originalCinemaChildren} from './cinema-original-particles.mjs?v=9577abe74187';
+import {contactRain,lineRainEntry,rainRate,portraitRainScale} from './rain-style.mjs?v=9577abe74187';
+import {handShell,handRing} from './handglow-particles.mjs?v=9577abe74187';
+import {FLAT_PATTERN,FLAT_PATTERNS,ACTIVE_FLAT_PATTERNS,FLAT_PALETTE,flatShell,flatChildren,flatOpening,flatAfterglints} from './flat-fireworks.mjs?v=9577abe74187';
+import {withHeadCollider,resolveBurstPoint} from './head-collision.mjs?v=9577abe74187';
+import {GIFT_PATTERNS,CINEMA_PATTERNS,GIFT_PALETTE,GIFT_BEAD_COLORS,giftShell,giftBeadChildren,cinemaShell,cinemaRingChildren,referencePattern} from './reference-bursts.mjs?v=9577abe74187';
+import {GIFT_COLORS,giftMaterial,giftSplash,giftLaunchOrigin,giftConfetti} from './gift-style.mjs?v=9577abe74187';
+import { clamp, collide, coverPoint } from './core.mjs?v=9577abe74187';
+import {chooseColors,roundColor} from './dandelion.mjs?v=9577abe74187';
+import {bouquetShell,poppingFlower,innerCrownParticles} from './bouquet.mjs?v=9577abe74187';
+import { SHELLS, PATTERNS, ACTIVE_PATTERNS, STAGED_PATTERNS, STICKER_PATTERN_BAG, rocketPoint, shellParticles, crossetteChildren, burstIsSafe, boundsDistance } from './pyro.mjs?v=9577abe74187';
 
 export class WaterSurface {
   constructor() { this.level = 0; this.y = new Float32Array(64); this.v = new Float32Array(64); }
@@ -165,10 +165,10 @@ export class StickerWorld {
     // Remove expired slots, never opaque particles, before admitting a new cohort.
     this.particles=this.particles.filter(p=>{if(p.life>0)return true;this.keepTrail(p);return false;});
     if(this.style==='flat')particles=thinFlat(particles);
-    const budget=Math.min(particles.length,Math.max(1,Math.floor(this.limit*share))),major=particles.filter(p=>!p.cinemaDust),dust=particles.filter(p=>p.cinemaDust),sample=(arr,n)=>Array.from({length:n},(_,i)=>arr[Math.floor(i*arr.length/n)]);
+    const budget=Math.min(particles.length,Math.max(1,(this.style==='flat'?flatBirthBudget(particles,this.limit,share):Math.floor(this.limit*share)))),major=particles.filter(p=>!p.cinemaDust),dust=particles.filter(p=>p.cinemaDust),sample=(arr,n)=>Array.from({length:n},(_,i)=>arr[Math.floor(i*arr.length/n)]);
     let picked=(this.style==='flat'?prioritizeFlat(particles,budget):this.style==='cinema'?thinCinema(particles,budget):null)||(major.length>budget?sample(major,budget):[...major,...sample(dust,Math.min(dust.length,budget-major.length))]);
     const room=Math.max(0,this.limit-this.particles.length);if(this.style==='cinema'&&room<picked.length)picked=interleaveCinema(picked);const flatEmitters=this.style==='flat'?picked.filter(p=>p.flatEmitAt!=null):[];
-    const immediate=this.style==='flat'&&room<picked.length?(flatEmitters.length>room?flatEmitters.slice(0,room):prioritizeFlat(picked,room)):picked.slice(0,room),waiting=this.style==='flat'?flatEmitters.filter(p=>!immediate.includes(p)):picked.slice(room);
+    const immediate=this.style==='flat'&&room<picked.length?(flatEmitters.length>room?flatEmitters.slice(0,room):prioritizeFlat(picked,room)):picked.slice(0,room),waiting=this.style==='flat'?picked.filter(p=>!immediate.includes(p)&&(p.flatEmitAt!=null||(!p.flatFine&&p.flatRole!=='dust'))).sort((a,b)=>(a.flatRole==='ring'?0:a.flatEmitAt!=null?1:2)-(b.flatRole==='ring'?0:b.flatEmitAt!=null?1:2)):picked.slice(room);
     // Bound deferred births too. Excess new detail is thinned before it becomes visible.
     this.pendingParticles.push(...waiting.slice(0,Math.max(0,this.limit-this.pendingParticles.length)));
     this.makeRoom(this.pendingParticles.length+immediate.length);return immediate;
