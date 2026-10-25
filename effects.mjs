@@ -1,18 +1,18 @@
-import {thinFlat,prioritizeFlat,markPortraitFlat,flatBirthBudget} from './flat-budget.mjs?v=b71ed6cff27a';
-import{flatRandom,flatFlowerSites,flatSitesClear}from'./flat-placement.mjs?v=b71ed6cff27a';
-import{thinCinema,interleaveCinema}from'./particle-quality.mjs?v=b71ed6cff27a';
-import {REFINED_CINEMA_PATTERN,refinedCinemaShell,refinedCinemaChildren} from './cinema-refined-particles.mjs?v=b71ed6cff27a';
-import {ORIGINAL_CINEMA_PATTERN,originalCinemaShell,originalCinemaChildren} from './cinema-original-particles.mjs?v=b71ed6cff27a';
-import {contactRain,lineRainEntry,slantedDropEntry,rainRate,portraitRainScale} from './rain-style.mjs?v=b71ed6cff27a';
-import {handShell,handRing} from './handglow-particles.mjs?v=b71ed6cff27a';
-import {FLAT_PATTERN,FLAT_PATTERNS,ACTIVE_FLAT_PATTERNS,FLAT_PALETTE,flatShell,flatChildren,flatOpening,flatAfterglints} from './flat-fireworks.mjs?v=b71ed6cff27a';
-import {withHeadCollider,resolveBurstPoint} from './head-collision.mjs?v=b71ed6cff27a';
-import {GIFT_PATTERNS,CINEMA_PATTERNS,GIFT_PALETTE,GIFT_BEAD_COLORS,giftShell,giftBeadChildren,cinemaShell,cinemaRingChildren,referencePattern} from './reference-bursts.mjs?v=b71ed6cff27a';
-import {GIFT_COLORS,giftMaterial,giftSplash,giftLaunchOrigin,giftConfetti} from './gift-style.mjs?v=b71ed6cff27a';
-import { clamp, collide, coverPoint } from './core.mjs?v=b71ed6cff27a';
-import {chooseColors,roundColor} from './dandelion.mjs?v=b71ed6cff27a';
-import {bouquetShell,poppingFlower,innerCrownParticles} from './bouquet.mjs?v=b71ed6cff27a';
-import { SHELLS, PATTERNS, ACTIVE_PATTERNS, STAGED_PATTERNS, STICKER_PATTERN_BAG, rocketPoint, shellParticles, crossetteChildren, burstIsSafe, boundsDistance } from './pyro.mjs?v=b71ed6cff27a';
+import {thinFlat,prioritizeFlat,markPortraitFlat,flatBirthBudget} from './flat-budget.mjs?v=4a2949673bbd';
+import{flatRandom,flatFlowerSites,flatSitesClear}from'./flat-placement.mjs?v=4a2949673bbd';
+import{thinCinema,interleaveCinema}from'./particle-quality.mjs?v=4a2949673bbd';
+import {REFINED_CINEMA_PATTERN,refinedCinemaShell,refinedCinemaChildren} from './cinema-refined-particles.mjs?v=4a2949673bbd';
+import {ORIGINAL_CINEMA_PATTERN,originalCinemaShell,originalCinemaChildren} from './cinema-original-particles.mjs?v=4a2949673bbd';
+import {contactRain,lineRainEntry,slantedDropEntry,rainRate,portraitRainScale} from './rain-style.mjs?v=4a2949673bbd';
+import {handShell,handRing} from './handglow-particles.mjs?v=4a2949673bbd';
+import {FLAT_PATTERN,FLAT_PATTERNS,ACTIVE_FLAT_PATTERNS,FLAT_PALETTE,flatShell,flatChildren,flatOpening,flatAfterglints} from './flat-fireworks.mjs?v=4a2949673bbd';
+import {withHeadCollider,resolveBurstPoint} from './head-collision.mjs?v=4a2949673bbd';
+import {GIFT_PATTERNS,CINEMA_PATTERNS,GIFT_PALETTE,GIFT_BEAD_COLORS,giftShell,giftBeadChildren,cinemaShell,cinemaRingChildren,referencePattern} from './reference-bursts.mjs?v=4a2949673bbd';
+import {GIFT_COLORS,giftMaterial,giftSplash,giftLaunchOrigin,giftConfetti} from './gift-style.mjs?v=4a2949673bbd';
+import { clamp, collide, coverPoint } from './core.mjs?v=4a2949673bbd';
+import {chooseColors,roundColor} from './dandelion.mjs?v=4a2949673bbd';
+import {bouquetShell,poppingFlower,innerCrownParticles} from './bouquet.mjs?v=4a2949673bbd';
+import { SHELLS, PATTERNS, ACTIVE_PATTERNS, STAGED_PATTERNS, STICKER_PATTERN_BAG, rocketPoint, shellParticles, crossetteChildren, burstIsSafe, boundsDistance } from './pyro.mjs?v=4a2949673bbd';
 
 export class WaterSurface {
   constructor() { this.level = 0; this.y = new Float32Array(64); this.v = new Float32Array(64); }
@@ -359,7 +359,7 @@ export class StickerWorld {
         if(p.trailClock>=(this.trailStep||.016)){p.trailClock%=(this.trailStep||.016);p.trail.unshift({x:p.x,y:p.y,age:p.maxLife-p.life});}
         const age=p.maxLife-p.life;p.trail=p.trail.filter(q=>age-q.age<=(p.trailAge??.28)).slice(0,p.tailLength);
       }
-      if(p.outerGlints&&!p.outerSpent&&p.life<=.32){p.outerSpent=true;if(p.retireRemaining==null){secondary.push(...flatAfterglints(p,this.random));this.event('glitter',{x:clamp(p.x/width),stage:3});}}
+      if(p.outerGlints&&!p.outerSpent&&p.life<=.32){p.outerSpent=true;if(p.retireRemaining==null&&(!p.flatFx||this.particles.length+secondary.length<this.limit*.80)){secondary.push(...flatAfterglints(p,this.random));this.event('glitter',{x:clamp(p.x/width),stage:3});}}
       if (p.type === 'drop' && !p.giftSplash && !p.rainRipple && p.life > 0 && p.y >= this.water.surface(p.x, width, height) - 2) { if(!p.generation&&['cinema','glow','flat','gift'].includes(this.style))additions.push({...p,y:this.water.surface(p.x,width,height)-3,hitNormal:{x:0,y:-1},hitRegion:'water'});this.water.impact(p.x, width, ['cinema','glow'].includes(this.style) ? Math.cbrt(p.volume ?? p.size ** 3) * 3.2 : p.size); p.life = 0; }
     }
     for (const p of additions) this.split(p);

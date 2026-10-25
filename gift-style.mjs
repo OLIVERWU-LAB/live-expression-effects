@@ -1,6 +1,6 @@
-import {particleVisibility} from './particle-visibility.mjs?v=b71ed6cff27a';
-import {clamp} from './core.mjs?v=b71ed6cff27a';
-import {selectedGiftShape} from './gift-shapes.mjs?v=b71ed6cff27a';
+import {particleVisibility} from './particle-visibility.mjs?v=4a2949673bbd';
+import {clamp} from './core.mjs?v=4a2949673bbd';
+import {selectedGiftShape} from './gift-shapes.mjs?v=4a2949673bbd';
 export const GIFT_COLORS=Object.freeze(['#FFCC32','#853DDD','#E94355','#367DD9','#CE36A6']);
 export const GIFT_KINDS=Object.freeze(['star','bead','ring','ribbon','coil','sparkle','drop','popper','capsule']);
 export function giftMaterial(p){
