@@ -16,7 +16,7 @@ export function flatFlowerSites(scale,seed,spreadScale=scale){
  });
 }
 export const flatSiteGap=(head,width,height)=>width<650&&height>width?clamp((head.right-head.left)*.24,34,52):clamp((head.right-head.left)*.26,52,84);
-export function flatSitesClear(sites,x,y,scale,head,width,height){return !head||sites.every(p=>boundsDistance(x+p.x,y+p.y,head)>=flatSiteGap(head,width,height)+35*scale*p.flowerScale);}
+export function flatSitesClear(sites,x,y,scale,head,width,height){return !head||sites.every(p=>boundsDistance(x+p.x,y+p.y,head)>=flatSiteGap(head,width,height));}
 export function placeFlatBouquet(layout,width,height,head){
  if(!head)return layout;
  const portrait=width<650&&height>width,cx=(head.left+head.right)/2,zone=layout?.zone||'above',requestedSide=layout?.requestedSide,side=requestedSide==='left'?-1:requestedSide==='right'?1:zone==='left'?-1:zone==='right'?1:0;
@@ -25,7 +25,7 @@ export function placeFlatBouquet(layout,width,height,head){
  const targetX=portrait?cx+side*width*.09:side<0?head.left*.48:side>0?(head.right+width)*.5:cx,targetY=portrait?head.top*.34:head.top*.58;
  // A small, bounded search runs only once per launch, never per animation frame.
  for(let step=0;step<16;step++){
-  const scale=fixed??Math.max(.22,nominal*Math.pow(.9,step)),spreadScale=fixed?Math.max(fixed*.82,fixed*Math.pow(.9,step)):scale;let best=null;
+  const scale=fixed??Math.max(.22,nominal*Math.pow(.9,step)),spreadScale=fixed?Math.max(fixed*.58,fixed*Math.pow(.9,step)):scale;let best=null;
   for(let variant=0;variant<(fixed&&step===0?32:8);variant++){
    const flatSeed=(seed+Math.imul(variant,2654435761))>>>0,sites=flatFlowerSites(scale,flatSeed,spreadScale),edge=16+32*scale;
    const sideEdge=p=>16+200*scale*.78*p.flowerScale;
@@ -37,7 +37,7 @@ export function placeFlatBouquet(layout,width,height,head){
     // Compact carrier spacing before moving a left launch to the right sky (or vice versa).
     if(fixed&&requestedSide&&!layout.flatAllowOpposite&&(x-width*.5)*side<0)continue;
     const clearance=layout?.clearance??gap;if(boundsDistance(x,y,head)<clearance+6)continue;
-    if(sites.some(p=>boundsDistance(x+p.x,y+p.y,head)<gap+(fixed?35:portrait?65:90)*scale*p.flowerScale))continue;
+    if(sites.some(p=>boundsDistance(x+p.x,y+p.y,head)<gap+(fixed?0:portrait?65:90)*scale*p.flowerScale))continue;
     // Preserve the complete size. Prefer the launch side, but move the whole
     // bouquet into clear sky when that side is occupied instead of shrinking it.
     const sidePenalty=fixed&&requestedSide&&(x-cx)*side<0?.35:0;

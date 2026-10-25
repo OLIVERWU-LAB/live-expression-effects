@@ -31,14 +31,14 @@ test('a constrained phone launch keeps the full bloom size and all planned flowe
  const width=390,height=844,head={left:113,right:277,top:160,bottom:410};
  for(const pattern of ACTIVE_FLAT_PATTERNS){
   const world=new StickerWorld(flatRandom(86));world.setStyle('flat');world.setEffect('laugh');world.setPattern(pattern);world.viewport={width,height};world.head=head;world.limit=420;
-  const plan=planLiveFirework(world,width,height,head,0,flatRandom(31));assert.ok(plan.flatSpreadScale>=plan.scale*.82);
+  const plan=planLiveFirework(world,width,height,head,0,flatRandom(31));assert.ok(plan.flatSpreadScale>=plan.scale*.58);
   assert.ok(world.launch(plan.x,plan.y,width,height,plan.scale,plan));const births=new Map();
   for(let frame=0;frame<180;frame++){
    world.update(1/60,width,height,null);
    for(const p of world.particles)if(p.cascadeChild&&!births.has(p.clusterIndex))births.set(p.clusterIndex,p);
    assert.ok(world.particles.length<=420);
   }
-  assert.equal(births.size,3);
+  assert.equal(births.size,4);
   for(const [index,p] of births)assert.ok(Math.abs(p.scale-plan.scale*.78)<1e-9);
  }
 });

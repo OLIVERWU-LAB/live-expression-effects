@@ -13,7 +13,15 @@ const sample=(a,n)=>{
 };
 const key=p=>[p.emitterId??'opening',p.clusterIndex??'opening',p.flatRole,p.flatBand??(p.petalLayer|| (p.innerPetal?2:1)),!!p.crownSatellite,(p.flatMobile||p.flatRadialIndex!=null)?(p.flatTailSpark?'tail':p.whiteFlash?'white':'color'):'',p.openingFlash?'flash':p.openingGlint?'glint':''].join(':');
 const groupsOf=particles=>{const groups=new Map();for(const p of particles){const k=key(p);if(!groups.has(k))groups.set(k,[]);groups.get(k).push(p);}return [...groups.values()];};
-const minimumForGroup=g=>isPaired(g)?(g[0].pattern==='flat-star-crown'&&g[0].outerGlints?Math.min(g.length,(g[0].flatDensity??1)<.3?4:8):g[0].flatFine||g[0].flatRole==='dust'?2:Math.min(4,g.length)):g[0].flatMobile&&g[0].whiteFlash?Math.min(g.length,3):1;
+const minimumForGroup=g=>{
+ const p=g[0],low=(p.flatDensity??1)<.3;
+ if(isPaired(g)){
+  if(low&&p.flatFine&&!p.whiteFlash)return 0;
+  if(p.pattern==='flat-star-crown'&&p.outerGlints)return Math.min(g.length,low?4:8);
+  return p.flatFine||p.flatRole==='dust'?2:Math.min(low?2:4,g.length);
+ }
+ return p.flatMobile&&p.whiteFlash?Math.min(g.length,3):1;
+};
 export function prioritizeFlat(particles,budget){
  const emitters=particles.filter(p=>p.flatEmitAt!=null),rest=particles.filter(p=>p.flatEmitAt==null);
  if(emitters.length>=budget)return emitters;
@@ -65,7 +73,7 @@ export function markPortraitFlat(shell,viewport){
 // One early flower must not consume 70% of the entire shared pool.
 export function flatBirthBudget(particles,limit,share){
  const flowers=new Set(particles.filter(p=>p.cascadeChild).map(p=>`${p.emitterId}:${p.clusterIndex}`));
- if(flowers.size){const required=groupsOf(particles.filter(p=>p.flatEmitAt==null)).reduce((n,g)=>n+minimumForGroup(g),0);return Math.max(required,Math.floor(limit*.14)*flowers.size);}
+ if(flowers.size){const required=groupsOf(particles.filter(p=>p.flatEmitAt==null)).reduce((n,g)=>n+minimumForGroup(g),0);return Math.max(required,Math.floor(limit*(limit<200?.11:.14))*flowers.size);}
  if(particles.some(p=>p.cascade))return Math.max(5,Math.floor(limit*.13));
  if(particles.some(p=>p.flatTailSpark))return Math.max(2,Math.floor(limit*.025));
  return Math.floor(limit*share);
