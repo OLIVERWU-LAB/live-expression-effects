@@ -1,5 +1,5 @@
-import {clamp} from './core.mjs?v=653d4c7f5108';
-import {FIRE_COLORS,PAPER_COLORS} from './pyro.mjs?v=653d4c7f5108';
+import {clamp} from './core.mjs?v=b71ed6cff27a';
+import {FIRE_COLORS,PAPER_COLORS} from './pyro.mjs?v=b71ed6cff27a';
 
 export const hexRGB=hex=>[1,3,5].map(i=>parseInt(hex.slice(i,i+2),16)/255);
 export function mixHex(a,b,t){const x=hexRGB(a),y=hexRGB(b);return '#'+x.map((v,i)=>Math.round((v+(y[i]-v)*clamp(t))*255).toString(16).padStart(2,'0')).join('');}
