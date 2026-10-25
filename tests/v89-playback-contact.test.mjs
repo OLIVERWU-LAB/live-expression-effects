@@ -11,8 +11,9 @@ test('desktop head offsets preserve both launch sides and complete safe flat bou
   const w=new StickerWorld(flatRandom(17));w.setStyle('flat');
   const head={left:1280*center-125,right:1280*center+125,top:240,bottom:500};
   const layout=planLiveFirework(w,1280,720,head,index,flatRandom(31));assert.ok(layout);
-  assert.equal(layout.launchX,index?1152:128);
-  // The origin alternates; the apex may move across the head to preserve size.
+  assert.ok(Math.abs(layout.x-layout.launchX)<=1280*.16);
+  assert.ok(Math.abs(layout.x-layout.launchX)/(720+22-layout.y)<=.25+1e-10);
+  // Prefer alternating halves while keeping ascent aligned with its safe apex.
   assert.equal(layout.requestedSide,index?'right':'left');
   assert.ok(flatSitesClear(flatFlowerSites(layout.scale,layout.flatSeed,layout.flatSpreadScale),layout.x,layout.y,layout.scale,head,1280,720));
  }
@@ -24,7 +25,8 @@ test('all styles alternate launch origins on desktop and phone without steering 
   for(let index=0;index<4;index++){
    const p=planLiveFirework(w,width,height,head,index,flatRandom(index+7));assert.ok(p,style);
    assert.equal(p.requestedSide,index%2?'right':'left');
-   assert.equal(p.launchX,index%2?width-Math.max(24,width*.1):Math.max(24,width*.1));
+   if(style==='flat')assert.ok(Math.abs(p.x-p.launchX)<=Math.min(width*.16,(height+22-p.y)*.25)+1e-8);
+   else assert.equal(p.launchX,index%2?width-Math.max(24,width*.1):Math.max(24,width*.1));
   }
  }
 });

@@ -2,14 +2,16 @@ import{placeFlatBouquet}from'./flat-placement.mjs';
 // Sample around each circle, separately for every flower and radial band.
 // Never remove a carrier: that would remove an entire future blossom.
 const sample=(a,n)=>n>=a.length?a:n?Array.from({length:n},(_,i)=>a[Math.floor(i*a.length/n)]):[];
-const key=p=>[p.clusterIndex??'opening',p.flatRole,p.flatBand??(p.petalLayer|| (p.innerPetal?2:1)),!!p.crownSatellite,p.flatMobile?(p.flatTailSpark?'tail':p.whiteFlash?'white':'color'):''].join(':');
+const key=p=>[p.clusterIndex??'opening',p.flatRole,p.flatBand??(p.petalLayer|| (p.innerPetal?2:1)),!!p.crownSatellite,p.flatMobile?(p.flatTailSpark?'tail':p.whiteFlash?'white':'color'):'',p.openingFlash?'flash':p.openingGlint?'glint':''].join(':');
 const groupsOf=particles=>{const groups=new Map();for(const p of particles){const k=key(p);if(!groups.has(k))groups.set(k,[]);groups.get(k).push(p);}return [...groups.values()];};
 export function prioritizeFlat(particles,budget){
  const emitters=particles.filter(p=>p.flatEmitAt!=null),rest=particles.filter(p=>p.flatEmitAt==null);
  if(emitters.length>=budget)return emitters;
- const all=groupsOf(rest),room=Math.min(rest.length,Math.max(0,budget-emitters.length));if(!all.length)return emitters;
- const reserve=all.map(g=>g[0].flatMobile?Math.min(g.length,g[0].whiteFlash?4:1):0),reserved=reserve.reduce((a,b)=>a+b,0);
- const counts=reserved<=room?all.map((g,i)=>reserve[i]+Math.floor((room-reserved)*(g.length-reserve[i])/Math.max(1,rest.length-reserved))):all.map(g=>Math.floor(room*g.length/Math.max(1,rest.length)));
+ const all=groupsOf(rest).sort((a,b)=>((a[0].flatRole==='ring'?0:a[0].flatFine||a[0].flatRole==='dust'?2:1)-(b[0].flatRole==='ring'?0:b[0].flatFine||b[0].flatRole==='dust'?2:1))),room=Math.min(rest.length,Math.max(0,budget-emitters.length));if(!all.length)return emitters;
+ // A ring and every radial band get an explicit slot before density detail.
+ const reserve=all.map(g=>g[0].flatMobile&&g[0].whiteFlash?Math.min(g.length,3):1),reserved=reserve.reduce((a,b)=>a+b,0);
+ const minimum=reserved<=room?reserve:all.map((g,i)=>i<room?1:0),used=minimum.reduce((a,b)=>a+b,0);
+ const counts=all.map((g,i)=>minimum[i]+Math.floor((room-used)*(g.length-minimum[i])/Math.max(1,rest.length-used)));
  for(let i=0,n=room-counts.reduce((a,b)=>a+b,0);n>0;i=(i+1)%all.length)if(counts[i]<all[i].length){counts[i]++;n--;}
  return [...emitters,...all.flatMap((g,i)=>sample(g,counts[i]))];
 }
@@ -47,4 +49,14 @@ export function fitFlatViewport(layout,width,height,head){
 export function markPortraitFlat(shell,viewport){
  if(!viewport||viewport.width>=650||viewport.height<=viewport.width)return;
  for(const p of shell.particles){p.flatMobile=true;if(p.whiteFlash)p.size=Math.max(p.size,p.flatTailSpark?1.35:1.15);}
+}
+
+// Reserve capacity for the later flowers and the overlapping next volley.
+// One early flower must not consume 70% of the entire shared pool.
+export function flatBirthBudget(particles,limit,share){
+ const flowers=new Set(particles.filter(p=>p.cascadeChild).map(p=>p.emitterId));
+ if(flowers.size)return Math.max(flowers.size,Math.floor(limit*.10)*flowers.size);
+ if(particles.some(p=>p.cascade))return Math.max(5,Math.floor(limit*.13));
+ if(particles.some(p=>p.flatTailSpark))return Math.max(2,Math.floor(limit*.025));
+ return Math.floor(limit*share);
 }

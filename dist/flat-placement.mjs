@@ -28,11 +28,14 @@ export function placeFlatBouquet(layout,width,height,head){
   const scale=fixed??Math.max(.22,nominal*Math.pow(.9,step)),spreadScale=fixed?Math.max(.16,fixed*Math.pow(.9,step)):scale;let best=null;
   for(let variant=0;variant<(fixed&&step===0?32:8);variant++){
    const flatSeed=(seed+Math.imul(variant,2654435761))>>>0,sites=flatFlowerSites(scale,flatSeed,spreadScale),edge=16+60*scale;
-   const minX=Math.max(...sites.map(p=>edge-p.x-Math.min(0,p.vx*.55))),maxX=Math.min(...sites.map(p=>width-edge-p.x-Math.max(0,p.vx*.55))),minY=Math.max(...sites.map(p=>edge-p.y-Math.min(0,p.vy*.55))),maxY=Math.min(...sites.map(p=>(portrait?Math.min(height*.58,head.top+(head.bottom-head.top)*.28):height*.62)-edge-p.y));
+   const sideEdge=p=>fixed?16+165*scale*.78*p.flowerScale:edge;
+   const minX=Math.max(...sites.map(p=>sideEdge(p)-p.x-Math.min(0,p.vx*.55))),maxX=Math.min(...sites.map(p=>width-sideEdge(p)-p.x-Math.max(0,p.vx*.55))),minY=Math.max(...sites.map(p=>edge-p.y-Math.min(0,p.vy*.55))),maxY=Math.min(...sites.map(p=>(portrait?Math.min(height*.58,head.top+(head.bottom-head.top)*.28):height*.62)-edge-p.y));
    if(maxX<minX||maxY<minY)continue;
    const xs=Array.from({length:9},(_,i)=>minX+(maxX-minX)*i/8),ys=Array.from({length:9},(_,i)=>minY+(maxY-minY)*i/8);
    xs.push(clamp(targetX,minX,maxX));ys.push(clamp(head.top-Math.max(...sites.map(p=>p.y+gap+(portrait?65:90)*scale*p.flowerScale)),minY,maxY));
    for(const x of xs)for(const y of ys){
+    // Compact carrier spacing before moving a left launch to the right sky (or vice versa).
+    if(fixed&&requestedSide&&!layout.flatAllowOpposite&&(x-width*.5)*side<0)continue;
     const clearance=layout?.clearance??gap;if(boundsDistance(x,y,head)<clearance+6)continue;
     if(sites.some(p=>boundsDistance(x+p.x,y+p.y,head)<gap+(fixed?35:portrait?65:90)*scale*p.flowerScale))continue;
     // Preserve the complete size. Prefer the launch side, but move the whole
@@ -46,5 +49,8 @@ export function placeFlatBouquet(layout,width,height,head){
   if(best){delete best.score;return best;}
   if(scale===.22)break;
  }
+ // If the requested half is physically occupied, use free sky and move the
+ // launch origin with it; never connect opposite corners with a diagonal.
+ if(fixed&&requestedSide&&!layout.flatAllowOpposite)return placeFlatBouquet({...layout,flatAllowOpposite:true},width,height,head);
  return null;
 }

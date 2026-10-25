@@ -14,6 +14,10 @@ export function planLiveFirework(world,width,height,head,index,random=Math.rando
  plan.launchX=launchX;plan.requestedSide=requestedSide;
  if(world.style==='flat')plan.flatFixedScale=flatViewportScale(width,height);
  const layout=world.style==='flat'?fitFlatViewport(plan,width,height,head):plan;
- if(layout)layout.launchX=launchX;
+ if(layout){
+  // Align the ascent with its selected apex; never shoot across the screen.
+  const drift=Math.min(width*.16,(height+22-layout.y)*.25);
+  layout.launchX=world.style==='flat'?Math.max(layout.x-drift,Math.min(layout.x+drift,launchX)):launchX;
+ }
  return layout;
 }
