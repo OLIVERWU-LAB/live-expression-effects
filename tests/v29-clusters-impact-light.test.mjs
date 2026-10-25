@@ -2,9 +2,9 @@ import test from 'node:test';import assert from 'node:assert/strict';
 import{StickerWorld}from'../dist/effects.mjs';import{flatShell,flatChildren,FLAT_CASCADES}from'../dist/flat-fireworks.mjs';import{giftShell,cinemaShell}from'../dist/reference-bursts.mjs';import{fireworkLights}from'../dist/lighting.mjs';
 const rng=seed=>()=>{seed=(Math.imul(seed,1664525)+1013904223)>>>0;return seed/4294967296;};
 test('three or four staggered flowers have consistent scales and fine particles at least four times smaller than their large pieces',()=>{
- for(const key of FLAT_CASCADES){const seeds=flatShell(1200,600,1,rng(42),key).particles;assert.ok(seeds.length===3||seeds.length===4);assert.ok(seeds.at(-1).flatEmitAt-seeds[0].flatEmitAt>.30);const sizes=[];
+ for(const key of FLAT_CASCADES){const seeds=flatShell(1200,600,1,rng(42),key).particles;assert.equal(seeds.length,5);assert.ok(seeds.at(-1).flatEmitAt-seeds[0].flatEmitAt>.30);const sizes=[];
   for(const p of seeds){const children=flatChildren(p,rng(8)),fine=children.filter(p=>p.flatFine),big=children.filter(p=>!p.flatFine);assert.equal(fine.length,32);assert.ok(Math.max(...big.map(p=>p.size))>Math.max(...fine.map(p=>p.size))*4);assert.ok(fine.every(p=>p.tailLength===0));sizes.push(Math.max(...big.map(p=>p.size)));}
-  assert.equal(new Set(sizes).size,1);
+  assert.ok(Math.max(...sizes)/Math.min(...sizes)>1.25);
  }
 });
 test('both gift modes shatter first-wave shapes and beads at the head or body surface without recursive explosions',()=>{

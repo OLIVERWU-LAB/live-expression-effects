@@ -4,7 +4,7 @@ const rng=seed=>()=>{seed=(Math.imul(seed,1664525)+1013904223)>>>0;return seed/4
 test('three or four white carriers split into five distinct live-centred flowers at fast-petal pace',()=>{
  for(const key of FLAT_CASCADES)for(const dt of[.008,.016,.033]){
   const w=new StickerWorld(rng(17));w.setStyle('flat');w.setEffect('laugh');w.burst(900,550,1,key);
-  const seeds=w.particles.filter(p=>p.flatRole==='seed');assert.ok(seeds.length===3||seeds.length===4);assert.ok(seeds.every(p=>p.flatRole==='seed'&&p.flatEmitAt>=.19&&p.flatEmitAt<.75));
+  const seeds=w.particles.filter(p=>p.flatRole==='seed');assert.equal(seeds.length,5);assert.ok(seeds.every(p=>p.flatRole==='seed'&&p.flatEmitAt>=.19&&p.flatEmitAt<.75));
   seeds[1].x+=34;seeds[1].vx*=-1;const centres=new Set();let children=0;
   for(let i=0;i<Math.ceil(.95/dt);i++){
    const before=new Set(w.particles);w.update(dt,1800,1800,null);

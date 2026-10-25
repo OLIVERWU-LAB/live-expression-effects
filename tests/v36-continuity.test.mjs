@@ -18,9 +18,9 @@ test('head collisions preserve animation age and a nearby flat emitter still ope
  for(const[style,flag]of[['flat','flatFx'],['cinema','cinematic'],['glow','handDrawn']]){const w=new StickerWorld(rng(4));w.setStyle(style);w.setEffect('laugh');w.head={left:200,right:340,top:250,bottom:440};const p={type:'spark',[flag]:true,cinematic:style!=='flat',flatRole:'dust',x:270,y:225,vx:0,vy:350,gravity:0,drag:0,size:4,life:3,maxLife:3,seed:2,variant:0,touched:0,angle:0,trail:[],collisionDelay:0};w.add(p);for(let i=0;i<10;i++)w.update(.02,600,900,null);assert.ok(p.hasCollided);assert.ok(p.maxLife-p.life<.25,style+' collision skipped animation time');}
  const w=new StickerWorld(rng(3));w.setStyle('flat');w.setEffect('laugh');w.burst(270,240,1,'flat-petals');w.head={left:0,right:600,top:0,bottom:900};for(let f=0;f<90;f++)w.update(.02,1000,1400,null);assert.equal(w.events.filter(e=>e.stage===2).length,5);
 });
-test('petals are fuller; crown keeps eight clearly separated primary stars',()=>{
+test('petals are fuller; crown keeps eleven clearly separated primary stars',()=>{
  for(const seed of flatShell(0,0,1,rng(5),'flat-petals').particles){const p=flatChildren(seed,rng(8));assert.ok(p.filter(q=>q.flatRole==='petal').length>=11);}
- const child=flatChildren(flatShell(0,0,1,rng(5),'flat-star-crown').particles[0],rng(6)),primary=child.filter(p=>p.flatRole==='star'&&p.tailLength),satellites=child.filter(p=>p.crownSatellite);assert.equal(primary.length,8);assert.equal(satellites.length,0);
+ const child=flatChildren(flatShell(0,0,1,rng(5),'flat-star-crown').particles[0],rng(6)),primary=child.filter(p=>p.flatRole==='star'&&p.tailLength),satellites=child.filter(p=>p.crownSatellite);assert.equal(primary.length,11);assert.equal(satellites.length,0);
 });
 test('cinema tails are continuous tapered meshes and erosion crossfades instead of switching geometry',()=>{
  const p={x:100,y:100,life:1,maxLife:2,trail:[{x:90,y:100},{x:75,y:98},{x:55,y:94},{x:20,y:90}]},m=cinemaTrailGeometry(p,2);assert.equal(m.points.length,5);const widths=m.left.map((q,i)=>Math.hypot(q.x-m.right[i].x,q.y-m.right[i].y));assert.ok(widths.slice(1).every((w,i)=>w<=widths[i]));assert.equal(widths.at(-1),0);

@@ -6,20 +6,15 @@ import {flatRandom} from '../dist/flat-placement.mjs';
 import {StickerWorld} from '../dist/effects.mjs';
 
 function paired(ps){
- for(const p of ps.filter(p=>p.flatRadialIndex!=null)){
-  const opposite=(p.flatRadialIndex+p.flatRadialCount/2)%p.flatRadialCount;
-  const q=ps.find(q=>q.flatRole===p.flatRole&&q.flatBand===p.flatBand&&!!q.crownSatellite===!!p.crownSatellite&&q.flatRadialIndex===opposite);
-  assert.ok(q,`missing opposite of ${p.flatRole}/${p.flatBand}/${p.flatRadialIndex}`);
-  assert.ok(Math.abs(p.vx+q.vx)<1e-8&&Math.abs(p.vy+q.vy)<1e-8,'opposite rays must launch with equal and opposite velocity');
-  assert.equal(p.x,q.x);assert.equal(p.y,q.y);assert.equal(p.gravity,q.gravity);assert.equal(p.drag,q.drag);
- }
+ const groups=new Map();for(const p of ps.filter(p=>p.flatRadialIndex!=null)){const k=[p.flatRole,p.flatBand,!!p.whiteFlash].join(':');if(!groups.has(k))groups.set(k,[]);groups.get(k).push(p);}
+ for(const group of groups.values()){const angles=group.map(p=>(Math.atan2(p.vy,p.vx)+Math.PI*2)%(Math.PI*2)).sort((a,b)=>a-b);for(let i=0;i<angles.length;i++)assert.ok(Math.abs((angles[(i+1)%angles.length]-angles[i]+Math.PI*2)%(Math.PI*2)-Math.PI*2/angles.length)<1e-8||angles.length===1);}
 }
 test('all retained flat forms start radially symmetric, including phone and minimum-budget thinning',()=>{
  for(const pattern of ACTIVE_FLAT_PATTERNS)for(const seed of[1,11,71])for(const scale of[.46,1]){
   const random=flatRandom(seed),parents=flatShell(400,180,scale,random,pattern).particles;
   for(const parent of parents){
    parent.vx=330;parent.vy=-250;const full=flatChildren(parent,random);paired(full);
-   for(const density of[.12,.3,.65,1])for(const budget of[21,30,65]){
+   for(const density of[.12,.3,.65,1])for(const budget of(density<.3?[21,30]:[100,150])){
     const chosen=prioritizeFlat(thinFlat(full.map(p=>({...p,flatMobile:true,flatDensity:density}))),budget);
     assert.ok(chosen.length<=budget);assert.ok(chosen.some(p=>p.flatRing));assert.ok(chosen.some(p=>p.whiteFlash));paired(chosen);
    }

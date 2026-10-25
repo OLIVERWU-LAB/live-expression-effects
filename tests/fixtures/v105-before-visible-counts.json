@@ -1,0 +1,62 @@
+[
+  {
+    "limit": 420,
+    "pattern": "flat-medallion",
+    "bands": {
+      "comet:0": 12,
+      "comet:1": 8,
+      "comet:2": 4
+    },
+    "particles": 49
+  },
+  {
+    "limit": 420,
+    "pattern": "flat-star-crown",
+    "bands": {
+      "comet:0": 8,
+      "star:1": 8,
+      "comet:2": 8
+    },
+    "particles": 37
+  },
+  {
+    "limit": 420,
+    "pattern": "flat-festival",
+    "bands": {
+      "ribbon:0": 12,
+      "comet:1": 6,
+      "star:2": 12
+    },
+    "particles": 51
+  },
+  {
+    "limit": 650,
+    "pattern": "flat-medallion",
+    "bands": {
+      "comet:0": 12,
+      "comet:1": 8,
+      "comet:2": 4
+    },
+    "particles": 59
+  },
+  {
+    "limit": 650,
+    "pattern": "flat-star-crown",
+    "bands": {
+      "comet:0": 8,
+      "star:1": 8,
+      "comet:2": 8
+    },
+    "particles": 41
+  },
+  {
+    "limit": 650,
+    "pattern": "flat-festival",
+    "bands": {
+      "ribbon:0": 12,
+      "comet:1": 6,
+      "star:2": 12
+    },
+    "particles": 59
+  }
+]

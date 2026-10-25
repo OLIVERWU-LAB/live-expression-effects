@@ -29,13 +29,14 @@ export function flatShell(x,y,scale=1,random=Math.random,pattern=FLAT_PATTERN,sp
  if(pattern==='flat-reprise'){const shell=handShell('cinema-rings',x,y,scale,random);return{...shell,particles:flattenReprise(shell.particles,FLAT_COLORWAYS[shell.variant],null)};}
  const tempo=flatTempo(pattern),root=Math.sqrt(scale),phase=random()*TAU,hue=Math.floor(random()*3),parent={x,y,scale,tempo,pattern,variant:hue,seed:random()*100};
  if(FLAT_CASCADES.includes(pattern)){
-  // Four irregularly spaced directions around the apex. This changes only
-  // the centres; every later flower keeps its accepted equal-angle ray shape.
-  const particles=[],count=4;
-  for(let j=0;j<count;j++){
-   const a=phase+j*TAU/4+(random()-.5)*.20,radius=(279+random()*42)*spreadScale,gravity=130*Math.sqrt(spreadScale)/(tempo*tempo),open=.20+j*.16,duration=open*tempo;
-   const motion=flatCarrierOffset(Math.cos(a)*radius,Math.sin(a)*radius*.45,duration,gravity);
-   particles.push(make(parent,'seed',motion.vx,motion.vy,3.7*root,open+.09,'#FFF8E8',random,{delay:.08,collisionDelay:1,flatEmitAt:duration,tailLength:14,trailAge:.14,drag:motion.drag,gravity,flatStopSpeed:28,turn:phase,cascade:true,clusterIndex:j,flowerCount:count,flowerScale:1,variant:(hue+j)%FLAT_COLORWAYS.length}));
+  // One launch -> five moving carriers -> five distinct, staggered flowers.
+  // Open the carrier spread before ignition; every blossom keeps radial rays.
+  // No final flower coordinates are stored; the moving carrier owns the origin.
+  const particles=[];
+  for(let j=0;j<5;j++){
+   const spreadRoot=Math.sqrt(spreadScale),gravity=130*spreadRoot/(tempo*tempo),a=phase+j*2.39996323,speed=(j===0?200:1150+random()*280)*spreadScale,open=j===0?.20+random()*.01:.22+j*.125+random()*.025;
+   const motion=flatCarrierVelocity(Math.cos(a)*speed*(j?1.85:1),Math.sin(a)*speed*(j?1.20:1)-35*spreadRoot,open*tempo,gravity);
+   particles.push(make(parent,'seed',motion.vx,motion.vy,3.7*root,open+.09,'#FFF8E8',random,{delay:.08,collisionDelay:1,flatEmitAt:open*tempo,tailLength:14,trailAge:.14,drag:motion.drag,gravity,flatStopSpeed:28,turn:phase+j*.22,cascade:true,clusterIndex:j,flowerScale:[.68,.92,1.16,.78,1.02][j],variant:(hue+j)%FLAT_COLORWAYS.length}));
   }
   return{particles,variant:hue};
  }
@@ -90,12 +91,12 @@ export function flatChildren(parent,random=Math.random){
 function radialShell(parent,phase,random){
  const p=[],colors=FLAT_COLORWAYS[parent.variant],r=Math.sqrt(parent.scale),s=parent.scale,key=parent.pattern;
  let band=0;const emit=(role,count,speed,size,palette,offset=0,extra={})=>{
-  const flatBand=band++;
+  const flatBand=band++,baseCount=count,primary=ACTIVE_FLAT_PATTERNS.includes(key)&&role!=='dust';if(primary)count=Math.round(count*4/3);
   for(let i=0;i<count;i++){
    // Equal angular steps and equal launch speed within each band. All heads
    // start at the real flower centre; gravity bends their paths after birth.
    const a=phase+(i+offset)/count*TAU,medallionRay=key==='flat-medallion'&&role==='comet',velocity=speed*s*(medallionRay?.92:1);
-   p.push(make(parent,role,Math.cos(a)*velocity,Math.sin(a)*velocity,size*r,2.05+random()*.24,palette[i%palette.length],random,{angle:a,flatBand,flatRadialIndex:i,flatRadialCount:count,tempo:1,gravity:(medallionRay?145:115)*r,drag:1.0,tailLength:['comet','ribbon','leaf','spoke'].includes(role)?24:0,trailAge:.28,cap:'#FFF2D6',...extra}));
+   p.push(make(parent,role,Math.cos(a)*velocity,Math.sin(a)*velocity,size*r,2.05+random()*.24,palette[i%palette.length],random,{angle:a,flatBand,flatRadialIndex:i,flatRadialCount:count,flatBaseCount:baseCount,flatTargetCount:primary?count:undefined,tempo:1,gravity:(medallionRay?145:115)*r,drag:1.0,tailLength:['comet','ribbon','leaf','spoke'].includes(role)?24:0,trailAge:.28,cap:'#FFF2D6',...extra}));
   }
  };
  if(key==='flat-medallion'){
@@ -216,7 +217,7 @@ export function drawFlatLaunch(g,r){
  g.beginPath();g.moveTo(left[0].x,left[0].y);for(const p of left)g.lineTo(p.x,p.y);for(const p of right.reverse())g.lineTo(p.x,p.y);g.closePath();g.fill();g.restore();
 }
 
-// A compact first flower opens at the launch apex before the four live seeds spread.
+// A compact first flower opens at the launch apex before the five live seeds spread.
 export const flatOpeningGlint=(age,p)=>.16+.84*(.5+.5*Math.sin(age*p.glintRate+p.glintPhase))**3;
 export function flatOpening(x,y,scale,variant,random=Math.random,pattern=FLAT_PATTERN){
  if(pattern==='flat-reprise')return[];
@@ -262,7 +263,7 @@ function drawFlatReprise(g,p){
 export function outerGlintEnvelope(p){const elapsed=clamp((p.maxLife-p.life-.36)/.55),late=clamp((.80-p.life)/.45),pulse=Math.pow(Math.max(0,Math.sin((p.maxLife-p.life)*19+p.seed)),4);return particleVisibility(p)*elapsed*late*clamp((p.life-.10)/.22)*pulse;}
 // Independent late sparks remain after their coloured head has burned away.
 export function flatAfterglints(parent,random=Math.random){
- if(Math.floor(parent.seed)%2!==0)return[];const root=Math.sqrt(parent.scale||1);
+ if(Math.floor(parent.seed)%((parent.flatDensity??1)<.5?3:2)!==0)return[];const root=Math.sqrt(parent.scale||1);
  return Array.from({length:2},(_,i)=>{const a=parent.seed+i*2.4,life=.72+random()*.14;return make(parent,'dust',parent.vx*.82+Math.cos(a)*(8+i*5),parent.vy*.82+Math.sin(a)*(8+i*5),(1.75+random()*.65)*root,life,'#FFFFFF',random,{x:parent.x+Math.cos(a)*(3+i*4)*root,y:parent.y+Math.sin(a)*(3+i*4)*root,flatTailSpark:true,whiteFlash:true,outerGlints:false,gravity:90*root,drag:1.1,tempo:1,life,maxLife:life,hasCollided:parent.hasCollided||false,hitRegion:parent.hitRegion,hitAge:parent.hitAge||0,noRecollision:true,trail:[],tailLength:0,collisionDelay:0});});
 }
 export function flatAfterglintEnvelope(p){const age=p.maxLife-p.life,pulse=Math.pow(.5+.5*Math.sin(age*22+p.seed),3);return particleVisibility(p)*clamp(age/.045)*clamp(p.life/.18)*(.18+.82*pulse);}
