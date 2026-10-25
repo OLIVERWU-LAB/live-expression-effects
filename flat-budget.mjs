@@ -1,4 +1,4 @@
-import{placeFlatBouquet}from'./flat-placement.mjs?v=8bca007e19ed';
+import{placeFlatBouquet}from'./flat-placement.mjs?v=d9a23e4fa6e4';
 // Sample around each circle, separately for every flower and radial band.
 // Never remove a carrier: that would remove an entire future blossom.
 const sample=(a,n)=>n>=a.length?a:n?Array.from({length:n},(_,i)=>a[Math.floor(i*a.length/n)]):[];
@@ -28,6 +28,7 @@ export function thinFlat(particles){
 }
 export function fitFlatViewport(layout,width,height,head){
  if(head)return placeFlatBouquet(layout,width,height,head);
+ if(layout?.flatFixedScale)return{...layout,scale:layout.flatFixedScale,radius:layout.flatFixedScale*205};
  if(!layout||width>=650||height<=width)return layout;
  // Fit the entire radial composition once. The distance from an individual
  // edge must not collapse the launch or redirect the five carriers afterwards.

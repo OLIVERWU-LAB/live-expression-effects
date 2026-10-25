@@ -1,12 +1,12 @@
-import {drawWaterSurface} from './water-renderer.mjs?v=8bca007e19ed';
-import {GIFT_BANKS} from './gift-banks.mjs?v=8bca007e19ed';
-import {loadGiftImage} from './gift-loader.mjs?v=8bca007e19ed';
-import {mixHex} from './emission.mjs?v=8bca007e19ed';
-import {particleVisibility} from './particle-visibility.mjs?v=8bca007e19ed';
-import {GIFT_MATERIALS,GIFT_RANDOM_MATERIALS} from './gift-materials.mjs?v=8bca007e19ed';
-import {giftBeadEnvelope} from './reference-bursts.mjs?v=8bca007e19ed';
-import {clamp} from './core.mjs?v=8bca007e19ed';
-import {GIFT_KINDS,GIFT_COLORS,giftMaterial,giftSplashEnvelope,giftFlashEnvelope,drawGiftConfetti} from './gift-style.mjs?v=8bca007e19ed';
+import {drawWaterSurface} from './water-renderer.mjs?v=d9a23e4fa6e4';
+import {GIFT_BANKS} from './gift-banks.mjs?v=d9a23e4fa6e4';
+import {loadGiftImage} from './gift-loader.mjs?v=d9a23e4fa6e4';
+import {mixHex} from './emission.mjs?v=d9a23e4fa6e4';
+import {particleVisibility} from './particle-visibility.mjs?v=d9a23e4fa6e4';
+import {GIFT_MATERIALS,GIFT_RANDOM_MATERIALS} from './gift-materials.mjs?v=d9a23e4fa6e4';
+import {giftBeadEnvelope} from './reference-bursts.mjs?v=d9a23e4fa6e4';
+import {clamp} from './core.mjs?v=d9a23e4fa6e4';
+import {GIFT_KINDS,GIFT_COLORS,giftMaterial,giftSplashEnvelope,giftFlashEnvelope,drawGiftConfetti} from './gift-style.mjs?v=d9a23e4fa6e4';
 const TAU=Math.PI*2;
 export function giftFrameIndex(phase,frames){return Math.round(((phase%TAU)+TAU)%TAU/TAU*frames)%frames;}
 export class GiftRenderer{

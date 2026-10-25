@@ -1,6 +1,7 @@
-import {planBurst} from './pyro.mjs?v=8bca007e19ed';
-import {fitFlatViewport} from './flat-budget.mjs?v=8bca007e19ed';
-import {flatLaunchBusy,flatLaunchGap} from './live-playback.mjs?v=8bca007e19ed';
+import {planBurst} from './pyro.mjs?v=d9a23e4fa6e4';
+import {fitFlatViewport} from './flat-budget.mjs?v=d9a23e4fa6e4';
+import {flatLaunchBusy,flatLaunchGap} from './live-playback.mjs?v=d9a23e4fa6e4';
+import {flatViewportScale} from './flat-placement.mjs?v=d9a23e4fa6e4';
 
 // The camera experience and answer previews use the same launch policy. Locks
 // change the expression input, never the show cadence or physical time scale.
@@ -11,6 +12,7 @@ export function planLiveFirework(world,width,height,head,index,random=Math.rando
  const plan=planBurst(width,height,head,index,random);if(!plan)return null;
  const edge=Math.max(24,width*.10),launchX=direction<0?edge:width-edge;
  plan.launchX=launchX;plan.requestedSide=requestedSide;
+ if(world.style==='flat')plan.flatFixedScale=flatViewportScale(width,height);
  const layout=world.style==='flat'?fitFlatViewport(plan,width,height,head):plan;
  if(layout)layout.launchX=launchX;
  return layout;
