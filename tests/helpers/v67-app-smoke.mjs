@@ -49,13 +49,13 @@ if(fault){
   if(lockTest){
    const select=effect=>el('pattern-picker').listeners.click({target:{closest:()=>playback.find(b=>b.dataset.playback===effect)}});
    for(let t=500;t<=1500;t+=100)await tick(t,0);assert.equal(el('smile-hint').hidden,false);
-   select('rain');assert.equal(el('smile-hint').hidden,true,'locking removes the invitation immediately');assert.equal(el('playback-lock-hint').hidden,false);assert.equal(el('preview-strength').disabled,true);assert.equal(el('strength-value').textContent,'35');assert.equal(playback[0].getAttribute('aria-pressed'),'true');
+   select('rain');assert.equal(el('smile-hint').hidden,true,'locking removes the invitation immediately');assert.equal(el('playback-lock-hint').hidden,false);assert.equal(el('preview-strength').disabled,true);assert.equal(el('strength-unit').hidden,true);assert.equal(el('smile-gauge').getAttribute('aria-valuenow'),'35');assert.equal(el('strength-value').textContent,'雨滴');assert.equal(playback[0].getAttribute('aria-pressed'),'true');
    const framesBefore=workers[0].posts.filter(p=>p.type==='frame').length;
-   for(let t=1600;t<=2800;t+=100){await tick(t,t%200?0:.99);assert.equal(el('strength-value').textContent,'35');assert.equal(el('smile-hint').hidden,true);}
+   for(let t=1600;t<=2800;t+=100){await tick(t,t%200?0:.99);assert.equal(el('strength-value').textContent,'雨滴');assert.equal(el('smile-hint').hidden,true);}
    assert.ok(workers[0].posts.filter(p=>p.type==='frame').length>framesBefore,'recognition keeps running for immediate unlocking and geometry');
-   select('fireworks');assert.equal(el('strength-value').textContent,'85');assert.equal(playback[0].getAttribute('aria-pressed'),'false');assert.equal(playback[1].getAttribute('aria-pressed'),'true');
-   for(let t=2900;t<=3500;t+=100){await tick(t,0);assert.equal(el('strength-value').textContent,'85');}
-   select('fireworks');assert.equal(el('playback-lock-hint').hidden,true);assert.equal(el('preview-strength').disabled,false);
+   select('fireworks');assert.equal(el('strength-value').textContent,'烟花');assert.equal(playback[0].getAttribute('aria-pressed'),'false');assert.equal(playback[1].getAttribute('aria-pressed'),'true');
+   for(let t=2900;t<=3500;t+=100){await tick(t,0);assert.equal(el('strength-value').textContent,'烟花');}
+   select('fireworks');assert.equal(el('playback-lock-hint').hidden,true);assert.equal(el('preview-strength').disabled,false);assert.equal(el('strength-unit').hidden,false);
    for(let t=3600;t<=5000;t+=100)await tick(t,0);const low=+el('strength-value').textContent;assert.equal(el('smile-hint').hidden,false,'unlock restores the neutral invitation');
    for(let t=5100;t<=6500;t+=100)await tick(t,.95);assert.ok(+el('strength-value').textContent>low+30,'unlock restores live expression readings');assert.equal(el('smile-hint').hidden,true);console.log('Locked playback fixes the displayed strength, exposes lock state, suppresses the invitation and restores live readings on unlock.');
   }

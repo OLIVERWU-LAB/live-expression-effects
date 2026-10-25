@@ -238,10 +238,10 @@ function currentHeadBounds() {
 function syncMeter(){
   const value=lockedEffect==='rain'?35:lockedEffect==='fireworks'?85:Math.round(expression.smile*100);
   const label=names[lockedState(state,lockedEffect,mode)];
-  $('strength-value').textContent=String(value);$('gauge-cursor').style.left=`calc(${value}% + ${5-value*.1}px)`;
+  $('strength-value').textContent=lockedEffect?label:String(value);$('strength-unit').hidden=!!lockedEffect;$('gauge-cursor').style.left=`calc(${value}% + ${5-value*.1}px)`;
   $('smile-gauge').setAttribute('aria-valuenow',String(value));
-  $('smile-gauge').setAttribute('aria-label',lockedEffect?'锁定播放强度':'笑容强度');
-  $('smile-gauge').setAttribute('aria-valuetext',`${value}% ${label}${lockedEffect?'，当前模式已锁定':''}`);$('effect-name').textContent=label;
+  $('smile-gauge').setAttribute('aria-label',lockedEffect?'锁定播放模式':'笑容强度');
+  $('smile-gauge').setAttribute('aria-valuetext',lockedEffect?`${label}，模式已锁定`:`${value}% ${label}`);$('effect-name').textContent=label;
 }
 function updateUI(now) {
   if (now - uiTime < 100) return; uiTime = now;
