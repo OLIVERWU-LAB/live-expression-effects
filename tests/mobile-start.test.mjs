@@ -1,6 +1,6 @@
 import test from'node:test';import assert from'node:assert/strict';import{execFileSync}from'node:child_process';import{readFileSync}from'node:fs';import{simulationSlices}from'../dist/live-playback.mjs';
 test('the first tap before module initialization requests one camera and reaches recognition',()=>{
- const output=execFileSync(process.execPath,['--experimental-vm-modules',new URL('./helpers/v67-app-smoke.mjs',import.meta.url).pathname,'--early-tap'],{encoding:'utf8',timeout:15000});assert.match(output,/First tap before app download is consumed once/);assert.match(output,/accepts a first face result/);
+ const output=execFileSync(process.execPath,['--experimental-vm-modules',new URL('./helpers/app-smoke.mjs',import.meta.url).pathname,'--early-tap'],{encoding:'utf8',timeout:15000});assert.match(output,/First tap before app download is consumed once/);assert.match(output,/accepts a first face result/);
 });
 test('the camera bootstrap is inline before the application graph, and matches its tested source',()=>{
  const root=new URL('../dist/',import.meta.url),html=readFileSync(new URL('index.html',root),'utf8'),source=readFileSync(new URL('./fixtures/camera-entry.js',import.meta.url),'utf8');assert.ok(html.includes('<script id="camera-entry">'+source+'</script>'));assert.ok(html.indexOf('id="camera-entry"')<html.indexOf('type="module"'));assert.ok(!html.includes('src="./camera-entry.js"'));

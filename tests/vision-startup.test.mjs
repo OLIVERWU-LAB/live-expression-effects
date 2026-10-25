@@ -36,6 +36,6 @@ test('compressed requests reuse complete legacy model cache entries before makin
 
 for(const scenario of ['cold-camera','ui-fault'])test('actual app startup with real HTML IDs: '+scenario,async()=>{
  const {execFileSync}=await import('node:child_process');
- const output=execFileSync(process.execPath,['--experimental-vm-modules',new URL('./helpers/v67-app-smoke.mjs',import.meta.url).pathname,...(scenario==='ui-fault'?['--ui-fault']:[])],{encoding:'utf8',timeout:15000});
+ const output=execFileSync(process.execPath,['--experimental-vm-modules',new URL('./helpers/app-smoke.mjs',import.meta.url).pathname,...(scenario==='ui-fault'?['--ui-fault']:[])],{encoding:'utf8',timeout:15000});
  assert.match(output,scenario==='ui-fault'?/error is visible and retryable/:/accepts a first face result/);
 });

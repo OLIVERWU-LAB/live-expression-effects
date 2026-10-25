@@ -1,5 +1,5 @@
 import test from'node:test';import assert from'node:assert/strict';import{readFileSync}from'node:fs';import{planLiveFirework}from'../dist/firework-playback.mjs';import{flatRandom}from'../dist/flat-placement.mjs';
-const reference=JSON.parse(readFileSync(new URL('./fixtures/v105-five-centres.json',import.meta.url),'utf8'));
+const reference=JSON.parse(readFileSync(new URL('./fixtures/five-centres.json',import.meta.url),'utf8'));
 import{flatShell,flatChildren}from'../dist/flat-fireworks.mjs';
 import{prioritizeFlat}from'../dist/flat-budget.mjs';
 test('the launch planner gently widens the accepted five-flower layout while keeping its seed and flower sizes',()=>{
