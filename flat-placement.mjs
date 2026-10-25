@@ -1,5 +1,5 @@
-import{flatShell}from'./flat-fireworks.mjs?v=b5df25bc8364';
-import{boundsDistance}from'./pyro.mjs?v=b5df25bc8364';
+import{flatShell}from'./flat-fireworks.mjs?v=b0f14ddab528';
+import{boundsDistance}from'./pyro.mjs?v=b0f14ddab528';
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 export const flatRandom=seed=>()=>((seed=Math.imul(seed,1664525)+1013904223>>>0)/4294967296);
 // Size follows the viewport, never the current head position or launch side.

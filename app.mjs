@@ -1,14 +1,14 @@
-import {planLiveFirework,fireworkLaunchBusy,fireworkLaunchGap} from './firework-playback.mjs?v=b5df25bc8364';
-import {performanceProfile} from './performance-profile.mjs?v=b5df25bc8364';
-import {cameraFrameReader} from './camera-frame.mjs?v=b5df25bc8364';
-import {VisionSession} from './vision-session.mjs?v=b5df25bc8364';
-import{ParticleQuality}from'./particle-quality.mjs?v=b5df25bc8364';
-import {applyLiveStyle,lockedState,simulationSlices} from './live-playback.mjs?v=b5df25bc8364';
-import { ExpressionController, clamp, headPolygon, previewHead } from './core.mjs?v=b5df25bc8364';
-import { StickerWorld, SilhouetteCollider } from './effects.mjs?v=b5df25bc8364';
-import {HandCollider,withHands} from './hands.mjs?v=b5df25bc8364';
-import { Renderer } from './renderer.mjs?v=b5df25bc8364';
-import { SoundDesigner } from './sound.mjs?v=b5df25bc8364';
+import {planLiveFirework,fireworkLaunchBusy,fireworkLaunchGap} from './firework-playback.mjs?v=b0f14ddab528';
+import {performanceProfile} from './performance-profile.mjs?v=b0f14ddab528';
+import {cameraFrameReader} from './camera-frame.mjs?v=b0f14ddab528';
+import {VisionSession} from './vision-session.mjs?v=b0f14ddab528';
+import{ParticleQuality}from'./particle-quality.mjs?v=b0f14ddab528';
+import {applyLiveStyle,lockedState,simulationSlices} from './live-playback.mjs?v=b0f14ddab528';
+import { ExpressionController, clamp, headPolygon, previewHead } from './core.mjs?v=b0f14ddab528';
+import { StickerWorld, SilhouetteCollider } from './effects.mjs?v=b0f14ddab528';
+import {HandCollider,withHands} from './hands.mjs?v=b0f14ddab528';
+import { Renderer } from './renderer.mjs?v=b0f14ddab528';
+import { SoundDesigner } from './sound.mjs?v=b0f14ddab528';
 const $ = id => document.getElementById(id), stage = $('stage'), video = $('camera');
 const renderer = new Renderer($('scene')), world = new StickerWorld(), expression = new ExpressionController();
 renderer.gift.tileSize=matchMedia('(max-width: 600px)').matches?96:0;
@@ -37,7 +37,7 @@ stage.dataset.build='release';
 const readFaceFrame=cameraFrameReader(480),readGeometryFrame=cameraFrameReader(320);
 let lastGeometryCapture=0,lastGeometryVideoTime=-1;
 const vision=new VisionSession({
- createWorker:()=>new Worker(new URL('./vision.worker.js?v=b5df25bc8364',import.meta.url)),
+ createWorker:()=>new Worker(new URL('./vision.worker.js?v=b0f14ddab528',import.meta.url)),
  createBitmap:()=>readFaceFrame(video),
  initOptions:{role:'face'},
  active:()=>wanted&&mode==='camera'&&!suspended,
@@ -46,7 +46,7 @@ const vision=new VisionSession({
  onEvent:handleVisionEvent
 });
 const geometry=new VisionSession({
- createWorker:()=>new Worker(new URL('./vision.worker.js?v=b5df25bc8364',import.meta.url)),
+ createWorker:()=>new Worker(new URL('./vision.worker.js?v=b0f14ddab528',import.meta.url)),
  createBitmap:()=>readGeometryFrame(video),initOptions:{role:'geometry'},
  onState:()=>syncLoading(),
  active:()=>wanted&&mode==='camera'&&!suspended&&engineReady,
@@ -238,10 +238,10 @@ function currentHeadBounds() {
 function syncMeter(){
   const value=lockedEffect==='rain'?35:lockedEffect==='fireworks'?85:Math.round(expression.smile*100);
   const label=names[lockedState(state,lockedEffect,mode)];
-  $('strength-value').textContent=String(value);$('gauge-cursor').style.left=`calc(${value}% + ${5-value*.1}px)`;
+  $('strength-value').textContent=lockedEffect?label:String(value);$('strength-unit').hidden=!!lockedEffect;$('gauge-cursor').style.left=`calc(${value}% + ${5-value*.1}px)`;
   $('smile-gauge').setAttribute('aria-valuenow',String(value));
-  $('smile-gauge').setAttribute('aria-label',lockedEffect?'锁定播放强度':'笑容强度');
-  $('smile-gauge').setAttribute('aria-valuetext',`${value}% ${label}${lockedEffect?'，当前模式已锁定':''}`);$('effect-name').textContent=label;
+  $('smile-gauge').setAttribute('aria-label',lockedEffect?'锁定播放模式':'笑容强度');
+  $('smile-gauge').setAttribute('aria-valuetext',lockedEffect?`${label}，模式已锁定`:`${value}% ${label}`);$('effect-name').textContent=label;
 }
 function updateUI(now) {
   if (now - uiTime < 100) return; uiTime = now;
